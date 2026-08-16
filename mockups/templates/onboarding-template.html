@@ -1,0 +1,1524 @@
+<title>Under Two Minutes</title>
+<style>
+  @font-face{
+    font-family:'Fraunces';font-style:italic;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_ITALIC__) format('woff2');
+  }
+  @font-face{
+    font-family:'Fraunces';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_NORMAL__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Sans';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXSANS__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_400__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_500__) format('woff2');
+  }
+
+  /* ============ TOKENS ============ */
+  :root{
+    /* chrome — light (default / un-stamped) */
+    --surface:#F6F7F9;
+    --surface-raised:#FFFFFF;
+    --ink:#1B1C22;
+    --ink-muted:#5B5E68;
+    --ink-faint:#6A6C74;
+    --border:#DDE0E5;
+    --accent:#B5652A;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#F3E4D3;
+    --focus:#2B57B0;
+    --good:#3F6B62;
+    --good-soft:#E1EBE8;
+    --flag:#9C4A3A;
+    --flag-soft:#F3E1DD;
+
+    /* fixed device world — the phone screens (a "screenshot," not viewer-themed) */
+    --app-bg:#121019;
+    --app-surface:#1C1927;
+    --app-surface-raised:#242032;
+    --app-ink:#EDEAF2;
+    --app-muted:#948FA6;
+    --app-faint:#87839C;
+    --app-border:#332F42;
+    --app-accent:#D98A46;
+    --app-accent-dim:#3B2A1C;
+    --app-good:#7FA79D;
+    --app-good-dim:#233330;
+    --app-focus:#7DA2FF;
+
+    /* fixed paper world — the recall document (also fixed, meant to print) */
+    --doc-bg:#FCFAF5;
+    --doc-ink:#211D1A;
+    --doc-muted:#6E655B;
+    --doc-faint:#756C5B;
+    --doc-rule:#DCD1BE;
+    --doc-accent:#A85A26;
+    --doc-flag:#9C4A3A;
+    --doc-flag-soft:#F1DFD3;
+    --doc-focus:#2B57B0;
+
+    /* type */
+    --f-display:'Fraunces', ui-serif, Georgia, serif;
+    --f-body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --f-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+    --fs-eyebrow:.6875rem;
+    --fs-caption:.8125rem;
+    --fs-body:.9375rem;
+    --fs-body-lg:1.0625rem;
+    --fs-h3:1.1875rem;
+    --fs-h2:1.5rem;
+
+    --radius-doc:3px;
+    --radius-card:14px;
+    --radius-pill:999px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --surface:#15141C;
+      --surface-raised:#1D1B26;
+      --ink:#EDEAF2;
+      --ink-muted:#A9A5B8;
+      --ink-faint:#8A8699;
+      --border:#332F3F;
+      --accent:#D98A46;
+      --accent-ink:#1B1208;
+      --accent-soft:#3B2A1C;
+      --focus:#7DA2FF;
+      --good:#7FA79D;
+      --good-soft:#233330;
+      --flag:#C97A68;
+      --flag-soft:#3A241F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --surface:#15141C;
+    --surface-raised:#1D1B26;
+    --ink:#EDEAF2;
+    --ink-muted:#A9A5B8;
+    --ink-faint:#8A8699;
+    --border:#332F3F;
+    --accent:#D98A46;
+    --accent-ink:#1B1208;
+    --accent-soft:#3B2A1C;
+    --focus:#7DA2FF;
+    --good:#7FA79D;
+    --good-soft:#233330;
+    --flag:#C97A68;
+    --flag-soft:#3A241F;
+  }
+
+  /* ============ BASE ============ */
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--surface);
+    color:var(--ink);
+    font-family:var(--f-body);
+    font-size:var(--fs-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+  p{margin:0}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+  /* Fixed worlds pin their own focus color — the chrome --focus token flips with the
+     viewer's OS theme and fails contrast inside the always-dark device world. */
+  .device-screen :focus-visible{outline-color:var(--app-focus)}
+  .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
+
+  /* ============ SHELL ============ */
+  .shell{
+    max-width:1180px;
+    margin:0 auto;
+    padding:2.25rem 1.5rem 4rem;
+  }
+  .shell-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:1.5rem;
+    flex-wrap:wrap;
+    margin-bottom:2rem;
+    padding-bottom:1.25rem;
+    border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;flex-direction:column;gap:.3rem}
+  .brand-mark{
+    font-family:var(--f-display);
+    font-weight:600;
+    font-size:1.375rem;
+    letter-spacing:.01em;
+  }
+  .brand-mark em{font-style:italic;color:var(--accent)}
+  .brand-sub{
+    font-size:var(--fs-caption);
+    color:var(--ink-muted);
+    max-width:40ch;
+  }
+
+  /* step switcher in the chrome */
+  .switcher{
+    display:flex;
+    gap:.25rem;
+    padding:.25rem;
+    background:var(--surface-raised);
+    border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+    flex-wrap:wrap;
+  }
+  .switcher button{
+    appearance:none;
+    border:none;
+    background:transparent;
+    color:var(--ink-muted);
+    font-size:var(--fs-caption);
+    font-weight:500;
+    padding:.5rem .85rem;
+    border-radius:var(--radius-pill);
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+    white-space:nowrap;
+  }
+  .switcher button:hover{color:var(--ink)}
+  .switcher button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+  .switcher-wrap{display:flex;flex-direction:column;gap:.45rem;align-items:flex-end}
+  .switcher-note{
+    font-size:.7rem;
+    color:var(--ink-faint);
+    max-width:44ch;
+    text-align:right;
+    line-height:1.5;
+  }
+
+  .lede{
+    max-width:64ch;
+    color:var(--ink-muted);
+    font-size:var(--fs-body);
+    margin-bottom:1.5rem;
+  }
+  .lede b{color:var(--ink);font-weight:600}
+
+  .step{display:none}
+  .step.is-active{display:block}
+
+  .shell-foot{
+    margin-top:2.5rem;
+    padding-top:1.25rem;
+    border-top:1px solid var(--border);
+    font-size:var(--fs-caption);
+    color:var(--ink-faint);
+    display:flex;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+
+  .btn{
+    appearance:none;
+    border:1px solid var(--border);
+    background:var(--surface-raised);
+    color:var(--ink);
+    font-size:var(--fs-caption);
+    font-weight:500;
+    padding:.55rem 1rem;
+    border-radius:8px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:.45rem;
+  }
+  .btn:hover{border-color:var(--accent)}
+  .btn[disabled]{opacity:.4;cursor:not-allowed}
+  .btn[disabled]:hover{border-color:var(--border)}
+
+  .stage-nav{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:.75rem;
+    margin-top:.25rem;
+  }
+  .stage-nav-count{
+    font-family:var(--f-mono);
+    font-size:var(--fs-caption);
+    color:var(--ink-faint);
+    min-width:7.5rem;
+    text-align:center;
+  }
+
+  /* ============ DEVICE FRAME ============ */
+  .device-stage{
+    display:flex;
+    justify-content:center;
+    padding:.5rem 0 1.25rem;
+  }
+  .device-frame{
+    width:min(390px, 100%);
+    border-radius:40px;
+    padding:12px;
+    background:linear-gradient(155deg,#2A2735,#131019);
+    box-shadow:0 1px 1px rgba(0,0,0,.4), 0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .device-screen{
+    background:var(--app-bg);
+    color:var(--app-ink);
+    border-radius:30px;
+    overflow:hidden;
+    font-family:var(--f-body);
+    min-height:670px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .device-notch{height:26px;display:flex;align-items:center;justify-content:center}
+  .device-notch::before{
+    content:'';
+    width:90px;height:6px;border-radius:99px;
+    background:rgba(255,255,255,.14);
+  }
+  .app-body{padding:.25rem 1.15rem 1.35rem;flex:1;display:flex;flex-direction:column;gap:1rem}
+
+  /* ---- StepRail ---- */
+  .steprail{display:flex;flex-direction:column;gap:.45rem}
+  .steprail-bars{display:flex;gap:.28rem}
+  .steprail-bars span{
+    flex:1;height:3px;border-radius:99px;
+    background:var(--app-border);
+    transition:background .2s ease;
+  }
+  .steprail-bars span.is-done{background:var(--app-faint)}
+  .steprail-bars span.is-now{background:var(--app-accent)}
+  .steprail-label{
+    display:flex;justify-content:space-between;gap:.75rem;
+    font-size:var(--fs-eyebrow);
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    font-weight:600;
+    color:var(--app-faint);
+  }
+  .steprail-label b{color:var(--app-accent);font-weight:600}
+
+  /* ---- shared app type ---- */
+  .app-title{
+    font-family:var(--f-display);
+    font-weight:600;
+    font-size:1.55rem;
+    line-height:1.15;
+    letter-spacing:-.01em;
+  }
+  .app-title em{font-style:italic;color:var(--app-accent)}
+  .app-lede{font-size:var(--fs-body);color:var(--app-muted);line-height:1.55}
+  .app-lede b{color:var(--app-ink);font-weight:600}
+  .app-hint{font-size:.75rem;color:var(--app-faint);line-height:1.5}
+  .spacer{flex:1;min-height:.5rem}
+
+  .app-pill{
+    align-self:flex-start;
+    display:inline-flex;align-items:center;gap:.5rem;
+    background:var(--app-accent-dim);
+    color:var(--app-accent);
+    font-size:var(--fs-caption);
+    font-weight:600;
+    padding:.4rem .8rem;
+    border-radius:var(--radius-pill);
+  }
+  .app-pill::before{
+    content:'';width:7px;height:7px;border-radius:50%;
+    background:var(--app-accent);
+    box-shadow:0 0 0 3px rgba(217,138,70,.25);
+  }
+
+  .app-cta{
+    appearance:none;width:100%;
+    background:var(--app-accent);border:1px solid var(--app-accent);
+    color:#1B1208;font-size:var(--fs-body-lg);font-weight:600;
+    padding:.95rem 1rem;border-radius:var(--radius-card);cursor:pointer;
+  }
+  .app-cta:hover{filter:brightness(1.06)}
+  .app-cta[disabled]{opacity:.35;cursor:not-allowed}
+  .app-cta[disabled]:hover{filter:none}
+  .gate-hint{
+    font-size:.72rem;
+    color:var(--app-accent);
+    line-height:1.5;
+    text-align:center;
+  }
+  .gate-hint:empty{display:none}
+  .app-cta.is-quiet{
+    background:transparent;border-color:var(--app-border);
+    color:var(--app-muted);font-size:var(--fs-body);font-weight:500;
+  }
+  .app-cta.is-quiet:hover{color:var(--app-ink);border-color:var(--app-faint);filter:none}
+
+  /* ---- welcome mark ---- */
+  .welcome-mark{
+    font-family:var(--f-display);
+    font-size:2.5rem;font-weight:600;letter-spacing:-.015em;line-height:1;
+  }
+  .welcome-mark em{font-style:italic;color:var(--app-accent)}
+  .privacy-note{
+    border-left:2px solid var(--app-accent-dim);
+    padding-left:.85rem;
+    font-size:var(--fs-caption);
+    color:var(--app-muted);
+    line-height:1.6;
+  }
+  .privacy-note b{color:var(--app-ink);font-weight:600}
+
+  /* ---- ConsentScope ---- */
+  .scope{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.9rem 1rem 1rem;
+    display:flex;flex-direction:column;gap:.55rem;
+  }
+  .scope-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem}
+  .scope-name{font-size:var(--fs-body-lg);font-weight:600;line-height:1.25}
+  .scope-key{
+    flex-shrink:0;
+    font-family:var(--f-mono);font-size:.6rem;
+    color:var(--app-faint);
+    border:1px solid var(--app-border);
+    padding:.2rem .38rem;border-radius:5px;
+    white-space:nowrap;
+  }
+  .scope-body{font-size:var(--fs-caption);color:var(--app-muted);line-height:1.55}
+  .scope-ifno{
+    font-size:var(--fs-caption);
+    color:var(--app-faint);
+    line-height:1.55;
+    border-top:1px dashed var(--app-border);
+    padding-top:.55rem;
+  }
+  .scope-ifno b{color:var(--app-muted);font-weight:600}
+  /* equal weight: identical geometry, identical resting treatment (FR-7.3) */
+  .scope-choice{display:flex;gap:.5rem}
+  .scope-choice button{
+    flex:1 1 0;
+    appearance:none;
+    border:1px solid var(--app-border);
+    background:var(--app-bg);
+    color:var(--app-ink);
+    font-size:var(--fs-body);
+    font-weight:600;
+    padding:.7rem .5rem;
+    border-radius:10px;
+    cursor:pointer;
+    text-align:center;
+  }
+  .scope-choice button:hover{border-color:var(--app-faint)}
+  .scope-choice button[aria-pressed="true"][data-decision="grant"]{
+    background:var(--app-good-dim);border-color:var(--app-good);color:var(--app-good);
+  }
+  .scope-choice button[aria-pressed="true"][data-decision="withdraw"]{
+    background:var(--app-surface-raised);border-color:var(--app-muted);color:var(--app-ink);
+  }
+  .scope-stamp{
+    font-family:var(--f-mono);font-size:.62rem;
+    color:var(--app-faint);
+    display:none;
+  }
+  .scope.is-answered .scope-stamp{display:block}
+
+  .policy-links{
+    display:flex;flex-direction:column;gap:.35rem;
+    font-size:var(--fs-caption);
+  }
+  .policy-links a{
+    color:var(--app-accent);
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .policy-links span{color:var(--app-faint);font-size:.72rem}
+
+  /* ---- conversation + receipt ---- */
+  .ask{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:16px 16px 16px 4px;
+    padding:.8rem .95rem;
+    font-size:var(--fs-body);
+    line-height:1.5;
+    align-self:flex-start;
+    max-width:94%;
+  }
+  .bubble{
+    align-self:flex-end;
+    max-width:90%;
+    background:var(--app-accent);
+    color:#1B1208;
+    font-size:var(--fs-body);
+    padding:.75rem .95rem;
+    border-radius:16px 16px 4px 16px;
+    line-height:1.5;
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .bubble.is-visible{opacity:1;transform:none}
+  .bubble .caret{
+    display:inline-block;width:2px;height:1em;background:#1B1208;
+    vertical-align:-2px;margin-left:1px;animation:blink 1s step-end infinite;
+  }
+  @keyframes blink{50%{opacity:0}}
+
+  .convo{display:flex;flex-direction:column;gap:.7rem}
+
+  .demo-row{display:flex;justify-content:center;gap:.5rem}
+  .demo-btn{
+    appearance:none;border:1px solid var(--app-border);
+    background:var(--app-surface);color:var(--app-ink);
+    font-size:var(--fs-caption);font-weight:600;
+    padding:.55rem 1.05rem;border-radius:var(--radius-pill);
+    cursor:pointer;
+  }
+  .demo-btn:hover{border-color:var(--app-accent)}
+
+  .receipt{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.9rem 1rem 1rem;
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity .3s ease, transform .3s ease;
+  }
+  .receipt.is-visible{opacity:1;transform:none}
+  .receipt-head{
+    font-size:var(--fs-eyebrow);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--app-faint);
+    font-weight:600;
+    margin-bottom:.2rem;
+    display:flex;justify-content:space-between;gap:.6rem;
+  }
+  .receipt-sub{
+    font-size:.72rem;color:var(--app-faint);line-height:1.5;
+    padding-bottom:.5rem;
+  }
+  .receipt-field{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.6rem;
+    padding:.45rem 0;
+    border-top:1px solid var(--app-border);
+    flex-wrap:wrap;
+  }
+  .receipt-field-label{color:var(--app-muted);font-size:var(--fs-caption);flex-shrink:0}
+  .receipt-field-val{
+    display:flex;align-items:center;gap:.45rem;
+    font-size:var(--fs-body);
+    flex-wrap:wrap;justify-content:flex-end;
+  }
+  .receipt-field-val.is-editing{width:100%;justify-content:flex-start;padding-top:.15rem}
+  .field-text{font-weight:500}
+  .field-text.is-empty{color:var(--app-faint);font-weight:400;font-style:italic}
+
+  .conf-tag{
+    font-size:.62rem;
+    font-family:var(--f-mono);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    padding:.14rem .4rem;
+    border-radius:5px;
+    color:var(--app-muted);
+    border:1px solid var(--app-border);
+    white-space:nowrap;
+  }
+  .conf-tag.is-paraphrase{color:var(--app-accent);border-color:var(--app-accent-dim);background:var(--app-accent-dim)}
+  .conf-tag.is-lookup{color:var(--app-good);border-color:var(--app-good-dim);background:var(--app-good-dim)}
+  .conf-tag.is-none{color:var(--app-faint);border-style:dashed}
+  .conf-tag.is-user{color:var(--app-ink);border-color:var(--app-muted)}
+
+  .correct-link{
+    background:none;border:none;color:var(--app-muted);
+    font-size:.7rem;text-decoration:underline;cursor:pointer;padding:0;
+    text-underline-offset:2px;
+  }
+  .correct-link:hover{color:var(--app-accent)}
+
+  .chip-picker{display:flex;gap:.35rem;flex-wrap:wrap;width:100%;padding:.2rem 0}
+  .chip-picker button{
+    appearance:none;
+    border:1px solid var(--app-border);
+    background:var(--app-bg);
+    color:var(--app-ink);
+    font-size:.75rem;font-weight:500;
+    padding:.35rem .6rem;border-radius:var(--radius-pill);
+    cursor:pointer;
+  }
+  .chip-picker button:hover{border-color:var(--app-accent)}
+  .chip-picker button.is-current{border-color:var(--app-accent);color:var(--app-accent)}
+  .step-input{
+    background:var(--app-bg);
+    border:1px solid var(--app-accent);
+    color:var(--app-ink);
+    border-radius:6px;padding:.3rem .5rem;font:inherit;width:9rem;
+  }
+
+  /* ---- permission rows ---- */
+  .perm{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.85rem .95rem .95rem;
+    display:flex;flex-direction:column;gap:.6rem;
+  }
+  .perm.is-blocked{opacity:.55}
+  .perm-say{font-size:var(--fs-body);font-weight:500;line-height:1.4}
+  .perm-why{font-size:.75rem;color:var(--app-faint);line-height:1.5}
+  .perm-choice{display:flex;gap:.5rem}
+  .perm-choice button{
+    flex:1 1 0;
+    appearance:none;border:1px solid var(--app-border);
+    background:var(--app-bg);color:var(--app-ink);
+    font-size:var(--fs-caption);font-weight:600;
+    padding:.6rem .5rem;border-radius:10px;cursor:pointer;
+  }
+  .perm-choice button:hover{border-color:var(--app-faint)}
+  .perm-choice button[aria-pressed="true"]{
+    background:var(--app-good-dim);border-color:var(--app-good);color:var(--app-good);
+  }
+  .perm-choice button[disabled]{cursor:not-allowed;color:var(--app-faint)}
+  .perm-choice button[disabled]:hover{border-color:var(--app-border)}
+  .perm-gated{
+    font-size:.72rem;color:var(--app-accent);line-height:1.5;
+    display:none;
+  }
+  .perm.is-blocked .perm-gated{display:block}
+
+  /* ---- BinaryChoice ---- */
+  .binary{display:flex;gap:.6rem}
+  .binary button{
+    flex:1 1 0;
+    appearance:none;border:1px solid var(--app-border);
+    background:var(--app-surface);color:var(--app-ink);
+    font-size:var(--fs-body);font-weight:600;
+    padding:1rem .8rem;border-radius:var(--radius-card);
+    cursor:pointer;text-align:left;
+    display:flex;flex-direction:column;gap:.2rem;
+  }
+  .binary button small{font-weight:400;color:var(--app-muted);font-size:.72rem;line-height:1.4}
+  .binary button:hover{border-color:var(--app-accent)}
+  .binary button[aria-pressed="true"]{border-color:var(--app-accent);background:var(--app-accent-dim)}
+
+  /* ---- ConsentReceipt ---- */
+  .cr{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.9rem 1rem 1rem;
+  }
+  .cr-row{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:.4rem .6rem;
+    padding:.42rem 0;
+    border-top:1px solid var(--app-border);
+    align-items:baseline;
+  }
+  .cr-row:first-of-type{border-top:none}
+  .cr-scope{font-family:var(--f-mono);font-size:.7rem;color:var(--app-muted);word-break:break-all}
+  .cr-decision{
+    font-size:.68rem;font-weight:700;font-family:var(--f-mono);
+    text-transform:uppercase;letter-spacing:.04em;
+    padding:.16rem .42rem;border-radius:5px;
+    border:1px solid var(--app-border);color:var(--app-faint);
+    white-space:nowrap;
+  }
+  .cr-decision.is-grant{color:var(--app-good);border-color:var(--app-good);background:var(--app-good-dim)}
+  .cr-decision.is-withdraw{color:var(--app-ink);border-color:var(--app-muted)}
+  .cr-stamp{
+    grid-column:1 / -1;
+    font-family:var(--f-mono);font-size:.6rem;color:var(--app-faint);
+  }
+  .cr-foot{
+    margin-top:.7rem;padding-top:.65rem;
+    border-top:1px dashed var(--app-border);
+    font-size:.72rem;color:var(--app-faint);line-height:1.55;
+  }
+
+  /* ---- Annotation ---- */
+  .annotation{
+    display:flex;
+    gap:.55rem;
+    align-items:flex-start;
+    border:1px dashed var(--app-border);
+    border-radius:10px;
+    padding:.6rem .75rem;
+    font-size:.75rem;
+    color:var(--app-faint);
+    line-height:1.5;
+  }
+  .annotation b{color:var(--app-muted)}
+  .annotation code{font-family:var(--f-mono);font-size:.92em;color:var(--app-muted)}
+
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:1.75rem;
+    transform:translate(-50%, 12px);
+    background:var(--ink);
+    color:var(--surface);
+    font-size:var(--fs-caption);
+    padding:.7rem 1.1rem;
+    border-radius:10px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:50;
+    max-width:min(30rem, calc(100vw - 2rem));
+    text-align:center;
+  }
+  .toast.is-visible{opacity:1;transform:translate(-50%, 0)}
+
+  @media (max-width:640px){
+    .shell{padding:1.5rem 1rem 3rem}
+    .switcher{width:100%}
+    .switcher button{flex:1 1 auto}
+  }
+</style>
+
+<div class="shell">
+
+  <div class="shell-head">
+    <div class="brand">
+      <div class="brand-mark">Head<em>State</em></div>
+      <div class="brand-sub">Screen mockups &mdash; first-run onboarding, six steps</div>
+    </div>
+    <div class="switcher-wrap">
+      <div class="switcher" role="tablist" aria-label="Onboarding step">
+        <button type="button" role="tab" aria-selected="true" data-step="0">Welcome</button>
+        <button type="button" role="tab" aria-selected="false" data-step="1">Collecting</button>
+        <button type="button" role="tab" aria-selected="false" data-step="2">Baseline</button>
+        <button type="button" role="tab" aria-selected="false" data-step="3">Sharing</button>
+        <button type="button" role="tab" aria-selected="false" data-step="4">Permissions</button>
+        <button type="button" role="tab" aria-selected="false" data-step="5">Ready</button>
+      </div>
+      <p class="switcher-note">Reviewer&rsquo;s jump list &mdash; not part of the flow. The in-app <b>Continue</b> and the Back/Next below the phone are gated on the consent screens; these tabs deliberately are not, so any screen stays reachable for review.</p>
+    </div>
+  </div>
+
+  <!-- ================= STEP 1 — WELCOME ================= -->
+  <section class="step is-active" data-panel="0">
+    <p class="lede"><b>First open, nothing logged yet.</b> A calm first encounter &mdash; the product is asking for two minutes, and it says so.</p>
+    <div class="device-stage">
+      <div class="device-frame"><div class="device-screen">
+        <div class="device-notch"></div>
+        <div class="app-body">
+          <div class="steprail">
+            <div class="steprail-bars">
+              <span class="is-now"></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="steprail-label"><b>Welcome</b><span>Step 1 of 6</span></div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <div class="welcome-mark">Head<em>State</em></div>
+          <p class="app-lede">Say one sentence when a migraine starts. Get back a page a neurologist can actually read &mdash; <b>dated, sourced, and printable</b> &mdash; on the worst day of the year.</p>
+
+          <div class="privacy-note">
+            Your record stays in your account. <b>Nothing goes anywhere else</b> &mdash; not to an assistant, not to a doctor, not down a link &mdash; until you say so, for that one thing, on its own screen.
+          </div>
+
+          <div class="spacer"></div>
+
+          <span class="app-pill">Under 2 minutes &middot; 6 steps</span>
+          <button class="app-cta" type="button" data-goto="1">Start</button>
+          <p class="app-hint">You can change every answer later, and nothing here is a diagnosis.</p>
+        </div>
+      </div></div>
+    </div>
+    <div class="stage-nav">
+      <button class="btn" type="button" data-nav="prev" disabled>&larr; Back</button>
+      <span class="stage-nav-count">Step 1 of 6</span>
+      <button class="btn" type="button" data-nav="next">Next &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ================= STEP 2 — COLLECTION CONSENT ================= -->
+  <section class="step" data-panel="1">
+    <p class="lede"><b>Collection consent, on its own screen, before the first question is asked.</b> The baseline conversation on the next step <i>is</i> collection &mdash; so it cannot come first. Allow and decline are the same size, the same weight, and neither is pre-selected or focused (FR-7.3).</p>
+    <div class="device-stage">
+      <div class="device-frame"><div class="device-screen">
+        <div class="device-notch"></div>
+        <div class="app-body">
+          <div class="steprail">
+            <div class="steprail-bars">
+              <span class="is-done"></span><span class="is-now"></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="steprail-label"><b>Collecting</b><span>Step 2 of 6</span></div>
+          </div>
+
+          <h2 class="app-title">What I&rsquo;ll <em>keep</em></h2>
+          <p class="app-lede">Two things, decided separately. Neither is bundled into the other.</p>
+
+          <div class="scope" data-scope="collect_symptom_data">
+            <div class="scope-head">
+              <span class="scope-name">Your symptoms, medications and timing</span>
+              <span class="scope-key">collect_symptom_data</span>
+            </div>
+            <p class="scope-body">The record itself: what you log, when it happened, and when you logged it &mdash; kept as two separate timestamps, because a Tuesday migraine written down on Thursday is still a Tuesday migraine.</p>
+            <p class="scope-ifno"><b>If you decline:</b> there is nothing to keep, so I&rsquo;ll close without creating an account. This is the one thing HeadState can&rsquo;t work around.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for collect_symptom_data">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="scope" data-scope="collect_location">
+            <div class="scope-head">
+              <span class="scope-name">Coarse location</span>
+              <span class="scope-key">collect_location</span>
+            </div>
+            <p class="scope-body">City-level only, and only so a day can carry the weather and barometric pressure that went with it. No precise position, no history of where you&rsquo;ve been.</p>
+            <p class="scope-ifno"><b>If you decline:</b> every other part of the app is unchanged. Logging, the recall summary, headache days, migraine days, medication-overuse counting &mdash; all identical. A day just won&rsquo;t have weather next to it.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for collect_location">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="policy-links">
+            <a href="#" data-policy="chd">Consumer Health Data Privacy Policy</a>
+            <a href="#" data-policy="general">General Privacy Policy</a>
+            <span>Two separate documents, two separate routes. The wording above is drawn from the same versioned policy text as the first one.</span>
+          </div>
+
+          <div class="annotation">
+            <span>&#9670;</span>
+            <span><b>Separate opt-in for collection, separate authorisation for sharing.</b> Washington&rsquo;s My Health My Data Act, enforceable by private action &mdash; and no single control may satisfy both (FR-7.4). Each Allow writes one append-only <code>consent_events</code> row and updates <code>consent_current</code> in the same transaction.</span>
+          </div>
+
+          <p class="gate-hint" id="gate-hint-collect"></p>
+          <button class="app-cta" type="button" data-goto="2" id="cta-collect" disabled>Continue</button>
+        </div>
+      </div></div>
+    </div>
+    <div class="stage-nav">
+      <button class="btn" type="button" data-nav="prev">&larr; Back</button>
+      <span class="stage-nav-count">Step 2 of 6</span>
+      <button class="btn" type="button" data-nav="next">Next &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ================= STEP 3 — BASELINE CONVERSATION ================= -->
+  <section class="step" data-panel="2">
+    <p class="lede"><b>One paragraph, typed or spoken, becomes a batch of correctable cards.</b> Not re-asked field by field. Press play &mdash; then try &ldquo;not quite?&rdquo; on any row: the editor is typed by the field, so laterality gets a chip picker and a tri-state symptom gets four options, never a bare text box.</p>
+    <div class="device-stage">
+      <div class="device-frame"><div class="device-screen">
+        <div class="device-notch"></div>
+        <div class="app-body">
+          <div class="steprail">
+            <div class="steprail-bars">
+              <span class="is-done"></span><span class="is-done"></span><span class="is-now"></span><span></span><span></span><span></span>
+            </div>
+            <div class="steprail-label"><b>Baseline</b><span>Step 3 of 6</span></div>
+          </div>
+
+          <div class="convo">
+            <div class="ask">Tell me about your migraines &mdash; how often, what they&rsquo;re usually like, and what you&rsquo;re currently taking.</div>
+            <div class="demo-row" id="convo-controls">
+              <button class="demo-btn" id="play-convo" type="button">&#9654; Play scenario</button>
+            </div>
+            <div class="bubble" id="convo-bubble"></div>
+          </div>
+
+          <div class="receipt" id="receipt-baseline">
+            <div class="receipt-head"><span>Your usual pattern</span><span>as described</span></div>
+            <p class="receipt-sub">Your own summary of a pattern &mdash; kept apart from the timestamped record, and never counted as a headache or migraine day.</p>
+
+            <div class="receipt-field">
+              <span class="receipt-field-label">Frequency</span>
+              <span class="receipt-field-val" data-field="Frequency" data-type="text">
+                <span class="conf-tag">lexical</span><span class="field-text">3&ndash;4 / month</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Laterality</span>
+              <span class="receipt-field-val" data-field="Laterality" data-type="enum"
+                    data-options="left|right|both|alternating">
+                <span class="conf-tag">lexical</span><span class="field-text">left</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Quality</span>
+              <span class="receipt-field-val" data-field="Quality" data-type="enum"
+                    data-options="throbbing|pressing|stabbing|other">
+                <span class="conf-tag">lexical</span><span class="field-text">throbbing</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Photophobia</span>
+              <span class="receipt-field-val" data-field="Photophobia" data-type="tristate"
+                    data-options="asked · yes|asked · no|asked · unknown|not asked">
+                <span class="conf-tag is-paraphrase">paraphrase</span><span class="field-text">asked &middot; yes</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Nausea</span>
+              <span class="receipt-field-val" data-field="Nausea" data-type="tristate"
+                    data-options="asked · yes|asked · no|asked · unknown|not asked">
+                <span class="conf-tag">lexical</span><span class="field-text">asked &middot; yes</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Vomiting</span>
+              <span class="receipt-field-val" data-field="Vomiting" data-type="tristate"
+                    data-options="asked · yes|asked · no|asked · unknown|not asked">
+                <span class="conf-tag">lexical</span><span class="field-text">asked &middot; no</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Aura</span>
+              <span class="receipt-field-val" data-field="Aura" data-type="tristate"
+                    data-options="asked · yes|asked · no|asked · unknown|not asked">
+                <span class="conf-tag is-none">no source</span><span class="field-text is-empty">not asked</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+          </div>
+
+          <div class="annotation">
+            <span>&#9670;</span>
+            <span><b>This card has no schema yet &mdash; an open gap, not a resolved design.</b> A remembered pattern (&ldquo;three or four a month&rdquo;) is not an observation: it has no <code>observed_at</code>, it describes no single moment, and <b>no spec file defines an object for it</b>. It is parked outside the observation model on purpose rather than silently written in as one, so correcting a row here supersedes nothing and writes no <code>observations</code> row. Needs a decision before build step 1.</span>
+          </div>
+
+          <div class="receipt" id="receipt-meds">
+            <div class="receipt-head"><span>What you&rsquo;re taking</span><span>2 found</span></div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Acute</span>
+              <span class="receipt-field-val" data-field="Acute" data-type="text">
+                <span class="conf-tag">lexical</span><span class="field-text">Sumatriptan 100&nbsp;mg</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Drug class</span>
+              <span class="receipt-field-val" data-field="Drug class" data-type="enum"
+                    data-options="triptan|ergot|opioid|combination_analgesic|non_opioid_analgesic">
+                <span class="conf-tag is-lookup">class lookup</span><span class="field-text">triptan</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Preventive</span>
+              <span class="receipt-field-val" data-field="Preventive" data-type="text">
+                <span class="conf-tag">lexical</span><span class="field-text">Propranolol 80&nbsp;mg daily</span>
+                <button class="correct-link" type="button">not quite?</button>
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="receipt-field-label">Taking since</span>
+              <span class="receipt-field-val" data-field="Taking since" data-type="text">
+                <span class="conf-tag is-none">no source</span><span class="field-text is-empty">you didn&rsquo;t say</span>
+                <button class="correct-link" type="button">add it</button>
+              </span>
+            </div>
+          </div>
+
+          <div class="annotation">
+            <span>&#9670;</span>
+            <span><b>Nothing here was invented.</b> Every filled row traces to a span of what you typed, or to one named lookup &mdash; drug class comes from the medication name, not from a guess. Where you said nothing, the row stays empty rather than plausible. Aura is left <code>not_asked</code> on purpose: &ldquo;never mentioned&rdquo; and &ldquo;no&rdquo; are different clinical facts, and it gets asked properly every morning.</span>
+          </div>
+
+          <button class="app-cta" type="button" data-goto="3">Looks right</button>
+        </div>
+      </div></div>
+    </div>
+    <div class="stage-nav">
+      <button class="btn" type="button" data-nav="prev">&larr; Back</button>
+      <span class="stage-nav-count">Step 3 of 6</span>
+      <button class="btn" type="button" data-nav="next">Next &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ================= STEP 4 — SHARING CONSENT ================= -->
+  <section class="step" data-panel="3">
+    <p class="lede"><b>A second, separate screen with its own affirmative actions.</b> Decline all three and symptom logging, the recall summary and every day count still work in full &mdash; that&rsquo;s FR-7.5, a requirement rather than a courtesy, and the copy says it out loud on each one.</p>
+    <div class="device-stage">
+      <div class="device-frame"><div class="device-screen">
+        <div class="device-notch"></div>
+        <div class="app-body">
+          <div class="steprail">
+            <div class="steprail-bars">
+              <span class="is-done"></span><span class="is-done"></span><span class="is-done"></span><span class="is-now"></span><span></span><span></span>
+            </div>
+            <div class="steprail-label"><b>Sharing</b><span>Step 4 of 6</span></div>
+          </div>
+
+          <h2 class="app-title">What can <em>leave</em></h2>
+          <p class="app-lede">Three ways data can go outward. Each is its own decision, and each is off until you turn it on.</p>
+
+          <div class="scope" data-scope="share_assistant_connector">
+            <div class="scope-head">
+              <span class="scope-name">Log through Claude, ChatGPT or Siri</span>
+              <span class="scope-key">share_assistant_connector</span>
+            </div>
+            <p class="scope-body">Lets you log by talking to an assistant you already use. Your words, and whatever the record sends back, travel through that company&rsquo;s servers. <b style="color:var(--app-ink)">Whether they keep any of it is undocumented, and I&rsquo;m not going to tell you it isn&rsquo;t.</b> Granted one assistant at a time, never all at once.</p>
+            <p class="scope-ifno"><b>If you decline:</b> voice and text logging inside HeadState is untouched, including offline.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for share_assistant_connector">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="scope" data-scope="share_export_link">
+            <div class="scope-head">
+              <span class="scope-name">Send the summary as a link</span>
+              <span class="scope-key">share_export_link</span>
+            </div>
+            <p class="scope-body">A single-use web link for a clinic that won&rsquo;t take a PDF. Expires in 24 hours, has a view limit, and every open is logged &mdash; including the ones that fail. Revoking it stops future opens; it can&rsquo;t retract a page someone has already read, downloaded or screenshotted.</p>
+            <p class="scope-ifno"><b>If you decline:</b> you can still print the summary, save it as a PDF, or hand over your phone. The recall page itself is unaffected.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for share_export_link">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="scope" data-scope="share_health_platform">
+            <div class="scope-head">
+              <span class="scope-name">Write migraine days back to Apple Health</span>
+              <span class="scope-key">share_health_platform</span>
+            </div>
+            <p class="scope-body">Pushes your day classifications outward into the Health app, where other apps you&rsquo;ve authorised can see them. This is data going out. Reading your sleep <i>in</i> is a different ask, on the next screen.</p>
+            <p class="scope-ifno"><b>If you decline:</b> nothing else changes, and reading sleep in still works if you allow it separately.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for share_health_platform">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="annotation">
+            <span>&#9670;</span>
+            <span><b>Two scopes are deliberately absent.</b> <code>research_aggregate</code> is not asked at first run &mdash; it belongs in Settings, after the product has earned the question. <code>sale</code> exists in the schema and renders no control at all, here or anywhere, pending counsel.</span>
+          </div>
+
+          <p class="gate-hint" id="gate-hint-share"></p>
+          <button class="app-cta" type="button" data-goto="4" id="cta-share" disabled>Continue</button>
+        </div>
+      </div></div>
+    </div>
+    <div class="stage-nav">
+      <button class="btn" type="button" data-nav="prev">&larr; Back</button>
+      <span class="stage-nav-count">Step 4 of 6</span>
+      <button class="btn" type="button" data-nav="next">Next &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ================= STEP 5 — PERMISSIONS ================= -->
+  <section class="step" data-panel="4">
+    <p class="lede"><b>Device permissions, not consent scopes</b> &mdash; and each one is pitched as a question I&rsquo;ll stop asking you, not a box to tick. The weather row is live: go back to step 2, decline coarse location, and the operating-system prompt is never even reached.</p>
+    <div class="device-stage">
+      <div class="device-frame"><div class="device-screen">
+        <div class="device-notch"></div>
+        <div class="app-body">
+          <div class="steprail">
+            <div class="steprail-bars">
+              <span class="is-done"></span><span class="is-done"></span><span class="is-done"></span><span class="is-done"></span><span class="is-now"></span><span></span>
+            </div>
+            <div class="steprail-label"><b>Permissions</b><span>Step 5 of 6</span></div>
+          </div>
+
+          <h2 class="app-title">Three things I can <em>stop asking</em> you</h2>
+
+          <div class="perm">
+            <p class="perm-say">Connect your health data so I can stop asking about sleep.</p>
+            <p class="perm-why">Reads sleep and rest hours from the Health app. Sleep is the single most tedious thing to type in every morning, and the one most likely to be wrong from memory.</p>
+            <div class="perm-choice" role="group" aria-label="Health app access">
+              <button type="button" aria-pressed="false">Connect</button>
+              <button type="button" aria-pressed="false">Not now</button>
+            </div>
+          </div>
+
+          <div class="perm">
+            <p class="perm-say">Let me knock once each morning, so a week doesn&rsquo;t get rebuilt from memory.</p>
+            <p class="perm-why">One notification, in the morning only &mdash; never in the evening. An evening question can&rsquo;t see the one thing that matters most: whether you slept with a migraine and woke up without one.</p>
+            <div class="perm-choice" role="group" aria-label="Morning notification">
+              <button type="button" aria-pressed="false">Allow notifications</button>
+              <button type="button" aria-pressed="false">Not now</button>
+            </div>
+          </div>
+
+          <div class="perm" id="perm-weather">
+            <p class="perm-say">Pull the weather so I can stop asking about pressure changes.</p>
+            <p class="perm-why">Attaches barometric pressure and conditions to each day, from your city. Whether that turns out to mean anything for you is a question for later &mdash; it is not a forecast, and there is no risk score anywhere in this app.</p>
+            <p class="perm-gated">You declined coarse location on step 2, so there is nothing to ask the operating system for. Change it in Settings and this comes back.</p>
+            <div class="perm-choice" role="group" aria-label="Weather">
+              <button type="button" aria-pressed="false">Use my city</button>
+              <button type="button" aria-pressed="false">Not now</button>
+            </div>
+          </div>
+
+          <div class="annotation">
+            <span>&#9670;</span>
+            <span><b>A consent scope gates the system prompt, not the other way round.</b> Declining <code>collect_location</code> on step 2 means the location permission dialog is never shown &mdash; a permission you can&rsquo;t lawfully use should never be requested.</span>
+          </div>
+
+          <button class="app-cta" type="button" data-goto="5">Continue</button>
+        </div>
+      </div></div>
+    </div>
+    <div class="stage-nav">
+      <button class="btn" type="button" data-nav="prev">&larr; Back</button>
+      <span class="stage-nav-count">Step 5 of 6</span>
+      <button class="btn" type="button" data-nav="next">Next &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ================= STEP 6 — READY ================= -->
+  <section class="step" data-panel="5">
+    <p class="lede"><b>One calibration question, then out.</b> The receipt below is live &mdash; it reflects whatever you actually chose on steps 2 and 4, undecided scopes included, exactly as the <code>consent_events</code> log would show them.</p>
+    <div class="device-stage">
+      <div class="device-frame"><div class="device-screen">
+        <div class="device-notch"></div>
+        <div class="app-body">
+          <div class="steprail">
+            <div class="steprail-bars">
+              <span class="is-done"></span><span class="is-done"></span><span class="is-done"></span><span class="is-done"></span><span class="is-done"></span><span class="is-now"></span>
+            </div>
+            <div class="steprail-label"><b>Ready</b><span>Step 6 of 6</span></div>
+          </div>
+
+          <h2 class="app-title">One last thing</h2>
+          <p class="app-lede">Right now, at this moment &mdash; where are you?</p>
+
+          <div class="binary" role="group" aria-label="Current state">
+            <button type="button" aria-pressed="false" data-calib="in">In one now<small>I&rsquo;ll start the record from this minute</small></button>
+            <button type="button" aria-pressed="false" data-calib="clear">Clear today<small>Nothing to log yet &mdash; that&rsquo;s data too</small></button>
+          </div>
+
+          <div class="annotation">
+            <span>&#9670;</span>
+            <span><b>This writes an observation, not a status.</b> Either answer is a timestamped row in the log. Whether it opens an episode is computed from it afterwards &mdash; and can be recomputed in June under a different rule without losing what you said in August.</span>
+          </div>
+
+          <div class="cr" id="consent-receipt">
+            <div class="receipt-head"><span>Your consent record</span><span class="u-numeric">policy chd-2026.02</span></div>
+            <div id="cr-rows"></div>
+            <p class="cr-foot">Every line above is append-only. Changing your mind later writes a new row rather than editing this one &mdash; which is why you can always see what you agreed to, and when.</p>
+          </div>
+
+          <p class="app-lede">I&rsquo;ll ask you two or three short questions <b>each morning</b>, and nothing at all in the evening. When one starts, just say &ldquo;<b>I have a migraine</b>&rdquo; &mdash; that&rsquo;s the whole interaction.</p>
+
+          <button class="app-cta" type="button" id="finish-btn">Open HeadState</button>
+          <p class="app-hint">Goes to Home. Everything on these six screens lives in Settings afterwards, on the same components.</p>
+        </div>
+      </div></div>
+    </div>
+    <div class="stage-nav">
+      <button class="btn" type="button" data-nav="prev">&larr; Back</button>
+      <span class="stage-nav-count">Step 6 of 6</span>
+      <button class="btn" type="button" data-nav="next" disabled>Next &rarr;</button>
+    </div>
+  </section>
+
+  <div class="shell-foot">
+    <span>Mockup only &mdash; not wired to a consent store, a backend, or the derivation engine.</span>
+    <span>frd.md &sect;7 &middot; tech-spec.md &sect;4.1 &middot; design-system.md</span>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var COLLECT_SCOPES = ['collect_symptom_data', 'collect_location'];
+  var SHARE_SCOPES = ['share_assistant_connector', 'share_export_link', 'share_health_platform'];
+  var SCOPES = COLLECT_SCOPES.concat(SHARE_SCOPES);
+  /* research_aggregate is never asked at first run, but the receipt still lists it —
+     a ConsentReceipt shows undecided scopes, not just answered ones. */
+  var RECEIPT_SCOPES = SCOPES.concat(['research_aggregate']);
+
+  var state = {};
+  SCOPES.forEach(function(s){ state[s] = null; });
+
+  /* ---------- toast ---------- */
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 3400);
+  }
+
+  /* ---------- step navigation ---------- */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.switcher [role="tab"]'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.step'));
+  var current = 0;
+
+  function decided(list){
+    return list.every(function(s){ return !!state[s]; });
+  }
+  function recordDeclined(){
+    return !!state.collect_symptom_data && state.collect_symptom_data.decision === 'withdraw';
+  }
+  /* Forward movement out of a consent screen requires an explicit answer on every
+     scope shown there. Requiring an answer is not pre-selecting one — FR-7.3 is
+     about which button is favoured, not about whether a decision is mandatory. */
+  function canLeave(n){
+    if (n === 1) return decided(COLLECT_SCOPES) && !recordDeclined();
+    if (n === 3) return decided(SHARE_SCOPES);
+    return true;
+  }
+
+  function goTo(n, viaFlow){
+    if (n < 0 || n >= panels.length) return;
+    if (viaFlow && n > current && !canLeave(current)) return;
+    current = n;
+    tabs.forEach(function(t, i){ t.setAttribute('aria-selected', i === n ? 'true' : 'false'); });
+    panels.forEach(function(p, i){ p.classList.toggle('is-active', i === n); });
+    if (n === panels.length - 1) renderReceipt();
+    window.scrollTo(reduced ? { top: 0 } : { top: 0, behavior: 'smooth' });
+    syncGates();
+  }
+
+  /* The tablist is reviewer chrome, not the flow — deliberately ungated. */
+  tabs.forEach(function(tab, i){
+    tab.addEventListener('click', function(){ goTo(i, false); });
+  });
+  document.querySelectorAll('[data-nav]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      goTo(btn.dataset.nav === 'next' ? current + 1 : current - 1, btn.dataset.nav === 'next');
+    });
+  });
+  document.querySelectorAll('[data-goto]').forEach(function(btn){
+    btn.addEventListener('click', function(){ goTo(parseInt(btn.dataset.goto, 10), true); });
+  });
+
+  /* ---------- gate state ---------- */
+  var ctaCollect = document.getElementById('cta-collect');
+  var ctaShare = document.getElementById('cta-share');
+  var hintCollect = document.getElementById('gate-hint-collect');
+  var hintShare = document.getElementById('gate-hint-share');
+
+  function outstanding(list){
+    return list.filter(function(s){ return !state[s]; }).length;
+  }
+
+  function syncGates(){
+    var leftC = outstanding(COLLECT_SCOPES);
+    if (recordDeclined()){
+      ctaCollect.disabled = true;
+      hintCollect.textContent = 'You declined the record itself, so onboarding ends here — there is no account to continue into, and nothing was written.';
+    } else if (leftC > 0){
+      ctaCollect.disabled = true;
+      hintCollect.textContent = leftC === 2
+        ? 'Both need an answer before we go on. Either answer is fine — but silence isn’t one.'
+        : 'One still needs an answer. Either answer is fine — but silence isn’t one.';
+    } else {
+      ctaCollect.disabled = false;
+      hintCollect.textContent = '';
+    }
+
+    var leftS = outstanding(SHARE_SCOPES);
+    if (leftS > 0){
+      ctaShare.disabled = true;
+      hintShare.textContent = leftS + (leftS === 1 ? ' still needs' : ' still need') + ' an answer. Declining all three is a complete, fully working setup — but it has to be said, not assumed.';
+    } else {
+      ctaShare.disabled = false;
+      hintShare.textContent = '';
+    }
+
+    var nav = panels[current].querySelector('[data-nav="next"]');
+    if (nav && current !== panels.length - 1) nav.disabled = !canLeave(current);
+  }
+
+  /* ---------- timestamps ---------- */
+  function stamp(){
+    var d = new Date();
+    function p(n){ return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+           ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+
+  /* ---------- ConsentScope ---------- */
+  document.querySelectorAll('.scope').forEach(function(card){
+    var scope = card.dataset.scope;
+    var buttons = Array.prototype.slice.call(card.querySelectorAll('.scope-choice button'));
+    var stampEl = card.querySelector('.scope-stamp');
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var decision = btn.dataset.decision;
+        buttons.forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+        btn.setAttribute('aria-pressed', 'true');
+        var at = stamp();
+        state[scope] = { decision: decision, at: at };
+        card.classList.add('is-answered');
+
+        /* Declining the record scope means no account exists to hold a consent row
+           either — so this one case writes nothing at all, and must not claim to. */
+        var terminal = (scope === 'collect_symptom_data' && decision === 'withdraw');
+        stampEl.textContent = terminal
+          ? 'no account created · no row written'
+          : 'consent_events · ' + decision + ' · ' + at;
+
+        if (scope === 'collect_location') syncWeather();
+        if (terminal){
+          showToast('Declined — onboarding ends here. No account, no consent row, nothing stored.');
+        }
+        syncGates();
+      });
+    });
+  });
+
+  /* ---------- consent gates the OS prompt ---------- */
+  var weatherCard = document.getElementById('perm-weather');
+  function syncWeather(){
+    var loc = state.collect_location;
+    var blocked = !!loc && loc.decision === 'withdraw';
+    weatherCard.classList.toggle('is-blocked', blocked);
+    weatherCard.querySelectorAll('.perm-choice button').forEach(function(b){
+      b.disabled = blocked;
+      if (blocked) b.setAttribute('aria-pressed', 'false');
+    });
+  }
+
+  /* ---------- permission rows ---------- */
+  document.querySelectorAll('.perm-choice').forEach(function(group){
+    var buttons = Array.prototype.slice.call(group.querySelectorAll('button'));
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if (btn.disabled) return;
+        buttons.forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+        btn.setAttribute('aria-pressed', 'true');
+      });
+    });
+  });
+
+  /* ---------- BinaryChoice ---------- */
+  document.querySelectorAll('.binary').forEach(function(group){
+    var buttons = Array.prototype.slice.call(group.querySelectorAll('button'));
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        buttons.forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+        btn.setAttribute('aria-pressed', 'true');
+        showToast(btn.dataset.calib === 'in'
+          ? 'Observation written — kind: pain, observed_at: now. The episode is derived from it, not set by it.'
+          : 'Observation written — an active “no symptoms” confirmation, not inferred from silence.');
+      });
+    });
+  });
+
+  /* ---------- ConsentReceipt ---------- */
+  function renderReceipt(){
+    var host = document.getElementById('cr-rows');
+    host.textContent = '';
+
+    if (recordDeclined()){
+      var note = document.createElement('p');
+      note.className = 'cr-foot';
+      note.style.marginTop = '0';
+      note.style.borderTop = 'none';
+      note.textContent = 'Nothing to show. You declined collect_symptom_data on step 2, so no account was created and no consent row was written — in the real app this screen is never reached.';
+      host.appendChild(note);
+      return;
+    }
+
+    RECEIPT_SCOPES.forEach(function(scope){
+      var rec = state[scope];
+      var row = document.createElement('div');
+      row.className = 'cr-row';
+
+      var name = document.createElement('span');
+      name.className = 'cr-scope';
+      name.textContent = scope;
+
+      var dec = document.createElement('span');
+      dec.className = 'cr-decision';
+      if (!rec){
+        dec.textContent = 'not decided';
+      } else if (rec.decision === 'grant'){
+        dec.textContent = 'granted';
+        dec.classList.add('is-grant');
+      } else {
+        dec.textContent = 'declined';
+        dec.classList.add('is-withdraw');
+      }
+
+      row.appendChild(name);
+      row.appendChild(dec);
+
+      var st = document.createElement('span');
+      st.className = 'cr-stamp';
+      if (rec){
+        st.textContent = rec.at + ' · method: onboarding';
+      } else if (scope === 'research_aggregate'){
+        st.textContent = 'not asked at first run · no row written';
+      } else {
+        st.textContent = 'no consent_events row written';
+      }
+      row.appendChild(st);
+
+      host.appendChild(row);
+    });
+  }
+  renderReceipt();
+  syncGates();
+
+  document.getElementById('finish-btn').addEventListener('click', function(){
+    showToast('Onboarding complete — this hands off to Home.');
+  });
+
+  document.querySelectorAll('[data-policy]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      showToast(a.dataset.policy === 'chd'
+        ? 'Standalone route /policy/consumer-health — separate document, separately linked (FR-7.6).'
+        : 'Separate route /policy/privacy — the general policy, distinct from the consumer health one.');
+    });
+  });
+
+  /* ---------- CorrectableField, typed by field shape ---------- */
+  function bind(link){
+    link.addEventListener('click', function(){
+      var wrap = link.closest('.receipt-field-val');
+      if (wrap.classList.contains('is-editing')) return;
+
+      var type = wrap.dataset.type || 'text';
+      var label = wrap.dataset.field || '';
+      /* The baseline card is not an observation, so its corrections must not claim
+         observation/supersession semantics. See the annotation under that card. */
+      var isBaseline = !!link.closest('#receipt-baseline');
+      var textEl = wrap.querySelector('.field-text');
+      var currentVal = textEl.classList.contains('is-empty') ? '' : textEl.textContent;
+      wrap.classList.add('is-editing');
+      wrap.textContent = '';
+
+      function commit(val, tagText, tagClass){
+        wrap.classList.remove('is-editing');
+        wrap.textContent = '';
+        var tag = document.createElement('span');
+        tag.className = 'conf-tag ' + (tagClass || 'is-user');
+        tag.textContent = tagText || 'user';
+        var txt = document.createElement('span');
+        txt.className = 'field-text';
+        txt.textContent = val;
+        var again = document.createElement('button');
+        again.className = 'correct-link';
+        again.type = 'button';
+        again.textContent = 'not quite?';
+        wrap.appendChild(tag);
+        wrap.appendChild(txt);
+        wrap.appendChild(again);
+        bind(again);
+        showToast(isBaseline
+          ? label + ' → “' + val + '”. Baseline updated in place — this object is not an observation, so nothing was superseded and no observations row was written.'
+          : label + ' → “' + val + '”. Written as a new observation with the old one superseded, never edited in place.');
+      }
+
+      if (type === 'enum' || type === 'tristate'){
+        var picker = document.createElement('span');
+        picker.className = 'chip-picker';
+        (wrap.dataset.options || '').split('|').forEach(function(opt){
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = opt;
+          if (opt === currentVal) b.classList.add('is-current');
+          b.addEventListener('click', function(){ commit(opt); });
+          picker.appendChild(b);
+        });
+        wrap.appendChild(picker);
+        return;
+      }
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'step-input';
+      input.value = currentVal;
+      wrap.appendChild(input);
+      input.focus();
+      input.select();
+      var done = false;
+      function finish(){
+        if (done) return;
+        done = true;
+        commit(input.value.trim() || currentVal || '—');
+      }
+      input.addEventListener('blur', finish);
+      input.addEventListener('keydown', function(e){ if (e.key === 'Enter') input.blur(); });
+    });
+  }
+  document.querySelectorAll('.correct-link').forEach(bind);
+
+  /* ---------- baseline conversation playback ---------- */
+  var utterance = "Maybe three or four a month. Usually the left side, throbbing, and light is unbearable. Sometimes nauseous, never actually thrown up. I take sumatriptan 100 when one starts, and propranolol 80 every morning.";
+  var playBtn = document.getElementById('play-convo');
+  var bubble = document.getElementById('convo-bubble');
+  var r1 = document.getElementById('receipt-baseline');
+  var r2 = document.getElementById('receipt-meds');
+  var playing = false;
+
+  function finishConvo(){
+    r1.classList.add('is-visible');
+    setTimeout(function(){ r2.classList.add('is-visible'); }, 260);
+    playBtn.textContent = '↻ Replay';
+    playing = false;
+  }
+
+  playBtn.addEventListener('click', function(){
+    if (playing) return;
+    playing = true;
+    bubble.classList.remove('is-visible');
+    bubble.textContent = '';
+    r1.classList.remove('is-visible');
+    r2.classList.remove('is-visible');
+    playBtn.textContent = '▶ Playing…';
+    bubble.classList.add('is-visible');
+
+    if (reduced){
+      bubble.textContent = utterance;
+      finishConvo();
+      return;
+    }
+    var i = 0;
+    (function typeNext(){
+      if (i <= utterance.length){
+        bubble.textContent = utterance.slice(0, i);
+        var caret = document.createElement('span');
+        caret.className = 'caret';
+        bubble.appendChild(caret);
+        i += 2;
+        setTimeout(typeNext, 18);
+      } else {
+        bubble.textContent = utterance;
+        setTimeout(finishConvo, 450);
+      }
+    })();
+  });
+
+})();
+</script>

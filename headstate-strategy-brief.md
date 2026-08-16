@@ -5,6 +5,8 @@ Current as of 13 August 2026
 
 **Direction:** Build for Eric first — a tool he needs and uses. Commercialize second. Patient-first DTC. Three jobs: **capture**, **recall**, **documents**.
 
+**Settled decisions:** ten decisions — platform, schema, capture model, backfill, prodrome scope, the confirmation gate, and specification scope — are recorded with full reasoning in `decision-log.md`. This brief reflects them as current state; that file is where the history and the "why" live.
+
 ---
 
 ## 1. What HeadState Is
@@ -92,6 +94,16 @@ And it is the mechanism that generates §2.1.
 
 ## 4. The Data Model
 
+> **The schema sketch below is illustrative and predates the specification.**
+> `tech-spec.md` §3 is binding. Notably: supersession is a separate table rather
+> than a column, attenuation is a boolean flag rather than a `rule` value, and
+> derived objects hang off a `derivations` parent that scopes every count. The
+> sketch below also still shows `DELPHI_OVERNIGHT` as a constant and
+> `boundary_rule: user_override` — both removed in the specification. The
+> overnight behaviour is an attack-scoped occupancy exception, and an override is
+> a separate persisted fact, not a rule tag.
+
+
 ### Observation layer — immutable, append-only
 ```
 observation_id, user_id
@@ -107,19 +119,29 @@ superseded_by: observation_id?          # corrections never delete
 ```
 
 ### Derived layer — recomputable, versioned, overridable
+All three derived object types carry both `confirmed_by: system | user` and
+`review_status: unreviewed | timed_out | user_reviewed`. The two are orthogonal:
+`confirmed_by` records who set the value, `review_status` records whether a
+human has actually looked at it. A timeout sets `review_status: timed_out` and
+does not touch `confirmed_by` — this is what lets a clinician export
+distinguish a reviewed inference from a lapsed one, and lets the correction
+corpus tell genuine confirmation from silence.
 ```
-episode_id, algorithm_version, computed_at
+episode_id, algorithm_version, computed_at,
+confirmed_by: system | user, review_status: unreviewed | timed_out | user_reviewed
 member_observations[]
 boundary_rule: icd_48h | status_migrainosus_12h | med_response_inference |
                user_override
 open: bool
 phase_annotations[]{ observation_id, phase, confidence,
-                     assigned_at, assigned_by: system | user }
+                     assigned_at, confirmed_by: system | user,
+                     review_status: unreviewed | timed_out | user_reviewed }
 day_classifications[]{ date, class: none | headache | migraine | aura_only,
                        rule: delphi_untreated_4h | delphi_treated_30min |
                              delphi_aura | attenuated,
                        attenuation_flag: bool, active_pharmacology[],
-                       confirmed_by: system | user }
+                       confirmed_by: system | user,
+                       review_status: unreviewed | timed_out | user_reviewed }
 ```
 
 Derivation rules, since `class` is not mutually exclusive by count:
@@ -157,6 +179,10 @@ Structure serves the prior auth. **Free text serves the questions you didn't mod
 ### Capture — frictionless or nothing else matters
 One utterance to structured observations, with a visible receipt and one-tap correction. No wizard. Mid-attack: write the record, confirm in four words, **ask nothing**. Re-engage after resolution for richer detail. Text must be genuinely first-class — voice is unusable on transit, in shared offices, and around family.
 
+**Event-anchored capture is the primary mechanism.** Onset and resolution are timestamped at or near the moment they're noticed, via an open/close affordance. Medication doses auto-trigger targeted follow-ups timed to pharmacology — roughly 30–60 minutes and 2 hours after a triptan or NSAID, next day for a corticosteroid taper — asking specifically about attenuation and recurrence. The 12-hour, 48-hour and 30-minute constants below need sub-day timestamp resolution that a once-daily checkpoint structurally cannot supply.
+
+**The daily checkpoint is a backstop, not the primary mechanism — next morning only.** Two questions are unconditional regardless of branching: aura, and whether the user fell asleep with a migraine and woke without one. Only a next-morning prompt can observe that overnight rule; an evening or end-of-day checkpoint is asked before sleep and can't see the waking state. Gating the aura question behind "did you have a headache today" would silently drop days from the migraine-day count that feeds the CGRP payer threshold. On any day inside an open episode, the checkpoint is capped short — an adaptive checkpoint that grows longer on worse days is heaviest exactly when capacity is lowest.
+
 ### Recall — the ER and appointment brief
 A **query** workload, not an export, and the thing that pays back in week one.
 
@@ -169,7 +195,7 @@ One page, generated on demand:
 
 Two hard constraints. **An ER physician will not browse an app** — they'll take a printed page, a link, or a verbal summary. And emergency medicine defaults to treating each visit as a fresh acute presentation, which is the same discrete-versus-continuous failure, relocated into the clinical encounter. Arriving at visit three with "day 12, two prior visits, here's the drug history and the recurrence curve" is a materially different conversation.
 
-Requirements: works offline, one tap from the lock screen, printable, shareable with someone who isn't the patient.
+Requirements: works offline, one tap from the lock screen, printable, shareable with someone who isn't the patient. The recall summary is exempt from the mandatory confirmation gate described in §3 and §8 — it must render in seconds for a photophobic patient in an emergency department, so unconfirmed items are labelled visibly on the page instead of blocking the view.
 
 ### Documents — the prior-authorization packet
 **Payer exports default to DAY COUNTS, never attack counts.**
@@ -182,6 +208,8 @@ A 21-day episode with ≥4h of headache daily is **21 headache days** and clears
 
 Under the Delphi rule, a treated day needs only **≥30 minutes** of headache regardless of drug class or characteristics, so medication-induced gaps mostly don't erase migraine days. The payer's own headache-day rule carries no such floor. Under either rule, the days at genuine risk are those *entirely* symptom-free due to medication, and neither rule recovers them on its own. **That is precisely the value of §2.6 — attenuation modeling is what stops drug-suppressed days from silently deleting themselves from either count.**
 
+**Backfilled observations always count toward these day counts, regardless of latency.** No published rule supports a backfill-latency exclusion. A backfilled entry carries low confidence via the standard per-field mechanism, and that confidence prints on the export — a reviewer sees a flagged low-confidence day rather than a silent gap. This matters most for exactly the patient the product exists for: a status migrainosus patient incapacitated for weeks is both the person most likely to backfill very late and the person most damaged by exclusion, because the missing days are the ones that establish a Botox or CGRP threshold.
+
 Also required: MOH counters, per-class **and** combined-class. Per-class thresholds are ≥10 days/month for triptans, ergots, opioids and combination analgesics, ≥15 for non-opioid analgesics. But **ICHD-3 8.2.6** covers any combination totaling **≥10 days/month** with no single class overused — so 6 triptan days plus 6 NSAID days is MOH while a per-class counter reports clear. Track both.
 
 Show the work: a payer or clinician should be able to see why day 14 counted, and which rule counted it.
@@ -192,29 +220,31 @@ Show the work: a payer or clinician should be able to see why day 14 counted, an
 
 ## 6. Build Order
 
-Sequenced for you as the user, which differs from a go-to-market sequence.
+Capacitor is repository scaffolding, not a numbered step. Steps 1–4 are
+specified — technical specification and functional requirements are scoped to
+them; steps 5–7 are sequenced but deliberately left unspecified until steps 1–4
+reveal more.
 
-1. **Capture and the observation store.** Immutable log, schema, conversational extraction with receipts and correction. Everything depends on this.
-2. **Recall.** The one-page current-state brief. Printable, shareable, offline. **Pays back before there's enough data for anything else** — which also answers the cold-start problem.
-3. **Derived episodes and day classification.** ICHD-3 constants, Delphi rules, dual readings, override. This is where a three-week episode becomes representable.
-4. **Integrations.** Sleep and weather first — highest signal, lowest effort. Then cycle and HRV. **This is where the platform question binds** (§7).
+0. **Capacitor scaffold, repo setup, CI.** TypeScript end to end, Postgres, managed platform.
+1. **Capture and the observation store.** Immutable log, schema with the third review state, event-anchored capture with the next-morning backstop. Everything depends on this.
+2. **Recall.** The one-page current-state brief. Printable, shareable, offline. Exempt from the confirmation gate. **Pays back before there's enough data for anything else** — which also answers the cold-start problem.
+3. **Derived episodes and day classification.** ICHD-3 constants, Delphi rules, dual readings, override. Backfill always counts. This is where a three-week episode becomes representable.
+4. **Integrations.** HealthKit and Health Connect for sleep and weather first — highest signal, lowest effort. Then cycle and HRV. Unblocked by Capacitor from step 0.
 5. **Phase annotation and retrospective relabeling**, including medication-response inference. Needs a few months of history to be interesting, and it operates on the past, so it can wait.
 6. **Correlation.** Needs the most data and is the least proven. Build it for yourself, not as a claim.
-7. **Prior-authorization packet.** Needs 30–90 days of clean data and needs to be right. Last, despite being the most valuable — it's only as good as everything above it.
+7. **Prior-authorization packet.** Needs 30–90 days of clean data and needs to be right. Last, despite being the most valuable — it's only as good as everything above it. Gated by the mandatory confirmation gate, which applies to Eric as it would to anyone else.
 
-**Divergence from independent QA, recorded rather than accidental:** an independent QA pass recommended pulling the Capacitor wrapper to Phase 1 and promoting the prior-authorization document to the lead position. This brief keeps Capacitor at step 4 and the prior-auth packet at step 7. That sequencing is a deliberate choice for a personal-use-first build, not an oversight: Capacitor arrives when integrations bind (§7), and the prior-auth packet is last because it is only as good as the data beneath it. Both recommendations are noted here rather than silently overridden.
+See `decision-log.md` for the reasoning behind this order.
 
 ---
 
 ## 7. Platform
 
-The two must-haves pull against each other. Easy daily logging wants a web app openable anywhere. Correlation wants sleep, HRV and cycle — and **HealthKit and Health Connect are native-only, no exceptions.**
+The two must-haves pull against each other. Easy daily logging wants a web app openable anywhere. Correlation wants sleep, HRV and cycle — and **HealthKit and Health Connect are native-only, no exceptions.** Nor can a web app do background audio capture, and Safari's LRU storage eviction makes server-side sync mandatory rather than optional.
 
-**For personal use, no App Store review is needed to run a Capacitor build on your own phone.** That's the unlock: go native early and privately, with none of the distribution overhead. Capacitor wraps the same web codebase; it isn't a rewrite.
+**The repository is scaffolded as a Capacitor project from commit one, wrapping the web app — there is no PWA-only period.** The web app remains the core codebase; Capacitor is a wrapper, not a rewrite. This unlocks HealthKit, Health Connect, background audio, native push, App Intents and Android AppFunctions from the start — and, if commercialized, App Store presence plus the only documented route into ChatGPT Health, which runs via Apple Health. For personal use, no App Store review is needed to run a build on your own phone.
 
-**Interim measure available today:** a Shortcuts automation dumping Apple Health data to the API on a schedule. Unpolished, needs no wrapper, unblocks correlation work immediately.
-
-**Recommendation:** PWA as the core codebase, **Capacitor wrapper at step 4.** It unlocks HealthKit and Health Connect, background audio, native push, App Intents and Android AppFunctions — and, if commercialized, App Store presence plus the only documented route into ChatGPT Health, which runs via Apple Health.
+**Stack:** TypeScript end to end — React with Vite for the app, Node and TypeScript for the API and the MCP server, Postgres for storage. Deployed on a managed platform (Fly.io) with managed Postgres. One language across the app, the Capacitor wrapper, the MCP server and the backend matters disproportionately for a solo builder, and Postgres suits an append-only observation log with derived projections well — JSONB for observation bodies, normal relational structure for the derived layer.
 
 **Assistant access:** one remote MCP server with OAuth 2.1 + PKCE, exposing log and query tools over the same backend. Claude accepts arbitrary MCP servers by URL with no review, so this can be running in days. The Free tier caps at one custom connector. This is where recall becomes genuinely good — conversational query over your own history, without the file shuffling.
 
@@ -245,7 +275,7 @@ The two must-haves pull against each other. Easy daily logging wants a web app o
 4. **Structured versus easy capture stays in tension.** Prior-auth-grade data wants ICHD-3 fields; easy logging wants one sentence. You may discover you'd rather tap four things. Stay open.
 5. **Retrospective reinterpretation breaks report reproducibility** without the two-clock design in from the start. Retrofitting is painful.
 6. **The med-response inference may have more prior art than it appears.** Verify before it becomes a differentiator claim.
-7. **Distribution, if commercializing.** No App Store presence as a PWA, near-zero organic discovery in assistant directories, and a noisy floor of near-identical AI trackers to be confused with.
+7. **Distribution, if commercializing.** No App Store presence until actually submitted for review, near-zero organic discovery in assistant directories, and a noisy floor of near-identical AI trackers to be confused with.
 8. **The algorithm is the most copyable component.** Position on the correction corpus and the report, not on inference logic.
 9. **Correlation is a research bet, not a claim.** The largest randomised trial of trigger analytics layered on a diary (M-sense Migräne, n=477, 12 weeks) compared the full app — trigger identification, correlation analysis, medication tracking — against a control app containing only a headache and medication diary. Result: migraine days per month fell from 7.74 to 5.79 in the intervention arm versus 7.76 to 5.41 in the control, a between-group difference of 0.38 days that was not statistically significant, with most secondary outcomes null. Investigators concluded self-monitoring itself drove the improvement in both arms. Consequence: correlation features are a research bet, not a marketing claim, and this is the evidential basis for the paywall position — gating correlation features is defensible on the evidence; gating logging or the recall/documents report is not.
 
@@ -253,10 +283,12 @@ The two must-haves pull against each other. Easy daily logging wants a web app o
 
 ## 10. Open Questions
 
-1. **How much intra-episode granularity do you actually want?** Every observation timestamped, or a few checkpoints daily? This sets how heavy capture feels, and it's the main lever on adherence.
-2. **The ER page — printed, or a link you display?** Determines whether offline printing is a v1 requirement.
-3. **Do you want prodrome alerts at all?** 85% precision, ~10-hour lead, poor sensitivity. Useful when it fires, silent most of the time. Some people would rather not be warned.
-4. **Does medication response resolve boundaries automatically, or only propose?** Per §3 it should propose — but confirm that a proposal you have to approve doesn't become the friction that stops you using it.
+Granularity, the recall-format question, prodrome alerts, and the automation-level question are all settled — see `decision-log.md`. What remains open, and deliberately so:
+
+1. **The MCP query-scope tension.** A remote MCP server exposing query tools makes any paywall on derived output architecturally unenforceable, and gating at the query-scope layer would reintroduce the history-depth gating that was already ruled out. No clean resolution found. Does not bind for a personal build.
+2. **What, if anything, becomes a paid product.** Two candidates — maintained payer-policy matching, and a clinician-cosignature workflow — precisely because neither reduces to the user's own data reformatted. Both point toward a clinic or business-to-business direction rather than a consumer SKU.
+3. **Whether the clinical path is a real ambition.** Contracting with clinics or pushing into an EHR triggers business-associate status — a one-way door, to be walked through deliberately if at all.
+4. **Instrument licensing.** The daily checkpoint's question wording is a licensing surface. Questions must be independently authored, and any use of PROMIS, HIT-6, MIDAS, MSQ or MPFID item wording needs legal clearance before anything is distributed or sold.
 
 ---
 

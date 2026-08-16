@@ -1,0 +1,1150 @@
+<title>Day Twelve</title>
+<style>
+  @font-face{
+    font-family:'Fraunces';font-style:italic;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_ITALIC__) format('woff2');
+  }
+  @font-face{
+    font-family:'Fraunces';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_NORMAL__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Sans';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXSANS__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_400__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_500__) format('woff2');
+  }
+
+  /* ============ TOKENS ============ */
+  :root{
+    /* chrome — light (default / un-stamped) */
+    --surface:#F6F7F9;
+    --surface-raised:#FFFFFF;
+    --ink:#1B1C22;
+    --ink-muted:#5B5E68;
+    --ink-faint:#6A6C74;
+    --border:#DDE0E5;
+    --accent:#B5652A;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#F3E4D3;
+    --focus:#2B57B0;
+    --good:#3F6B62;
+    --good-soft:#E1EBE8;
+    --flag:#9C4A3A;
+    --flag-soft:#F3E1DD;
+
+    /* fixed device world — the phone screens (a "screenshot," not viewer-themed) */
+    --app-bg:#121019;
+    --app-surface:#1C1927;
+    --app-surface-raised:#242032;
+    --app-ink:#EDEAF2;
+    --app-muted:#948FA6;
+    --app-faint:#87839C;
+    --app-border:#332F42;
+    --app-accent:#D98A46;
+    --app-accent-dim:#3B2A1C;
+    --app-good:#7FA79D;
+    --app-focus:#7DA2FF;
+
+    /* fixed paper world — the recall document (also fixed, meant to print) */
+    --doc-bg:#FCFAF5;
+    --doc-ink:#211D1A;
+    --doc-muted:#6E655B;
+    --doc-faint:#756C5B;
+    --doc-rule:#DCD1BE;
+    --doc-accent:#A85A26;
+    --doc-flag:#9C4A3A;
+    --doc-flag-soft:#F1DFD3;
+    --doc-focus:#2B57B0;
+
+    /* type */
+    --f-display:'Fraunces', ui-serif, Georgia, serif;
+    --f-body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --f-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+    --fs-eyebrow:.6875rem;
+    --fs-caption:.8125rem;
+    --fs-body:.9375rem;
+    --fs-body-lg:1.0625rem;
+    --fs-h3:1.1875rem;
+    --fs-h2:1.5rem;
+
+    --radius-doc:3px;
+    --radius-card:14px;
+    --radius-pill:999px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --surface:#15141C;
+      --surface-raised:#1D1B26;
+      --ink:#EDEAF2;
+      --ink-muted:#A9A5B8;
+      --ink-faint:#8A8699;
+      --border:#332F3F;
+      --accent:#D98A46;
+      --accent-ink:#1B1208;
+      --accent-soft:#3B2A1C;
+      --focus:#7DA2FF;
+      --good:#7FA79D;
+      --good-soft:#233330;
+      --flag:#C97A68;
+      --flag-soft:#3A241F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --surface:#15141C;
+    --surface-raised:#1D1B26;
+    --ink:#EDEAF2;
+    --ink-muted:#A9A5B8;
+    --ink-faint:#8A8699;
+    --border:#332F3F;
+    --accent:#D98A46;
+    --accent-ink:#1B1208;
+    --accent-soft:#3B2A1C;
+    --focus:#7DA2FF;
+    --good:#7FA79D;
+    --good-soft:#233330;
+    --flag:#C97A68;
+    --flag-soft:#3A241F;
+  }
+
+  /* ============ BASE ============ */
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--surface);
+    color:var(--ink);
+    font-family:var(--f-body);
+    font-size:var(--fs-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+  p{margin:0}
+  button{font:inherit;color:inherit}
+  table{border-collapse:collapse}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+  .device-screen :focus-visible{outline-color:var(--app-focus)}
+  .doc-sheet :focus-visible{outline-color:var(--doc-focus)}
+  .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
+
+  /* ============ SHELL ============ */
+  .shell{
+    max-width:1180px;
+    margin:0 auto;
+    padding:2.25rem 1.5rem 4rem;
+  }
+  .shell-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:1.5rem;
+    flex-wrap:wrap;
+    margin-bottom:2rem;
+    padding-bottom:1.25rem;
+    border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;flex-direction:column;gap:.3rem}
+  .brand-mark{
+    font-family:var(--f-display);
+    font-weight:600;
+    font-size:1.375rem;
+    letter-spacing:.01em;
+  }
+  .brand-mark em{
+    font-style:italic;
+    color:var(--accent);
+  }
+  .brand-sub{
+    font-size:var(--fs-caption);
+    color:var(--ink-muted);
+    max-width:38ch;
+  }
+  .switcher{
+    display:inline-flex;
+    gap:.25rem;
+    padding:.25rem;
+    background:var(--surface-raised);
+    border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+  }
+  .switcher button{
+    appearance:none;
+    border:none;
+    background:transparent;
+    color:var(--ink-muted);
+    font-size:var(--fs-caption);
+    font-weight:500;
+    padding:.55rem 1rem;
+    border-radius:var(--radius-pill);
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+    white-space:nowrap;
+  }
+  .switcher button:hover{color:var(--ink)}
+  .switcher button[aria-selected="true"]{
+    background:var(--accent);
+    color:var(--accent-ink);
+  }
+
+  .panel{display:none}
+  .panel.is-active{display:block}
+
+  .shell-foot{
+    margin-top:3rem;
+    padding-top:1.25rem;
+    border-top:1px solid var(--border);
+    font-size:var(--fs-caption);
+    color:var(--ink-faint);
+    display:flex;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+
+  /* ============ RECALL DOCUMENT ============ */
+  .doc-toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    margin-bottom:1rem;
+  }
+  .doc-toolbar-label{
+    font-size:var(--fs-caption);
+    color:var(--ink-muted);
+  }
+  .doc-toolbar-actions{display:flex;gap:.6rem}
+  .btn{
+    appearance:none;
+    border:1px solid var(--border);
+    background:var(--surface-raised);
+    color:var(--ink);
+    font-size:var(--fs-caption);
+    font-weight:500;
+    padding:.55rem 1rem;
+    border-radius:8px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:.45rem;
+  }
+  .btn:hover{border-color:var(--accent)}
+  .btn-primary{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--accent-ink);
+  }
+  .btn-primary:hover{filter:brightness(1.06)}
+
+  .doc-sheet{
+    background:var(--doc-bg);
+    color:var(--doc-ink);
+    border:1px solid var(--doc-rule);
+    border-radius:var(--radius-doc);
+    padding:clamp(1.5rem, 4vw, 3.25rem);
+    box-shadow:0 1px 2px rgba(20,15,5,.06), 0 12px 32px -20px rgba(20,15,5,.35);
+  }
+  .doc-eyebrow{
+    font-size:var(--fs-eyebrow);
+    text-transform:uppercase;
+    letter-spacing:.11em;
+    color:var(--doc-muted);
+    font-weight:600;
+  }
+  .doc-hero{
+    display:flex;
+    flex-direction:column;
+    gap:.6rem;
+    padding-bottom:1.5rem;
+    margin-bottom:1.75rem;
+    border-bottom:2px solid var(--doc-rule);
+  }
+  .doc-hero-line{
+    display:flex;
+    align-items:baseline;
+    gap:.55rem;
+    flex-wrap:wrap;
+  }
+  .doc-hero-num{
+    font-family:var(--f-display);
+    font-weight:600;
+    font-size:clamp(2.1rem, 6vw, 3.1rem);
+    line-height:1;
+  }
+  .doc-hero-of{
+    font-family:var(--f-display);
+    font-style:italic;
+    font-size:clamp(1.15rem, 2.4vw, 1.45rem);
+    color:var(--doc-muted);
+  }
+  .doc-hero-sub{
+    font-size:var(--fs-body-lg);
+    color:var(--doc-muted);
+  }
+  .doc-hero-sub b{color:var(--doc-ink);font-weight:600}
+  .doc-badges{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.35rem}
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    font-size:var(--fs-eyebrow);
+    letter-spacing:.03em;
+    padding:.32rem .65rem;
+    border-radius:var(--radius-pill);
+    font-weight:600;
+  }
+  .badge-visits{background:var(--doc-flag-soft);color:var(--doc-flag)}
+  .badge-not-new{background:rgba(0,0,0,.05);color:var(--doc-muted);border:1px solid var(--doc-rule)}
+
+  .doc-section{margin-bottom:1.9rem}
+  .doc-section:last-of-type{margin-bottom:0}
+  .doc-section h2{
+    font-family:var(--f-body);
+    font-size:var(--fs-eyebrow);
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    font-weight:600;
+    color:var(--doc-accent);
+    margin-bottom:.75rem;
+    display:flex;
+    align-items:center;
+    gap:.6rem;
+  }
+  .doc-section h2::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background:var(--doc-rule);
+  }
+
+  .med-table{width:100%;font-size:var(--fs-body)}
+  .med-table th{
+    text-align:left;
+    font-size:var(--fs-eyebrow);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--doc-faint);
+    font-weight:600;
+    padding:0 .5rem .45rem 0;
+    border-bottom:1px solid var(--doc-rule);
+  }
+  .med-table td{
+    padding:.5rem .5rem .5rem 0;
+    border-bottom:1px solid var(--doc-rule);
+    vertical-align:top;
+  }
+  .med-table tr:last-child td{border-bottom:none}
+  .med-time{white-space:nowrap;color:var(--doc-muted)}
+  .med-name{font-weight:600}
+  .med-effect{color:var(--doc-muted);font-style:italic}
+
+  .doc-stat-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    margin-top:.9rem;
+    padding-top:.9rem;
+    border-top:1px dashed var(--doc-rule);
+  }
+  .doc-stat{font-size:var(--fs-body)}
+  .doc-stat b{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+  .flag-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    background:var(--doc-flag-soft);
+    color:var(--doc-flag);
+    font-size:var(--fs-caption);
+    font-weight:600;
+    padding:.35rem .7rem;
+    border-radius:var(--radius-pill);
+  }
+  .flag-chip::before{content:'●';font-size:.55em}
+
+  .doc-timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.85rem}
+  .doc-timeline li{
+    display:grid;
+    grid-template-columns:6.5rem 1fr;
+    gap:1rem;
+  }
+  .tl-date{
+    font-family:var(--f-mono);
+    font-size:var(--fs-caption);
+    color:var(--doc-muted);
+    padding-top:.15rem;
+  }
+  .tl-body b{font-weight:600}
+  .tl-arrow{color:var(--doc-accent)}
+  .unconfirmed{
+    text-decoration:underline dotted var(--doc-muted);
+    text-underline-offset:3px;
+    cursor:help;
+    position:relative;
+  }
+  .unconfirmed:hover::after,
+  .unconfirmed:focus::after{
+    content:'unconfirmed — awaiting review';
+    position:absolute;
+    left:0;
+    bottom:1.5em;
+    background:var(--doc-ink);
+    color:var(--doc-bg);
+    font-family:var(--f-body);
+    font-size:.7rem;
+    font-style:normal;
+    white-space:nowrap;
+    padding:.35rem .55rem;
+    border-radius:5px;
+  }
+
+  .doc-grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.75rem}
+  .doc-fact{margin-bottom:.6rem;font-size:var(--fs-body)}
+  .doc-fact b{display:block;font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.06em;color:var(--doc-faint);font-weight:600;margin-bottom:.2rem}
+  .doc-redflag{color:var(--doc-flag);font-weight:600}
+
+  .doc-footer{
+    margin-top:2.25rem;
+    padding-top:1.25rem;
+    border-top:1px solid var(--doc-rule);
+    display:flex;
+    justify-content:space-between;
+    gap:1.5rem;
+    flex-wrap:wrap;
+  }
+  .doc-provenance{
+    font-family:var(--f-display);
+    font-style:italic;
+    color:var(--doc-muted);
+    font-size:var(--fs-body);
+    max-width:38ch;
+  }
+  .doc-meta{
+    font-size:var(--fs-caption);
+    color:var(--doc-faint);
+    text-align:right;
+  }
+  .doc-meta div{margin-bottom:.2rem}
+
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:1.75rem;
+    transform:translate(-50%, 12px);
+    background:var(--ink);
+    color:var(--surface);
+    font-size:var(--fs-caption);
+    padding:.7rem 1.1rem;
+    border-radius:10px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:50;
+  }
+  .toast.is-visible{opacity:1;transform:translate(-50%, 0)}
+
+  @media print{
+    body *{visibility:hidden}
+    .doc-sheet, .doc-sheet *{visibility:visible}
+    .doc-sheet{
+      position:absolute;top:0;left:0;width:100%;
+      border:none;box-shadow:none;border-radius:0;padding:0;
+    }
+    .doc-toolbar{display:none}
+  }
+
+  /* ============ DEVICE FRAME (capture + checkpoint) ============ */
+  .device-stage{
+    display:flex;
+    justify-content:center;
+    padding:1rem 0 2.5rem;
+  }
+  .device-frame{
+    width:min(390px, 100%);
+    border-radius:40px;
+    padding:12px;
+    background:linear-gradient(155deg,#2A2735,#131019);
+    box-shadow:0 1px 1px rgba(0,0,0,.4), 0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .device-screen{
+    background:var(--app-bg);
+    color:var(--app-ink);
+    border-radius:30px;
+    overflow:hidden;
+    font-family:var(--f-body);
+    min-height:640px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .device-notch{
+    height:26px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .device-notch::before{
+    content:'';
+    width:90px;height:6px;border-radius:99px;
+    background:rgba(255,255,255,.14);
+  }
+  .app-body{padding:.25rem 1.15rem 1.25rem;flex:1;display:flex;flex-direction:column;gap:1.1rem}
+
+  .app-pill{
+    align-self:flex-start;
+    display:inline-flex;
+    align-items:center;
+    gap:.5rem;
+    background:var(--app-accent-dim);
+    color:var(--app-accent);
+    font-size:var(--fs-caption);
+    font-weight:600;
+    padding:.4rem .8rem;
+    border-radius:var(--radius-pill);
+  }
+  .app-pill::before{
+    content:'';
+    width:7px;height:7px;border-radius:50%;
+    background:var(--app-accent);
+    box-shadow:0 0 0 3px rgba(217,138,70,.25);
+  }
+
+  .app-context{font-size:var(--fs-caption);color:var(--app-faint);display:flex;flex-direction:column;gap:.4rem}
+  .app-context-row{display:flex;justify-content:space-between;gap:.75rem}
+  .app-context-row span:last-child{font-family:var(--f-mono);color:var(--app-muted)}
+
+  .stage{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:.85rem;min-height:230px}
+
+  .demo-row{display:flex;justify-content:center;gap:.5rem}
+  .demo-btn{
+    appearance:none;border:1px solid var(--app-border);
+    background:var(--app-surface);color:var(--app-ink);
+    font-size:var(--fs-caption);font-weight:600;
+    padding:.55rem 1.05rem;border-radius:var(--radius-pill);
+    cursor:pointer;display:inline-flex;align-items:center;gap:.45rem;
+  }
+  .demo-btn:hover{border-color:var(--app-accent)}
+  .demo-btn.is-ghost{background:transparent;color:var(--app-muted)}
+
+  .bubble{
+    align-self:flex-end;
+    max-width:88%;
+    background:var(--app-accent);
+    color:#1B1208;
+    font-size:var(--fs-body);
+    padding:.75rem .95rem;
+    border-radius:16px 16px 4px 16px;
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .bubble.is-visible{opacity:1;transform:none}
+  .bubble .caret{display:inline-block;width:2px;height:1em;background:#1B1208;vertical-align:-2px;margin-left:1px;animation:blink 1s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  .confirm-line{
+    align-self:flex-start;
+    font-size:var(--fs-caption);
+    color:var(--app-good);
+    font-weight:600;
+    opacity:0;
+    transition:opacity .3s ease;
+    display:flex;
+    align-items:center;
+    gap:.4rem;
+  }
+  .confirm-line.is-visible{opacity:1}
+  .confirm-line::before{content:'✓';font-weight:700}
+
+  .receipt{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.95rem 1rem 1.05rem;
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity .3s ease .1s, transform .3s ease .1s;
+  }
+  .receipt.is-visible{opacity:1;transform:none}
+  .receipt-head{
+    font-size:var(--fs-eyebrow);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--app-faint);
+    font-weight:600;
+    margin-bottom:.65rem;
+  }
+  .receipt-field{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.6rem;
+    padding:.4rem 0;
+    border-top:1px solid var(--app-border);
+  }
+  .receipt-field:first-of-type{border-top:none}
+  .receipt-field-label{color:var(--app-muted);font-size:var(--fs-caption)}
+  .receipt-field-val{
+    display:flex;align-items:center;gap:.5rem;
+    font-size:var(--fs-body);
+  }
+  .receipt-field-val.is-editing{width:100%}
+  .receipt-field-val input{
+    background:var(--app-bg);
+    border:1px solid var(--app-accent);
+    color:var(--app-ink);
+    border-radius:6px;
+    padding:.3rem .5rem;
+    font:inherit;
+    width:8.5rem;
+  }
+  .conf-tag{
+    font-size:.65rem;
+    font-family:var(--f-mono);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    padding:.14rem .4rem;
+    border-radius:5px;
+    color:var(--app-muted);
+    border:1px solid var(--app-border);
+  }
+  .conf-tag.is-paraphrase{color:var(--app-accent);border-color:var(--app-accent-dim);background:var(--app-accent-dim)}
+  .correct-link{
+    background:none;border:none;color:var(--app-muted);
+    font-size:.7rem;text-decoration:underline;cursor:pointer;padding:0;
+  }
+  .correct-link:hover{color:var(--app-accent)}
+
+  .app-inputbar{
+    display:flex;align-items:center;gap:.7rem;
+    padding-top:.35rem;
+  }
+  .mic-btn{
+    flex-shrink:0;
+    width:52px;height:52px;border-radius:50%;
+    background:var(--app-accent);
+    border:none;color:#1B1208;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    box-shadow:0 0 0 0 rgba(217,138,70,.35);
+  }
+  .mic-btn svg{width:22px;height:22px}
+  .text-alt{
+    flex:1;
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    color:var(--app-muted);
+    border-radius:var(--radius-pill);
+    padding:.85rem 1.05rem;
+    font-size:var(--fs-body);
+  }
+
+  .annotation{
+    display:flex;
+    gap:.55rem;
+    align-items:flex-start;
+    border:1px dashed var(--app-border);
+    border-radius:10px;
+    padding:.6rem .75rem;
+    font-size:.75rem;
+    color:var(--app-faint);
+    line-height:1.45;
+  }
+  .annotation b{color:var(--app-muted)}
+
+  /* checkpoint-specific */
+  .mode-toggle{
+    display:flex;background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-pill);padding:.2rem;
+  }
+  .mode-toggle button{
+    flex:1;appearance:none;border:none;background:transparent;
+    color:var(--app-muted);font-size:.75rem;font-weight:600;
+    padding:.5rem .5rem;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .mode-toggle button[aria-pressed="true"]{background:var(--app-accent);color:#1B1208}
+
+  .cp-q{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.9rem 1rem;
+  }
+  .cp-q-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.75rem}
+  .cp-q-text{font-size:var(--fs-body-lg);font-weight:500}
+  .always-tag{
+    flex-shrink:0;
+    font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;
+    font-weight:700;color:var(--app-accent);
+    border:1px solid var(--app-accent-dim);background:var(--app-accent-dim);
+    padding:.22rem .5rem;border-radius:5px;white-space:nowrap;
+  }
+  .cp-answers{display:flex;gap:.55rem;flex-wrap:wrap}
+  .cp-answers button{
+    appearance:none;border:1px solid var(--app-border);background:var(--app-bg);
+    color:var(--app-ink);font-size:var(--fs-caption);font-weight:600;
+    padding:.5rem .95rem;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .cp-answers button:hover{border-color:var(--app-accent)}
+  .cp-answers button.is-picked{background:var(--app-accent);color:#1B1208;border-color:var(--app-accent)}
+
+  .cp-binary{display:flex;gap:.7rem}
+  .cp-binary button{
+    flex:1;
+    appearance:none;border:1px solid var(--app-border);
+    background:var(--app-surface);color:var(--app-ink);
+    font-size:var(--fs-body);font-weight:600;
+    padding:1.1rem .8rem;border-radius:var(--radius-card);
+    cursor:pointer;text-align:left;
+    display:flex;flex-direction:column;gap:.2rem;
+  }
+  .cp-binary button small{font-weight:400;color:var(--app-muted);font-size:.72rem}
+  .cp-binary button:hover{border-color:var(--app-accent)}
+
+  .cp-note{
+    font-size:.75rem;color:var(--app-faint);
+    border-top:1px solid var(--app-border);
+    padding-top:.75rem;
+    line-height:1.5;
+  }
+
+  .cp-stack{display:flex;flex-direction:column;gap:.85rem}
+
+  /* intro copy under switcher for context, chrome-themed */
+  .lede{
+    max-width:62ch;
+    color:var(--ink-muted);
+    font-size:var(--fs-body);
+    margin-bottom:1.75rem;
+  }
+  .lede b{color:var(--ink)}
+
+  @media (max-width:640px){
+    .doc-grid2{grid-template-columns:1fr}
+    .doc-timeline li{grid-template-columns:4.5rem 1fr}
+    .doc-footer{flex-direction:column}
+    .doc-meta{text-align:left}
+  }
+</style>
+
+<div class="shell">
+
+  <div class="shell-head">
+    <div class="brand">
+      <div class="brand-mark">Head<em>State</em></div>
+      <div class="brand-sub">Screen mockups — build steps 1&ndash;2, capture and recall</div>
+    </div>
+    <div class="switcher" role="tablist" aria-label="Screen">
+      <button type="button" role="tab" aria-selected="true" data-panel="recall">Recall summary</button>
+      <button type="button" role="tab" aria-selected="false" data-panel="capture">Mid-attack capture</button>
+      <button type="button" role="tab" aria-selected="false" data-panel="checkpoint">Morning checkpoint</button>
+    </div>
+  </div>
+
+  <!-- ============ PANEL: RECALL ============ -->
+  <section class="panel is-active" id="panel-recall">
+    <p class="lede">Generated on demand, one tap from app open. Renders complete offline &mdash; <b>this is what a printed page looks like</b>, so the toolbar below disappears when you actually print it.</p>
+
+    <div class="doc-toolbar">
+      <span class="doc-toolbar-label">For the visit or the emergency department</span>
+      <div class="doc-toolbar-actions">
+        <button class="btn" id="share-btn" type="button">Share PDF</button>
+        <button class="btn btn-primary" id="print-btn" type="button">Print</button>
+      </div>
+    </div>
+
+    <article class="doc-sheet">
+      <div class="doc-hero">
+        <span class="doc-eyebrow">Current episode</span>
+        <div class="doc-hero-line">
+          <span class="doc-hero-num">Day 12</span>
+          <span class="doc-hero-of">of a continuous episode</span>
+        </div>
+        <p class="doc-hero-sub">Started <b>Mon Aug 3, 6:40&nbsp;AM</b> &middot; has not resolved since</p>
+        <div class="doc-badges">
+          <span class="badge badge-visits">2 prior ED presentations this episode &mdash; Aug 3, Aug 9</span>
+          <span class="badge badge-not-new">Not a new or first-time headache</span>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h2>On board &mdash; last 72 hours</h2>
+        <table class="med-table">
+          <thead>
+            <tr><th>Time</th><th>Medication</th><th>Route</th><th>Noted effect</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="med-time u-numeric">Today 7:10&nbsp;AM</td>
+              <td class="med-name">Sumatriptan 100&nbsp;mg</td>
+              <td>Oral</td>
+              <td class="med-effect">Partial relief, ~45 min</td>
+            </tr>
+            <tr>
+              <td class="med-time u-numeric">Yesterday 9:40&nbsp;PM</td>
+              <td class="med-name">Ibuprofen 600&nbsp;mg</td>
+              <td>Oral</td>
+              <td class="med-effect">No meaningful relief</td>
+            </tr>
+            <tr>
+              <td class="med-time u-numeric">Yesterday 8:15&nbsp;AM</td>
+              <td class="med-name">Sumatriptan 100&nbsp;mg</td>
+              <td>Oral</td>
+              <td class="med-effect">Partial relief</td>
+            </tr>
+            <tr>
+              <td class="med-time u-numeric">Aug 13, 11:50&nbsp;PM</td>
+              <td class="med-name">Ondansetron 4&nbsp;mg</td>
+              <td>Oral</td>
+              <td class="med-effect">For nausea</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="doc-stat-row">
+          <span class="doc-stat">Acute-medication days, last 30: <b class="u-numeric">9 of 10</b> &mdash; triptan class</span>
+          <span class="flag-chip">Approaching MOH threshold</span>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h2>Tried this episode, with result</h2>
+        <ol class="doc-timeline">
+          <li>
+            <span class="tl-date u-numeric">Aug 3</span>
+            <span class="tl-body">ED visit 1 &mdash; sumatriptan injection + IV fluids <span class="tl-arrow">&rarr;</span> brief relief, <span class="unconfirmed" tabindex="0">recurred ~4h later</span></span>
+          </li>
+          <li>
+            <span class="tl-date u-numeric">Aug 9</span>
+            <span class="tl-body">ED visit 2 &mdash; dexamethasone IV 10&nbsp;mg <span class="tl-arrow">&rarr;</span> remission ~36h <span class="tl-arrow">&rarr;</span> recurrence Aug 11, similar severity</span>
+          </li>
+          <li>
+            <span class="tl-date u-numeric">Aug 11&ndash;today</span>
+            <span class="tl-body">Oral triptan on recurrence, partial relief each time &mdash; headache has not fully resolved</span>
+          </li>
+        </ol>
+      </div>
+
+      <div class="doc-section">
+        <h2>Baseline &amp; red flags</h2>
+        <div class="doc-grid2">
+          <div>
+            <div class="doc-fact"><b>Typical pattern</b>Episodic migraine, ~3&ndash;4 days/month, left-sided, throbbing, photophobia + nausea</div>
+            <div class="doc-fact"><b>Aura</b>None, historically</div>
+          </div>
+          <div>
+            <div class="doc-fact"><b>What's different this time</b><span class="doc-redflag">Continuous &gt;12 days</span> &mdash; prior attacks resolved within 72h</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h2>Current preventives</h2>
+        <p>Propranolol 80&nbsp;mg daily, since 2019</p>
+      </div>
+
+      <div class="doc-footer">
+        <p class="doc-provenance">&ldquo;Generated from a continuously time-stamped patient log, not reconstructed from memory. Verify all details with the patient.&rdquo;</p>
+        <div class="doc-meta">
+          <div>Generated Aug 15, 2026, 6:52&nbsp;AM</div>
+          <div>Neurology &mdash; Dr.&nbsp;R.&nbsp;Okafor, (555) 019-2231</div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ PANEL: CAPTURE ============ -->
+  <section class="panel" id="panel-capture">
+    <p class="lede"><b>Mid-attack.</b> Write the record, confirm in a few words, ask nothing. Press play to see one utterance become a structured, correctable entry.</p>
+
+    <div class="device-stage">
+      <div class="device-frame">
+        <div class="device-screen">
+          <div class="device-notch"></div>
+          <div class="app-body">
+            <span class="app-pill">In a migraine &middot; Day 12</span>
+
+            <div class="app-context">
+              <div class="app-context-row"><span>6:15&nbsp;AM</span><span>Sumatriptan 100mg logged</span></div>
+              <div class="app-context-row"><span>7:02&nbsp;AM</span><span>Partial relief noted</span></div>
+            </div>
+
+            <div class="stage" id="capture-stage">
+              <div class="demo-row" id="capture-controls">
+                <button class="demo-btn" id="play-capture" type="button">&#9654; Play scenario</button>
+              </div>
+              <div class="bubble" id="capture-bubble"></div>
+              <div class="confirm-line" id="capture-confirm">Logged. Feel better.</div>
+              <div class="receipt" id="capture-receipt">
+                <div class="receipt-head">What I heard</div>
+                <div class="receipt-field">
+                  <span class="receipt-field-label">Onset</span>
+                  <span class="receipt-field-val" data-field="onset">
+                    <span class="conf-tag">lexical</span><span class="field-text">just now</span>
+                    <button class="correct-link" type="button">not quite?</button>
+                  </span>
+                </div>
+                <div class="receipt-field">
+                  <span class="receipt-field-label">Laterality</span>
+                  <span class="receipt-field-val" data-field="laterality">
+                    <span class="conf-tag">lexical</span><span class="field-text">left</span>
+                    <button class="correct-link" type="button">not quite?</button>
+                  </span>
+                </div>
+                <div class="receipt-field">
+                  <span class="receipt-field-label">Region</span>
+                  <span class="receipt-field-val" data-field="region">
+                    <span class="conf-tag">lexical</span><span class="field-text">behind eye</span>
+                    <button class="correct-link" type="button">not quite?</button>
+                  </span>
+                </div>
+                <div class="receipt-field">
+                  <span class="receipt-field-label">Severity</span>
+                  <span class="receipt-field-val" data-field="severity">
+                    <span class="conf-tag is-paraphrase">paraphrase</span><span class="field-text">severe</span>
+                    <button class="correct-link" type="button">not quite?</button>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="app-inputbar">
+              <button class="mic-btn" type="button" aria-label="Log by voice">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+              </button>
+              <div class="text-alt">or type it out</div>
+            </div>
+
+            <div class="annotation">
+              <span>&#9670;</span>
+              <span><b>No follow-up questions during an attack.</b> One confirmation, zero prompts &mdash; richer detail is collected later, once the attack has likely resolved.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL: CHECKPOINT ============ -->
+  <section class="panel" id="panel-checkpoint">
+    <p class="lede"><b>Next morning only.</b> Two questions are unconditional regardless of branching. Toggle below to see the version shown inside an open episode, capped short.</p>
+
+    <div class="device-stage">
+      <div class="device-frame">
+        <div class="device-screen">
+          <div class="device-notch"></div>
+          <div class="app-body">
+            <span class="app-pill" style="background:var(--app-surface);color:var(--app-muted)">Tuesday, 7:40&nbsp;AM</span>
+
+            <div class="mode-toggle" role="group" aria-label="Checkpoint mode">
+              <button type="button" aria-pressed="true" data-mode="normal">Normal day</button>
+              <button type="button" aria-pressed="false" data-mode="open">Inside an open episode</button>
+            </div>
+
+            <div class="cp-stack" id="cp-common">
+              <div class="cp-q">
+                <div class="cp-q-top">
+                  <span class="cp-q-text">Any aura?</span>
+                  <span class="always-tag">Always asked</span>
+                </div>
+                <div class="cp-answers">
+                  <button type="button" data-q="aura">Yes</button>
+                  <button type="button" data-q="aura" class="is-picked">No</button>
+                  <button type="button" data-q="aura">Not sure</button>
+                </div>
+              </div>
+
+              <div class="cp-q">
+                <div class="cp-q-top">
+                  <span class="cp-q-text">Fell asleep with a migraine and woke without one?</span>
+                  <span class="always-tag">Always asked</span>
+                </div>
+                <div class="cp-answers">
+                  <button type="button" data-q="overnight">Yes</button>
+                  <button type="button" data-q="overnight" class="is-picked">No</button>
+                  <button type="button" data-q="overnight">N/A</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="cp-stack" id="cp-normal">
+              <div class="cp-q">
+                <div class="cp-q-top">
+                  <span class="cp-q-text">Any headache yesterday, even mild?</span>
+                </div>
+                <div class="cp-answers">
+                  <button type="button" data-q="hx" class="is-picked">Yes</button>
+                  <button type="button" data-q="hx">No</button>
+                </div>
+              </div>
+              <div class="cp-note">Branches on the answer above &mdash; duration and rough severity, one tap each. Skipping is silent and penalty-free.</div>
+            </div>
+
+            <div class="cp-stack" id="cp-open" hidden>
+              <div class="cp-binary">
+                <button type="button">Still going<small>Nothing's changed since yesterday</small></button>
+                <button type="button">Something changed<small>Add a one-line note</small></button>
+              </div>
+              <div class="cp-note">Capped short on any day inside an open episode &mdash; the two questions above plus this, nothing longer. Detail moves into small real-time asks instead.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="shell-foot">
+    <span>Mockups only &mdash; not wired to the derivation engine or a backend.</span>
+    <span>tech-spec.md &middot; frd.md &middot; decision-log.md</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  // ---- tab switching ----
+  var tabs = document.querySelectorAll('.switcher [role="tab"]');
+  var panels = { recall: document.getElementById('panel-recall'),
+                 capture: document.getElementById('panel-capture'),
+                 checkpoint: document.getElementById('panel-checkpoint') };
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){ t.setAttribute('aria-selected', 'false'); });
+      tab.setAttribute('aria-selected', 'true');
+      Object.keys(panels).forEach(function(k){ panels[k].classList.remove('is-active'); });
+      panels[tab.dataset.panel].classList.add('is-active');
+    });
+  });
+
+  // ---- toast ----
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 2600);
+  }
+  document.getElementById('print-btn').addEventListener('click', function(){ window.print(); });
+  document.getElementById('share-btn').addEventListener('click', function(){
+    showToast('Ready to share — opens your device’s share sheet');
+  });
+
+  // ---- capture demo ----
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var utterance = "It's happening again, right behind my left eye, really bad.";
+  var playBtn = document.getElementById('play-capture');
+  var bubble = document.getElementById('capture-bubble');
+  var confirmLine = document.getElementById('capture-confirm');
+  var receipt = document.getElementById('capture-receipt');
+  var playing = false;
+
+  function resetCapture(){
+    bubble.classList.remove('is-visible');
+    bubble.innerHTML = '';
+    confirmLine.classList.remove('is-visible');
+    receipt.classList.remove('is-visible');
+  }
+
+  function playCapture(){
+    if (playing) return;
+    playing = true;
+    resetCapture();
+    playBtn.textContent = '▶ Playing…';
+    bubble.classList.add('is-visible');
+
+    if (reduced) {
+      bubble.textContent = utterance;
+      finishCapture();
+      return;
+    }
+
+    var i = 0;
+    var speed = 26;
+    function typeNext(){
+      if (i <= utterance.length){
+        bubble.innerHTML = utterance.slice(0, i) + '<span class="caret"></span>';
+        i++;
+        setTimeout(typeNext, speed);
+      } else {
+        bubble.innerHTML = utterance;
+        setTimeout(finishCapture, 500);
+      }
+    }
+    typeNext();
+  }
+
+  function finishCapture(){
+    confirmLine.classList.add('is-visible');
+    setTimeout(function(){
+      receipt.classList.add('is-visible');
+      playBtn.textContent = '↻ Replay';
+      playing = false;
+    }, 250);
+  }
+
+  playBtn.addEventListener('click', playCapture);
+
+  // ---- inline field correction ----
+  document.querySelectorAll('.correct-link').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var wrap = btn.closest('.receipt-field-val');
+      if (wrap.classList.contains('is-editing')) return;
+      var textEl = wrap.querySelector('.field-text');
+      var current = textEl.textContent;
+      wrap.classList.add('is-editing');
+      wrap.innerHTML = '<input type="text" value="' + current + '" />';
+      var input = wrap.querySelector('input');
+      input.focus();
+      input.select();
+      function commit(){
+        var val = input.value.trim() || current;
+        wrap.classList.remove('is-editing');
+        wrap.innerHTML = '<span class="conf-tag">user</span><span class="field-text">' + val + '</span><button class="correct-link" type="button">not quite?</button>';
+        wrap.querySelector('.correct-link').addEventListener('click', arguments.callee.caller);
+      }
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', function(e){ if (e.key === 'Enter') input.blur(); });
+    });
+  });
+
+  // ---- checkpoint answer selection ----
+  document.querySelectorAll('.cp-answers').forEach(function(group){
+    group.addEventListener('click', function(e){
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      group.querySelectorAll('button').forEach(function(b){ b.classList.remove('is-picked'); });
+      btn.classList.add('is-picked');
+    });
+  });
+
+  // ---- checkpoint mode toggle ----
+  var modeButtons = document.querySelectorAll('.mode-toggle button');
+  var cpNormal = document.getElementById('cp-normal');
+  var cpOpen = document.getElementById('cp-open');
+  modeButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      modeButtons.forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+      var isOpen = btn.dataset.mode === 'open';
+      cpNormal.hidden = isOpen;
+      cpOpen.hidden = !isOpen;
+    });
+  });
+})();
+</script>

@@ -38,6 +38,7 @@ Ranked by durability:
 <project root>/
 ├── README.md
 ├── CLAUDE.md
+├── decision-log.md
 ├── headstate-strategy-brief.md
 ├── HeadState-Clinical-Review.docx
 └── Research/
@@ -47,12 +48,14 @@ Ranked by durability:
     ├── assistant-integration.md
     ├── competitive-landscape.md
     ├── product-architecture.md
-    └── migraine-buddy-features.md
+    ├── migraine-buddy-features.md
+    └── open-question-recommendations.md
 ```
 
 | File | Purpose |
 |---|---|
 | `CLAUDE.md` | Context and hard invariants for Claude Code sessions working in this repo; read before writing code |
+| `decision-log.md` | The binding record of settled decisions — reasoning and consequences; wins over research documents where they disagree |
 | `headstate-strategy-brief.md` | Current strategy: defensible position, data model, three jobs, build order, regulatory posture, risks |
 | `HeadState-Clinical-Review.docx` | A seven-page document prepared for a neurologist, designed to be argued with; ends in ten questions |
 | `Research/continuous-timeline-verification.md` | **Start here.** Independent verification of what is and is not novel; per-app capability matrix; ICHD-3 counting rules; premonitory and corticosteroid evidence; prior-auth counting |
@@ -62,34 +65,48 @@ Ranked by durability:
 | `Research/competitive-landscape.md` | The incumbent, the 2026 AI wave, adjacent and clinical players, evidence-based gap analysis |
 | `Research/product-architecture.md` | Product principles, information architecture, core user flows, conversational extraction discipline |
 | `Research/migraine-buddy-features.md` | Complete feature inventory of the incumbent |
+| `Research/open-question-recommendations.md` | Researched recommendations behind the granularity, recall-format, prodrome and automation-level decisions |
 
 Source code will also live in this root going forward.
 
-**Precedence when sources disagree:** `CLAUDE.md` governs implementation decisions; `Research/` documents govern evidence and citations. Where the two disagree, report the discrepancy rather than silently reconciling it.
+**Precedence when sources disagree:** `CLAUDE.md` governs implementation decisions; `Research/` documents govern evidence and citations. Where the two disagree, report the discrepancy rather than silently reconciling it. `decision-log.md` sits above both — it is the binding record of settled decisions, and research documents are the evidence behind a decision, not an alternative to it.
 
 ## Build order
 
 Sequenced for the developer as the primary user, not for a market launch.
+Capacitor is repository scaffolding, not a numbered step. The technical
+specification and functional requirements are scoped to steps 1–4; steps 5–7
+are sequenced but deliberately left unspecified until steps 1–4 reveal more.
+See `decision-log.md` for the reasoning.
 
-1. **Capture and the observation store** — immutable log, schema, conversational extraction with receipts and correction. Everything depends on this.
-2. **Recall** — the one-page current-state brief. Printable, shareable, offline. Pays back before there is enough data for anything else, which also answers the cold-start problem.
-3. **Derived episodes and day classification** — ICHD-3 constants, Delphi rules, dual readings, user override. Where a multi-week episode becomes representable.
-4. **Integrations** — sleep and weather first (highest signal, lowest effort), then cycle and HRV. Where the platform question binds, because HealthKit and Health Connect are native-only.
-5. **Phase annotation and retrospective relabelling**, including medication-response inference. Operates on history, so it can wait.
-6. **Correlation.** Needs the most data and is the least proven.
-7. **Prior-authorisation packet.** Needs 30–90 days of clean data and needs to be right — last, despite being the most valuable, because it is only as good as everything above it.
+0. **Capacitor scaffold, repo setup, CI** — TypeScript end to end, Postgres, managed platform.
+1. **Capture and the observation store** — immutable log, schema with the third review state, event-anchored capture with a next-morning backstop. Everything depends on this.
+2. **Recall** — the one-page current-state brief. Printable, shareable, offline. Exempt from the confirmation gate. Pays back before there is enough data for anything else, which also answers the cold-start problem.
+3. **Derived episodes and day classification** — ICHD-3 constants, Delphi rules, dual readings, user override. Backfill always counts. Where a multi-week episode becomes representable.
+4. **Integrations** — HealthKit and Health Connect for sleep and weather first (highest signal, lowest effort), then cycle and HRV.
+5. **Phase annotation and retrospective relabelling**, including medication-response inference. Operates on history, so it can wait. Also the point at which the deferred prodrome surface can be revisited with data.
+6. **Correlation.** Needs the most data and is the least proven — a research bet, not a claim.
+7. **Prior-authorisation packet.** Needs 30–90 days of clean data and needs to be right — last, despite being the most valuable, because it is only as good as everything above it. Gated by the mandatory confirmation gate.
 
 ## Key decisions already made
 
-- PWA core codebase with a Capacitor wrapper pulled early (native is required for HealthKit/Health Connect, App Store presence, and iOS App Intents / Android AppFunctions)
+- The repository is scaffolded as a Capacitor project from commit one — no PWA-only period; the web app remains the core codebase and Capacitor is a wrapper, not a rewrite
+- TypeScript end to end (React (D14) with Vite, Node for the API and MCP server) on Postgres, deployed on a managed platform (Fly.io (D14)) with managed Postgres
 - One remote MCP server with OAuth 2.1 + PKCE, reused for the iOS Shortcuts path
 - Patient-first direct-to-consumer, not provider-channel, at launch
 - Payer exports report day counts, never attack counts
 - No attack-risk prediction, and no trigger prediction as a claim
-- The algorithm proposes and the human confirms, with the output distinguishing the two
+- The algorithm proposes and the human confirms, with the output distinguishing the two; derived objects also carry a `review_status` (unreviewed / timed out / user-reviewed) orthogonal to who confirmed them
+- Backfilled observations always count toward day counts regardless of latency, flagged with low confidence rather than excluded
+- Capture is event-anchored (open/close, dose-triggered follow-ups) as the primary mechanism, with a next-morning daily checkpoint as a backstop only
+- The recall summary is exempt from the mandatory confirmation gate; the prior-authorisation packet is not, including for the primary user
+- The prodrome pattern surface — alert or passive display — is deferred entirely, revisited once retrospective phase labelling has run
+- The technical specification and functional requirements are scoped to build steps 1–4 only
 - No community or social features
 - No gamification
 - Scope stays migraine-adjacent rather than becoming a general symptom tracker
+
+See `decision-log.md` for the reasoning behind each of these.
 
 ## Personal use now vs. commercialisation gates
 
@@ -105,11 +122,12 @@ Sequenced for the developer as the primary user, not for a market launch.
 
 ## Open questions
 
-- How much intra-episode granularity is actually wanted — every observation timestamped, or a few checkpoints daily? Sets how heavy capture feels and is the main lever on adherence.
-- Should the recall summary be printed or displayed as a link? Determines whether offline printing is a v1 requirement.
-- Are prodrome alerts wanted at all? 85% precision, ~10-hour lead, poor sensitivity — useful when they fire, silent most of the time.
-- Does medication-response inference resolve boundaries automatically or only propose? It should propose, but confirm that an approval step does not become the friction that stops it being used.
-- What is paywalled, if this commercialises? Evidence suggests correlations are defensible to gate and logging and the report are not. Basis: the largest randomised trial of trigger analytics layered on a diary (n=477, 12 weeks) compared the full M-sense Migräne app — trigger identification, correlation analysis, medication tracking — against a control app containing only a headache and medication diary, and found 7.74→5.79 migraine days/month versus 7.76→5.41, a 0.38-day between-group difference that was not statistically significant, with investigators concluding self-monitoring itself drove the improvement in both arms. See `Research/qa-verification-report.md` for the full finding.
+Granularity, the recall-format question, prodrome alerts, and the automation-level question are settled — see `decision-log.md`. What remains open, and deliberately so:
+
+- **The MCP query-scope tension.** A remote MCP server exposing query tools makes any paywall on derived output architecturally unenforceable, and gating at the query-scope layer would reintroduce the history-depth gating that was already ruled out. Does not bind for a personal build.
+- **What, if anything, becomes a paid product.** Two candidates — maintained payer-policy matching, and a clinician-cosignature workflow — point toward a clinic or business-to-business direction rather than a consumer SKU.
+- **Whether the clinical path is a real ambition.** Contracting with clinics or pushing into an EHR triggers business-associate status — a one-way door.
+- **Instrument licensing.** The daily checkpoint's question wording is a licensing surface; any use of PROMIS, HIT-6, MIDAS, MSQ or MPFID item wording needs legal clearance before distribution or sale.
 
 ## Status and provenance
 
@@ -134,10 +152,9 @@ The research files themselves are dated by month only, so exact currency within 
 The project's working to-do list currently lives inside `Research/qa-verification-report.md`, in a section that describes itself as an audit trail rather than a to-do list. Surfaced here:
 
 1. Send a HEAP inquiry to HealthMeasures before any commercial use of PROMIS.
-2. Read the M-sense trial in full and decide whether interictal capture is a headline claim or a research bet.
-3. Verify the ICHD-3 quotations against the printed classification (*Cephalalgia* 2018;38(1):1–211) and retrieve the Delphi paper's Correction.
-4. Obtain a trademark clearance opinion before brand spend, given the Headspace Health registered family in overlapping classes.
-5. Design the Washington My Health My Data Act consent model into v1 rather than retrofitting it later.
-6. Confirm with Anthropic and OpenAI whether health data passed through MCP tool calls is retained, before exposing the connector to anyone else.
-
-Two further QA recommendations — pulling the Capacitor wrapper forward to Phase 1, and promoting the prior-authorisation document to the lead position — were considered against the build order above, and the current build order deliberately differs from them.
+2. Verify the ICHD-3 quotations against the printed classification (*Cephalalgia* 2018;38(1):1–211) and retrieve the Delphi paper's Correction.
+3. Obtain a trademark clearance opinion before brand spend, given the Headspace Health registered family in overlapping classes.
+4. Design the Washington My Health My Data Act consent model into v1 rather than retrofitting it later.
+5. Confirm with Anthropic and OpenAI whether health data passed through MCP tool calls is retained, before exposing the connector to anyone else.
+6. Write the technical specification, scoped to build steps 1–4.
+7. Write the functional requirements as testable acceptance criteria, scoped to the same steps, once the technical specification exists.
