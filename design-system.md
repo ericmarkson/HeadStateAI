@@ -2,7 +2,7 @@
 
 **Scope:** the visual identity and component vocabulary behind the screen mockups (recall summary, mid-attack capture, morning checkpoint — see `decision-log.md` D15). Extracted so every future mockup, and eventually every Storybook component, draws from one source instead of being re-derived per screen.
 
-**Status:** covers the three screens built so far. Timeline, observation correction, and the episode-boundary override interaction are now decided (D16–D19) but not yet mocked — §6 has the resolutions. §7 is the ordered path to mocking every remaining screen, including the Report. Insights alone stays gated on a scope decision only Eric can make.
+**Status:** covers six screens built so far — recall summary, mid-attack capture, morning checkpoint, Onboarding, Home, and now the Timeline (`mockups/timeline.html`, Task 3 of §7). Observation correction and the episode-boundary override interaction are decided (D16–D19) but not yet mocked as their own surfaces — §6 has the resolutions; D16 (Timeline row model) is now built against, not just decided. §7 is the ordered path to mocking every remaining screen, including the Report. Insights alone stays gated on a scope decision only Eric can make.
 
 ---
 
@@ -45,6 +45,8 @@ Named, not defaulted — each was chosen against what the surface actually is (a
 | `--doc-faint` | `#756C5B` | Doc (fixed) | Corrected 16 Aug alongside `--app-faint` — the original `#A39A8E` measured 2.66:1 against `--doc-bg` |
 | `--app-focus` | `#7DA2FF` | Device (fixed) | Reuses dark-chrome's `--focus` value, pinned rather than theme-reactive. 7.62:1 against `--app-bg` (corrected 16 Aug — originally stated as "~9:1," a measurement error; the value itself was never wrong) |
 | `--doc-focus` | `#2B57B0` | Doc (fixed) | Reuses light-chrome's `--focus` value, pinned. ~5.5:1 against `--doc-bg` |
+| `--app-border` | `#332F42` | Device (fixed) | Added with Home (task 2), documented here after the fact — the hairline used for card and rail borders. `--rail-none` (below) aliases it |
+| `--rail-migraine` / `--rail-headache` / `--rail-aura` / `--rail-none` | aliases `--app-accent` / `#B98A52` / `#8E86D6` / aliases `--app-border` | Device (fixed) | **Provisional — added with Timeline (task 3), not yet cross-checked against a full palette pass.** DayRail border-left color, keyed to `day_classifications.class` per `DAY_CLASS_PRECEDENCE` (migraine > headache > aura_only > none). Each passes 4.5:1 against `--app-surface` individually (measured 5.36–6.30:1; `--rail-none`/`--app-faint`-adjacent text is the tightest margin at ≈4.73:1), but migraine/headache sit close together as amber hues — every rail states its class in text too, never by color alone, so this is not currently a legibility risk, but a future pass should widen the hue separation |
 
 **Bug this fixes.** The first three mockups shared one global `:focus-visible{outline-color:var(--focus)}` rule, but `--focus` is a *chrome* token that flips with the viewer's OS theme. On a light-OS viewer, that resolved to the light-mode blue (`#2B57B0`) inside the always-dark device world — 2.77:1 against `--app-bg`, below the WCAG 3:1 non-text minimum. Fixed and doc worlds need their own pinned focus color for the same reason every other fixed-world token is pinned (§1): **scope the rule**, don't rely on the global one inside a world that doesn't react to viewer theme:
 
@@ -116,7 +118,7 @@ Every tag value any mockup's Receipt component may render, with what it means. D
 
 ## 5. Using this system
 
-**Where the mockups live.** `mockups/` at the repo root — alongside `tech-spec.md`, `frd.md`, this file, the lot. Not scratch output; these are the project's actual design deliverables and persist the same way everything else does. Four published files at the top level (`headstate-mockups.html`, `headstate-styleguide.html`, `onboarding.html`, `home.html`), each mirrored to a Claude Artifact URL for viewing — the repo file is the source, the URL is a rendering of it, re-published whenever the file changes. `mockups/templates/` holds the pre-font-splice source for each (placeholders intact, useful as a starting point for a new mockup). `mockups/fonts/` holds the five font files already fetched and base64-encoded — reuse these `.b64.txt` files for any new mockup rather than re-fetching from Google Fonts.
+**Where the mockups live.** `mockups/` at the repo root — alongside `tech-spec.md`, `frd.md`, this file, the lot. Not scratch output; these are the project's actual design deliverables and persist the same way everything else does. Five published files at the top level (`headstate-mockups.html`, `headstate-styleguide.html`, `onboarding.html`, `home.html`, `timeline.html`), each mirrored to a Claude Artifact URL for viewing — the repo file is the source, the URL is a rendering of it, re-published whenever the file changes. `mockups/templates/` holds the pre-font-splice source for each (placeholders intact, useful as a starting point for a new mockup). `mockups/fonts/` holds the five font files already fetched and base64-encoded — reuse these `.b64.txt` files for any new mockup rather than re-fetching from Google Fonts.
 
 **Tokens.** The full `:root` custom-property block, as currently implemented, lives in any published mockup's `<style>` block — `headstate-mockups.html` is the shortest reference. Copy it verbatim as the starting point for any new screen; do not re-derive colors by eye.
 
@@ -129,9 +131,9 @@ Once build step 0 exists, these still belong in a proper shared assets location 
 
 **Spacing/radius.** Two radius scales by world, not one: `--radius-doc` (3px — paper has sharp corners) for the doc world, `--radius-card` (14px) and `--radius-pill` (999px) for the device world — native app UI convention, not decorative variety. Layout uses flex/grid `gap`, never per-element margins.
 
-## 6. Resolved (D16–D19) — not yet mocked
+## 6. Resolved (D16–D19)
 
-These four were blocked as of the first pass; each now has a settled answer, recorded in `decision-log.md`. None have a screen built yet.
+These four were blocked as of the first pass; each now has a settled answer, recorded in `decision-log.md`. D16 (Timeline row model) is now built against — `mockups/timeline.html`, task 3 of §7. D17–D19 are decided but their own screens (the boundary-override drawer, a dedicated correction surface, retrospective capture) are not yet mocked as standalone surfaces; D17's two-tier interaction has a "not yet built" stub on the Timeline's DayRail rather than a working implementation.
 
 - **Timeline row model (D16).** One row = one capture moment (MomentCard, grouped by `provenance.transcript_id`), not an observation, a day, or an episode. Episode/day-class context is a DayRail overlay, not the row unit — which is what lets `relapse_collapsed` and `relapse_split` coexist without two competing row sets. A corrected observation shows current value only by default, with a HistoryMarker to expand it.
 - **Observation correction interaction (D16, component in §4).** CorrectableField, typed per field shape, used identically on the Timeline, the recall summary, and the review queue — not a bespoke pattern per surface. The UI presents a single-field edit; the write it produces is a whole new observation row plus a supersession link (FR-1.2) — that gap between UI abstraction and data write is deliberate, not an oversight to fix.
@@ -148,7 +150,7 @@ Ordered by dependency, not by page name — each step either needs nothing furth
 |---|---|---|
 | 1 | Mock **Onboarding** — consent screens (separate collection/sharing, equally weighted, FR-7.3/7.4) + conversational baseline capture | No decision needed. First because Settings (6) reuses its consent components |
 | 2 | Mock **Home**, full surface — symptom-free-day state, passive context card, retrospective-entry affordance, both capture-confirmation variants (real-time vs. D19's backfilled line) | No decision needed |
-| 3 | Mock **Timeline** — MomentCard feed, PassiveStrip, DayRail, HistoryMarker | Decided, D16 |
+| 3 | Mock **Timeline** — MomentCard feed, PassiveStrip, DayRail, HistoryMarker | **Done** — `mockups/timeline.html`. Also demonstrates the `relapse_collapsed`/`relapse_split` dual reading (D17 scalar threshold, chrome-world toggle) and the DAY_CLASS_PRECEDENCE merge case, without building the boundary-override drawer itself (that's task 4) |
 | 4 | Mock the **episode-boundary override drawer** — BoundaryPicker (Tier 1) + BoundaryAdjuster (Tier 2), off the Timeline's DayRail | Decided, D17/D18 — sequenced after 3 |
 | 5 | Mock the **review queue** — Tier-2 batched confirmation | Spec exists, FR-3.26–3.31. Before the Report (8) because its gate reuses this pattern |
 | 6 | Mock **Settings** — integrations + consent/sharing | Spec exists, FR-4.x/FR-7.x. Reuses (1)'s components |

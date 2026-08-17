@@ -1,0 +1,1203 @@
+<title>The Record, Not the Attack</title>
+<style>
+  @font-face{
+    font-family:'Fraunces';font-style:italic;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_ITALIC__) format('woff2');
+  }
+  @font-face{
+    font-family:'Fraunces';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_NORMAL__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Sans';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXSANS__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_400__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_500__) format('woff2');
+  }
+
+  /* ============ TOKENS ============ */
+  :root{
+    /* chrome — light (default / un-stamped) */
+    --surface:#F6F7F9;
+    --surface-raised:#FFFFFF;
+    --ink:#1B1C22;
+    --ink-muted:#5B5E68;
+    --ink-faint:#6A6C74;
+    --border:#DDE0E5;
+    --accent:#B5652A;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#F3E4D3;
+    --focus:#2B57B0;
+    --good:#3F6B62;
+    --good-soft:#E1EBE8;
+    --flag:#9C4A3A;
+    --flag-soft:#F3E1DD;
+
+    /* fixed device world — the phone screens (a "screenshot," not viewer-themed) */
+    --app-bg:#121019;
+    --app-surface:#1C1927;
+    --app-surface-raised:#242032;
+    --app-ink:#EDEAF2;
+    --app-muted:#948FA6;
+    --app-faint:#87839C;
+    --app-border:#332F42;
+    --app-accent:#D98A46;
+    --app-accent-dim:#3B2A1C;
+    --app-good:#7FA79D;
+    --app-good-dim:#233330;
+    --app-focus:#7DA2FF;
+
+    /* fixed paper world — kept for token parity with the other mockups */
+    --doc-bg:#FCFAF5;
+    --doc-ink:#211D1A;
+    --doc-muted:#6E655B;
+    --doc-faint:#756C5B;
+    --doc-rule:#DCD1BE;
+    --doc-accent:#A85A26;
+    --doc-flag:#9C4A3A;
+    --doc-flag-soft:#F1DFD3;
+    --doc-focus:#2B57B0;
+
+    /* type */
+    --f-display:'Fraunces', ui-serif, Georgia, serif;
+    --f-body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --f-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+    --fs-eyebrow:.6875rem;
+    --fs-caption:.8125rem;
+    --fs-body:.9375rem;
+    --fs-body-lg:1.0625rem;
+    --fs-h3:1.1875rem;
+    --fs-h2:1.5rem;
+
+    --radius-doc:3px;
+    --radius-card:14px;
+    --radius-pill:999px;
+
+    /* DayRail class colors — new in this mockup, not yet in design-system.md.
+       Device-world only; not needed in chrome or doc. Text label always carries
+       the meaning too — these are never the only signal. */
+    --rail-migraine:var(--app-accent);
+    --rail-headache:#B98A52;
+    --rail-aura:#8E86D6;
+    --rail-none:var(--app-border);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --surface:#15141C;
+      --surface-raised:#1D1B26;
+      --ink:#EDEAF2;
+      --ink-muted:#A9A5B8;
+      --ink-faint:#8A8699;
+      --border:#332F3F;
+      --accent:#D98A46;
+      --accent-ink:#1B1208;
+      --accent-soft:#3B2A1C;
+      --focus:#7DA2FF;
+      --good:#7FA79D;
+      --good-soft:#233330;
+      --flag:#C97A68;
+      --flag-soft:#3A241F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --surface:#15141C;
+    --surface-raised:#1D1B26;
+    --ink:#EDEAF2;
+    --ink-muted:#A9A5B8;
+    --ink-faint:#8A8699;
+    --border:#332F3F;
+    --accent:#D98A46;
+    --accent-ink:#1B1208;
+    --accent-soft:#3B2A1C;
+    --focus:#7DA2FF;
+    --good:#7FA79D;
+    --good-soft:#233330;
+    --flag:#C97A68;
+    --flag-soft:#3A241F;
+  }
+
+  /* ============ BASE ============ */
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--surface);
+    color:var(--ink);
+    font-family:var(--f-body);
+    font-size:var(--fs-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+  p{margin:0}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+  /* Fixed worlds pin their own focus color — the chrome --focus token flips with the
+     viewer's OS theme and fails contrast inside the always-dark device world. */
+  .device-screen :focus-visible{outline-color:var(--app-focus)}
+  .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
+
+  /* ============ SHELL ============ */
+  .shell{max-width:1180px;margin:0 auto;padding:2.25rem 1.5rem 4rem}
+  .shell-head{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:1.5rem;flex-wrap:wrap;margin-bottom:1.75rem;
+    padding-bottom:1.25rem;border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;flex-direction:column;gap:.3rem}
+  .brand-mark{font-family:var(--f-display);font-weight:600;font-size:1.375rem;letter-spacing:.01em}
+  .brand-mark em{font-style:italic;color:var(--accent)}
+  .brand-sub{font-size:var(--fs-caption);color:var(--ink-muted);max-width:44ch}
+
+  .lede{max-width:68ch;color:var(--ink-muted);font-size:var(--fs-body);margin-bottom:1.5rem}
+  .lede b{color:var(--ink);font-weight:600}
+
+  /* reviewer control bar — chrome world, explicitly outside the phone */
+  .controls{
+    display:flex;flex-wrap:wrap;gap:1.25rem 2rem;
+    align-items:flex-start;
+    background:var(--surface-raised);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1rem 1.15rem;
+    margin-bottom:1.5rem;
+  }
+  .control-group{display:flex;flex-direction:column;gap:.45rem}
+  .control-label{
+    font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.09em;
+    font-weight:600;color:var(--ink-faint);
+  }
+  .switcher{
+    display:flex;gap:.25rem;padding:.25rem;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+    flex-wrap:wrap;
+  }
+  .switcher button{
+    appearance:none;border:none;background:transparent;color:var(--ink-muted);
+    font-size:var(--fs-caption);font-weight:500;
+    padding:.45rem .8rem;border-radius:var(--radius-pill);
+    cursor:pointer;white-space:nowrap;
+    transition:background .15s ease, color .15s ease;
+  }
+  .switcher button:hover{color:var(--ink)}
+  .switcher button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+  .controls-note{
+    flex:1 1 18rem;min-width:14rem;
+    font-size:.72rem;color:var(--ink-faint);line-height:1.55;
+    align-self:center;
+  }
+  .episode-counter{
+    display:inline-flex;align-items:center;gap:.4rem;
+    font-family:var(--f-mono);font-size:.72rem;
+    color:var(--ink-muted);
+    background:var(--surface);border:1px solid var(--border);
+    padding:.3rem .6rem;border-radius:var(--radius-pill);
+  }
+
+  .shell-foot{
+    margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--border);
+    font-size:var(--fs-caption);color:var(--ink-faint);
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  }
+
+  /* ============ DEVICE FRAME ============ */
+  .device-stage{display:flex;justify-content:center;padding:.5rem 0 1rem}
+  .device-frame{
+    width:min(390px, 100%);
+    border-radius:40px;padding:12px;
+    background:linear-gradient(155deg,#2A2735,#131019);
+    box-shadow:0 1px 1px rgba(0,0,0,.4), 0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .device-screen{
+    background:var(--app-bg);color:var(--app-ink);
+    border-radius:30px;overflow:hidden;
+    font-family:var(--f-body);
+    height:780px;
+    display:flex;flex-direction:column;position:relative;
+  }
+  .device-notch{height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .device-notch::before{
+    content:'';width:90px;height:6px;border-radius:99px;background:rgba(255,255,255,.14);
+  }
+
+  /* ---- fixed screen header ---- */
+  .tl-head{
+    flex-shrink:0;
+    padding:.15rem 1.15rem .8rem;
+    display:flex;flex-direction:column;gap:.35rem;
+    border-bottom:1px solid var(--app-border);
+  }
+  .tl-title{font-family:var(--f-display);font-weight:600;font-size:var(--fs-h3)}
+  .tl-sub{font-size:.72rem;color:var(--app-faint)}
+
+  /* ---- scrollable feed ---- */
+  .tl-scroll{
+    flex:1;overflow-y:auto;min-height:0;
+    padding:.9rem 1.15rem 1.4rem;
+    display:flex;flex-direction:column;gap:1.1rem;
+  }
+  .tl-scroll::-webkit-scrollbar{width:6px}
+  .tl-scroll::-webkit-scrollbar-thumb{background:var(--app-border);border-radius:99px}
+
+  .day-group{display:flex;flex-direction:column;gap:.55rem}
+  .day-rows{display:flex;flex-direction:column;gap:.55rem}
+
+  /* ---- DayRail ---- */
+  .dayrail{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;
+    padding:.55rem .7rem;border-radius:10px;
+    border-left:3px solid var(--rail-none);
+    background:var(--app-surface);
+  }
+  .dayrail--migraine{border-left-color:var(--rail-migraine)}
+  .dayrail--headache{border-left-color:var(--rail-headache)}
+  .dayrail--aura_only{border-left-color:var(--rail-aura)}
+  .dayrail--none{border-left-color:var(--rail-none)}
+  .dayrail.is-attenuated{border-left-style:dashed}
+
+  .dayrail-main{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+  .dayrail-top{display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap}
+  .dayrail-date{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--app-ink);font-weight:600;white-space:nowrap}
+  .dayrail-class{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  .dayrail--migraine .dayrail-class{color:var(--rail-migraine)}
+  .dayrail--headache .dayrail-class{color:var(--rail-headache)}
+  .dayrail--aura_only .dayrail-class{color:var(--rail-aura)}
+  .dayrail--none .dayrail-class{color:var(--app-faint)}
+  .dayrail-rule{font-size:.66rem;color:var(--app-faint);font-family:var(--f-mono)}
+  .dayrail-episode{font-size:.66rem;color:var(--app-faint);font-family:var(--f-mono)}
+  .dayrail-note{font-size:.7rem;color:var(--app-muted);line-height:1.5;max-width:46ch}
+
+  .dayrail-side{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;flex-shrink:0}
+
+  .badge-atten{
+    display:inline-flex;align-items:center;gap:.3rem;
+    font-size:.62rem;font-weight:600;color:var(--app-accent);
+    border:1px dashed var(--app-accent);background:var(--app-accent-dim);
+    padding:.14rem .45rem;border-radius:5px;white-space:nowrap;
+  }
+  .badge-atten::before{content:'⟡'}
+
+  .badge-review{
+    font-size:.62rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.03em;
+    padding:.14rem .45rem;border-radius:5px;white-space:nowrap;
+  }
+  .badge-review.is-unreviewed{color:var(--app-faint);border:1px dotted var(--app-faint)}
+  .badge-review.is-reviewed{color:var(--app-good);border:1px solid var(--app-good-dim);background:var(--app-good-dim)}
+  .badge-review.is-confirmed{color:var(--app-accent);border:1px solid var(--app-accent-dim);background:var(--app-accent-dim)}
+  .badge-review.is-timedout{color:var(--app-faint);border:1px dashed var(--app-faint)}
+
+  .stub-btn{
+    appearance:none;border:1px dashed var(--app-border);background:transparent;
+    color:var(--app-faint);font-size:.66rem;font-weight:600;
+    padding:.3rem .6rem;border-radius:var(--radius-pill);cursor:not-allowed;
+  }
+
+  /* connecting band for a two-date episode span (relapse toggle) */
+  .episode-span{
+    display:flex;flex-direction:column;gap:.4rem;
+    border-left:2px solid transparent;padding-left:0;margin-left:0;
+    transition:border-color .15s ease, padding-left .15s ease, margin-left .15s ease;
+  }
+  .episode-span.is-collapsed{border-left-color:var(--app-accent);padding-left:.65rem;margin-left:-2px}
+  .episode-label{
+    font-size:.68rem;color:var(--app-faint);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+  }
+  .episode-label b{color:var(--app-muted);font-weight:600}
+
+  /* ---- empty-day row ---- */
+  .tl-empty{
+    font-size:.75rem;color:var(--app-faint);font-style:italic;
+    padding:.3rem .1rem;
+  }
+
+  /* ---- PassiveStrip (reused verbatim from Home) ---- */
+  .strip{
+    display:flex;align-items:baseline;justify-content:space-between;gap:.7rem;
+    padding:.42rem .7rem;
+    border:1px solid var(--app-border);border-radius:10px;
+    font-size:var(--fs-caption);
+    background:transparent;
+  }
+  .strip-what{color:var(--app-muted);display:flex;align-items:baseline;gap:.45rem;flex-wrap:wrap}
+  .strip-val{font-family:var(--f-mono);color:var(--app-ink);font-size:var(--fs-caption);text-align:right}
+  .feed-tag{
+    font-family:var(--f-mono);font-size:.6rem;
+    color:var(--app-faint);border:1px solid var(--app-border);
+    padding:.1rem .32rem;border-radius:4px;white-space:nowrap;
+  }
+
+  /* ---- MomentCard (Receipt variant, grouped by capture moment) ---- */
+  .momentcard{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.85rem .95rem .9rem;
+  }
+  .mc-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;
+    margin-bottom:.55rem;flex-wrap:wrap;
+  }
+  .mc-time{font-family:var(--f-mono);font-size:.72rem;color:var(--app-ink);font-weight:600}
+  .mc-source{font-size:.66rem;color:var(--app-faint)}
+
+  .receipt-field{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:.6rem;padding:.4rem 0;
+    border-top:1px solid var(--app-border);flex-wrap:wrap;
+  }
+  .receipt-field:first-of-type{border-top:none}
+  .receipt-field-label{color:var(--app-muted);font-size:var(--fs-caption);flex-shrink:0;display:flex;align-items:center;gap:.3rem}
+  .receipt-field-val{
+    display:flex;align-items:center;gap:.45rem;
+    font-size:var(--fs-body);flex-wrap:wrap;justify-content:flex-end;
+  }
+  .receipt-field-val.is-editing{width:100%;justify-content:flex-start;padding-top:.15rem}
+  .field-text{font-weight:500}
+  .field-text.is-mono{font-family:var(--f-mono);font-size:var(--fs-caption)}
+
+  .conf-tag{
+    font-size:.62rem;font-family:var(--f-mono);
+    text-transform:uppercase;letter-spacing:.03em;
+    padding:.14rem .4rem;border-radius:5px;
+    color:var(--app-muted);border:1px solid var(--app-border);white-space:nowrap;
+  }
+  /* Closed tag vocabulary — design-system.md §4. Every value gets its own
+     treatment; two provenances must never render identically. */
+  .conf-tag.is-paraphrase{color:var(--app-accent);border-color:var(--app-accent-dim);background:var(--app-accent-dim)}
+  .conf-tag.is-resolved{color:var(--app-good);border-color:var(--app-good-dim);background:var(--app-good-dim)}
+  .conf-tag.is-reduced{color:var(--app-accent);border-color:var(--app-accent);background:var(--app-accent-dim)}
+  .conf-tag.is-system{color:var(--app-faint);border-style:dotted;border-color:var(--app-faint);background:transparent}
+  .conf-tag.is-user{color:var(--app-ink);border-color:var(--app-muted)}
+  .conf-tag.is-nosource{color:var(--app-faint);border-style:dashed}
+
+  .correct-link{
+    background:none;border:none;color:var(--app-muted);
+    font-size:.7rem;text-decoration:underline;text-underline-offset:2px;
+    cursor:pointer;padding:0;
+  }
+  .correct-link:hover{color:var(--app-accent)}
+
+  /* CorrectableField — stepper, severity only */
+  .stepper{display:flex;align-items:center;gap:.5rem;width:100%;padding:.15rem 0}
+  .stepper button{
+    appearance:none;width:30px;height:30px;flex-shrink:0;
+    border:1px solid var(--app-border);background:var(--app-bg);
+    color:var(--app-ink);font-size:1rem;font-weight:600;line-height:1;
+    border-radius:8px;cursor:pointer;
+  }
+  .stepper button:hover:not([disabled]){border-color:var(--app-accent)}
+  .stepper button[disabled]{opacity:.35;cursor:not-allowed}
+  .stepper-val{flex:1;text-align:center;font-weight:600;font-size:var(--fs-body)}
+  .stepper-scale{display:flex;gap:2px;flex:0 0 auto}
+  .stepper-scale i{display:block;width:14px;height:4px;border-radius:2px;background:var(--app-border)}
+  .stepper-scale i.is-lit{background:var(--app-accent)}
+  .stepper-done{
+    appearance:none;border:none;background:var(--app-accent);color:#1B1208;
+    font-size:.7rem;font-weight:600;padding:.3rem .6rem;border-radius:6px;cursor:pointer;
+  }
+
+  /* CorrectableField — chip picker, enums + tri-state */
+  .chip-picker{display:flex;gap:.35rem;flex-wrap:wrap;width:100%;padding:.2rem 0}
+  .chip-picker button{
+    appearance:none;border:1px solid var(--app-border);background:var(--app-bg);
+    color:var(--app-ink);font-size:.75rem;font-weight:500;
+    padding:.35rem .6rem;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .chip-picker button:hover{border-color:var(--app-accent)}
+  .chip-picker button.is-current{border-color:var(--app-accent);color:var(--app-accent)}
+
+  .step-input{
+    background:var(--app-bg);border:1px solid var(--app-accent);color:var(--app-ink);
+    border-radius:6px;padding:.3rem .5rem;font:inherit;width:9.5rem;
+  }
+
+  /* HistoryMarker — collapsed by default, expands inline, never navigates away */
+  .hist-marker{
+    background:none;border:none;color:var(--app-muted);
+    font-size:.62rem;font-family:var(--f-mono);
+    text-decoration:underline dotted;text-underline-offset:2px;
+    cursor:pointer;padding:0;
+  }
+  .hist-marker:hover{color:var(--app-accent)}
+  .hist-expand{
+    display:none;flex-direction:column;gap:.15rem;
+    width:100%;margin-top:.35rem;padding:.45rem .55rem;
+    background:var(--app-bg);border:1px solid var(--app-border);border-radius:8px;
+    font-size:.7rem;color:var(--app-muted);
+  }
+  .hist-expand.is-open{display:flex}
+  .hist-old{color:var(--app-faint)}
+  .hist-old s{text-decoration:line-through}
+
+  /* Backfilled MomentCard treatment — must never look like an ordinary card */
+  .momentcard.is-backfilled{border-style:dashed;border-color:var(--app-accent-dim)}
+  .mc-backfill{
+    margin-top:.6rem;padding-top:.55rem;
+    border-top:1px dashed var(--app-accent-dim);
+    font-size:.7rem;color:var(--app-accent);line-height:1.5;
+    display:flex;gap:.4rem;align-items:flex-start;
+  }
+  .mc-backfill::before{content:'⏱';flex-shrink:0}
+
+  .mc-note{
+    margin-top:.6rem;padding-top:.55rem;border-top:1px dashed var(--app-border);
+    font-size:.7rem;color:var(--app-faint);line-height:1.5;font-style:italic;
+  }
+
+  .tl-older-divider{
+    display:flex;align-items:center;gap:.6rem;color:var(--app-faint);font-size:.68rem;margin:.1rem 0;
+  }
+  .tl-older-divider::before,.tl-older-divider::after{content:'';flex:1;height:1px;background:var(--app-border)}
+  .tl-older-btn{
+    align-self:center;margin-top:.2rem;
+    appearance:none;border:1px solid var(--app-border);background:var(--app-surface);
+    color:var(--app-muted);font-size:.72rem;font-weight:600;
+    padding:.5rem 1rem;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .tl-older-btn:hover{border-color:var(--app-accent)}
+
+  .annotation{
+    display:flex;gap:.55rem;align-items:flex-start;
+    border:1px dashed var(--border);border-radius:10px;
+    padding:.7rem .85rem;font-size:.78rem;color:var(--ink-faint);line-height:1.55;
+    max-width:60rem;margin:0 auto 1rem;
+  }
+  .annotation b{color:var(--ink)}
+  .annotation code{font-family:var(--f-mono);font-size:.92em;color:var(--ink-muted)}
+
+  .toast{
+    position:fixed;left:50%;bottom:1.75rem;
+    transform:translate(-50%, 12px);
+    background:var(--ink);color:var(--surface);
+    font-size:var(--fs-caption);padding:.7rem 1.1rem;border-radius:10px;
+    opacity:0;pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:50;max-width:min(32rem, calc(100vw - 2rem));text-align:center;
+  }
+  .toast.is-visible{opacity:1;transform:translate(-50%, 0)}
+
+  @media (max-width:640px){
+    .shell{padding:1.5rem 1rem 3rem}
+    .controls{flex-direction:column;gap:1rem}
+  }
+</style>
+
+<div class="shell">
+
+  <div class="shell-head">
+    <div class="brand">
+      <div class="brand-mark">Head<em>State</em></div>
+      <div class="brand-sub">Screen mockup &mdash; Timeline, the observation-level record</div>
+    </div>
+  </div>
+
+  <p class="lede"><b>One row is one capture moment, not an attack.</b> Episodes and day classification render as a thin rail above each day&rsquo;s rows &mdash; an overlay, never the row unit itself &mdash; which is what lets a sub-48-hour recurrence hold two competing readings without needing two competing feeds (D16). Scroll to see a corrected field, a pharmacologically attenuated stretch, a four-day-late backfill, and the exact midnight-crossing case this project&rsquo;s day-count arithmetic has gotten wrong twice.</p>
+
+  <div class="controls">
+    <div class="control-group">
+      <span class="control-label">Relapse reading &mdash; Aug 12&ndash;13</span>
+      <div class="switcher" role="group" aria-label="Relapse derivation variant">
+        <button type="button" aria-pressed="true" data-relapse="collapsed">Collapsed &mdash; one episode</button>
+        <button type="button" aria-pressed="false" data-relapse="split">Split &mdash; two episodes</button>
+      </div>
+    </div>
+    <span class="episode-counter" id="episode-counter">2 migraine days either way &middot; 1 episode</span>
+    <p class="controls-note">Reviewer-only, chrome world &mdash; nothing inside the phone frame depicts a control that doesn&rsquo;t exist in the product. ICHD-3 declines to resolve a recurrence under 48h headache-free; both readings are computed and neither is chosen silently (§5.3). The day classes below don&rsquo;t change between the two &mdash; only the episode boundary and the attack count do, which is exactly why payer exports report day counts, never attack counts (invariant 9).</p>
+  </div>
+
+  <div class="device-stage">
+    <div class="device-frame"><div class="device-screen">
+      <div class="device-notch"></div>
+
+      <div class="tl-head">
+        <span class="tl-title">Timeline</span>
+        <span class="tl-sub">Sun 9 Aug &ndash; Sun 17 Aug &middot; observation-level, newest first</span>
+      </div>
+
+      <div class="tl-scroll" id="tl-scroll"></div>
+
+    </div></div>
+  </div>
+
+  <div class="annotation">
+    <span>&#9670;</span>
+    <span><b>The boundary-override drawer (BoundaryPicker / BoundaryAdjuster, D17) is not built yet.</b> &ldquo;Adjust boundary&rdquo; below is a visibly inert stub, not a working control &mdash; it is design-system.md §7 Task 4, sequenced after this screen. Tapping it names that rather than pretending to open something.</span>
+  </div>
+
+  <div class="annotation" style="border-color:var(--border)">
+    <span>&#9670;</span>
+    <span><b>DayRail class colors (migraine / headache / aura_only / none) are new in this mockup</b> &mdash; design-system.md doesn&rsquo;t define them yet. Every rail also states its class in text, never by color alone. These four tokens (<code>--rail-migraine</code>, <code>--rail-headache</code>, <code>--rail-aura</code>, <code>--rail-none</code>) belong in the design system&rsquo;s token table on the next style-guide pass, the same way <code>--app-good-dim</code> was documented retroactively after Home.</span>
+  </div>
+
+  <div class="shell-foot">
+    <span>Mockup only &mdash; not wired to the derivation engine or a backend.</span>
+    <span>decision-log.md D16&ndash;D19 &middot; tech-spec.md &sect;5.2&ndash;5.3 &middot; design-system.md &sect;7</span>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 3200);
+  }
+
+  /* Closed vocabulary — design-system.md §4. Every value maps to a distinct
+     treatment; anything unmapped is a bug, not a default. */
+  var TAG_CLASS = {
+    'lexical':    '',
+    'paraphrase': 'is-paraphrase',
+    'user':       'is-user',
+    'no source':  'is-nosource',
+    'resolved':   'is-resolved',
+    'system':     'is-system',
+    'reduced':    'is-reduced'
+  };
+  function tagClass(tag){
+    if (!(tag in TAG_CLASS)) throw new Error('Unknown confidence tag: ' + tag);
+    return TAG_CLASS[tag];
+  }
+
+  var SEVERITY = ['mild', 'moderate', 'severe'];
+
+  /* ---------------- data model ---------------- */
+  /* Everything below is invented sample data for the mockup — see the fork's
+     report for which worked cases each date is standing in for. */
+
+  var RELAPSE_NOTE = {
+    collapsed: {
+      12: 'Read as one relapsing episode continuing into the 13th (ICHD-3 permits either reading).',
+      13: 'Continuation of the same episode, per the collapsed reading.',
+      label: 'One episode, Aug 12&ndash;13 &mdash; relapse of the same attack'
+    },
+    split: {
+      12: 'Read as its own distinct episode under the split reading (ends same day).',
+      13: 'Read as a new, separate attack under the split reading &mdash; not a relapse.',
+      label: 'Two distinct episodes, Aug 12 and Aug 13'
+    }
+  };
+
+  var DAYS = [
+    {
+      date:'2026-08-17', label:'Sun&nbsp;17&nbsp;Aug', rel:'Today',
+      cls:'none', rule:null, attenuated:false, confirmedBy:'system', reviewStatus:'unreviewed',
+      note:'Nothing computed to review yet &mdash; the day is still in progress.',
+      items:[
+        { type:'passive', strips:[
+          { what:'Slept', feed:'apple_health', val:'6h 40m' }
+        ]},
+        { type:'empty', text:'Nothing logged yet today.' }
+      ]
+    },
+    {
+      date:'2026-08-16', label:'Sat&nbsp;16&nbsp;Aug',
+      cls:'migraine', rule:'delphi_treated_30min', attenuated:false,
+      attributedEpisode:'9:02&nbsp;AM attack (earliest)',
+      confirmedBy:'user', reviewStatus:'user_reviewed',
+      note:'Two attacks today. Rule is taken from the 3:30&nbsp;PM attack &mdash; it won the merge. Attribution goes to the 9:02&nbsp;AM attack, the <i>earliest</i> occupying attack (DAY_CLASS_PRECEDENCE) &mdash; a different attack than the one that set the rule. User confirmed the merge is correct.',
+      items:[
+        { type:'moment', id:'m-0902', time:'9:02&nbsp;AM', source:'typed',
+          note:'Untreated, under an hour, one characteristic &mdash; headache-qualifying, not migraine.',
+          fields:[
+            { label:'Severity', val:'mild', tag:'lexical', type:'severity' },
+            { label:'Resolved by', val:'11:00 AM', tag:'lexical', type:'text' }
+          ]
+        },
+        { type:'moment', id:'m-1530', time:'3:30&nbsp;PM', source:'voice &middot; one capture',
+          note:'Treated within 30 minutes &mdash; migraine-qualifying regardless of duration (delphi_treated_30min).',
+          fields:[
+            { label:'Laterality', val:'right', tag:'lexical', type:'enum', options:'left|right|both|alternating' },
+            { label:'Severity', val:'severe', tag:'user', type:'severity',
+              history:{ from:'moderate', fromTag:'paraphrase', at:'corrected 4:10 PM' } },
+            { label:'Nausea', val:'asked · yes', tag:'lexical', type:'tristate',
+              options:'asked · yes|asked · no|asked · unknown|not asked' },
+            { label:'Drug class', val:'triptan', tag:'resolved', type:'enum',
+              options:'triptan|ergot|opioid|combination_analgesic|non_opioid_analgesic|corticosteroid' }
+          ]
+        }
+      ]
+    },
+    {
+      date:'2026-08-15', label:'Fri&nbsp;15&nbsp;Aug',
+      cls:'headache', rule:null, attenuated:true,
+      confirmedBy:'system', reviewStatus:'unreviewed',
+      note:'20 minutes of head pain, inside yesterday’s dexamethasone taper &mdash; flagged attenuated. Still counts as a headache day; attenuation only blocks a <i>none</i> day from counting.',
+      items:[
+        { type:'moment', id:'m-0815-1', time:'7:40&nbsp;PM', source:'typed',
+          note:'Under 4h and one characteristic &mdash; headache-qualifying, not migraine.',
+          fields:[
+            { label:'Duration', val:'about 20 minutes', tag:'lexical', type:'text' },
+            { label:'Severity', val:'mild', tag:'lexical', type:'severity' },
+            { label:'Vomiting', val:'not asked', tag:'no source', type:'tristate',
+              options:'asked · yes|asked · no|asked · unknown|not asked' }
+          ]
+        },
+        { type:'passive', strips:[
+          { what:'Slept', feed:'apple_health', val:'7h 10m' }
+        ]}
+      ]
+    },
+    {
+      date:'2026-08-14', label:'Thu&nbsp;14&nbsp;Aug',
+      cls:'none', rule:null, attenuated:true,
+      confirmedBy:'system', reviewStatus:'unreviewed',
+      note:'No head pain at all &mdash; but inside the dexamethasone window started this morning, so it&rsquo;s flagged attenuated anyway. An attenuated <i>none</i> day never counts toward headache or migraine days &mdash; and it is never dropped from an export silently (§5.5).',
+      items:[
+        { type:'moment', id:'m-0814', time:'8:00&nbsp;AM', source:'typed',
+          note:'3-day taper &mdash; every day inside this window is flagged attenuated, whatever its class.',
+          fields:[
+            { label:'Medication', val:'Dexamethasone', tag:'lexical', type:'text' },
+            { label:'Drug class', val:'corticosteroid', tag:'resolved', type:'enum',
+              options:'triptan|ergot|opioid|combination_analgesic|non_opioid_analgesic|corticosteroid' },
+            { label:'Course start', val:'Thu 14 Aug, 8:00 AM', tag:'lexical', type:'datetime', mono:true, iso:'2026-08-14T08:00' },
+            { label:'Course end', val:'Sun 17 Aug, 8:00 AM', tag:'lexical', type:'datetime', mono:true, iso:'2026-08-17T08:00' }
+          ]
+        }
+      ]
+    },
+    {
+      date:'2026-08-13', label:'Wed&nbsp;13&nbsp;Aug', relapse:13,
+      clsFn:true, rule:'delphi_treated_30min', attenuated:false,
+      confirmedBy:'system', reviewStatus:'unreviewed',
+      showAdjust:true,
+      items:[
+        { type:'moment', id:'m-0813-1', time:'10:00&nbsp;AM', source:'voice',
+          note:'Treated within 30 minutes &mdash; migraine-qualifying (delphi_treated_30min). About 15h after yesterday’s attack ended &mdash; inside the 48h RECURRENCE_AMBIGUOUS_WINDOW.',
+          fields:[
+            { label:'Laterality', val:'left', tag:'lexical', type:'enum', options:'left|right|both|alternating' },
+            { label:'Severity', val:'severe', tag:'paraphrase', type:'severity' },
+            { label:'Nausea', val:'asked · no', tag:'lexical', type:'tristate',
+              options:'asked · yes|asked · no|asked · unknown|not asked' },
+            { label:'Drug class', val:'triptan', tag:'resolved', type:'enum',
+              options:'triptan|ergot|opioid|combination_analgesic|non_opioid_analgesic|corticosteroid' }
+          ]
+        },
+        { type:'moment', id:'m-0813-2', time:'7:30&nbsp;AM', source:'typed', backfilled:true,
+          recordedAt:'Sun 17 Aug, 8:10 AM',
+          note:'A separate capture moment from the 10:00 AM card above &mdash; same day, different transcript, so it stays its own row rather than merging into it (D16).',
+          fields:[
+            { label:'Medication', val:'Ibuprofen 600mg', tag:'lexical', type:'text' },
+            { label:'Drug class', val:'non_opioid_analgesic', tag:'resolved', type:'enum',
+              options:'triptan|ergot|opioid|combination_analgesic|non_opioid_analgesic|corticosteroid' },
+            { label:'Confidence', val:'reduced — 4d 0h 40m late', tag:'reduced', type:'none' }
+          ]
+        }
+      ]
+    },
+    {
+      date:'2026-08-12', label:'Tue&nbsp;12&nbsp;Aug', relapse:12,
+      clsFn:true, rule:'delphi_untreated_4h', attenuated:false,
+      confirmedBy:'system', reviewStatus:'unreviewed',
+      items:[
+        { type:'moment', id:'m-0812', time:'2:00&nbsp;PM', source:'voice',
+          note:'Untreated, 5 hours, two characteristics (throbbing + photophobia&amp;phonophobia) &mdash; migraine-qualifying (delphi_untreated_4h).',
+          fields:[
+            { label:'Laterality', val:'right', tag:'lexical', type:'enum', options:'left|right|both|alternating' },
+            { label:'Quality', val:'throbbing', tag:'lexical', type:'enum', options:'throbbing|pressure|stabbing|other' },
+            { label:'Photophobia', val:'asked · yes', tag:'lexical', type:'tristate',
+              options:'asked · yes|asked · no|asked · unknown|not asked' },
+            { label:'Phonophobia', val:'asked · yes', tag:'lexical', type:'tristate',
+              options:'asked · yes|asked · no|asked · unknown|not asked' }
+          ]
+        }
+      ]
+    },
+    {
+      date:'2026-08-11', label:'Mon&nbsp;11&nbsp;Aug',
+      cls:'none', rule:null, attenuated:false,
+      confirmedBy:'system', reviewStatus:'unreviewed',
+      items:[
+        { type:'empty', text:'Nothing logged for this date.' }
+      ]
+    },
+    {
+      date:'2026-08-10', label:'Sun&nbsp;10&nbsp;Aug',
+      cls:'none', rule:null, attenuated:false,
+      confirmedBy:'system', reviewStatus:'user_reviewed',
+      note:'Saturday night&rsquo;s attack technically overlaps this date &mdash; but its occupancy here is <b>suppressed</b>: woke headache-free (Delphi rule 4). This date does not count as a headache day. User reviewed and agreed.',
+      items:[
+        { type:'moment', id:'m-0810', time:'7:15&nbsp;AM', source:'daily checkpoint',
+          note:'This single answer is what makes the suppression above possible &mdash; unobservable without the unconditional overnight question (FR-1.20).',
+          fields:[
+            { label:'Overnight — fell asleep with a migraine, woke without one', val:'yes', tag:'lexical', type:'tristate',
+              options:'yes|no|n/a' }
+          ]
+        }
+      ]
+    },
+    {
+      date:'2026-08-09', label:'Sat&nbsp;9&nbsp;Aug',
+      cls:'migraine', rule:'delphi_untreated_4h', attenuated:false,
+      confirmedBy:'system', reviewStatus:'user_reviewed',
+      note:'Untreated, 5 hours total, two characteristics. Crosses midnight &mdash; occupies tonight <i>and</i> Sunday morning, but Sunday&rsquo;s occupancy is suppressed below. <b>1 migraine day, not 2</b> &mdash; the exact arithmetic this codebase has gotten wrong twice.',
+      items:[
+        { type:'moment', id:'m-0809', time:'10:40&nbsp;PM', source:'voice',
+          note:'Duration measured across midnight, per attack, not per calendar date (DURATION_QUALIFICATION) &mdash; asleep by ~1 AM, woke around 3:40 AM.',
+          fields:[
+            { label:'Laterality', val:'left', tag:'lexical', type:'enum', options:'left|right|both|alternating' },
+            { label:'Quality', val:'pressure', tag:'lexical', type:'enum', options:'throbbing|pressure|stabbing|other' },
+            { label:'Nausea', val:'asked · yes', tag:'lexical', type:'tristate',
+              options:'asked · yes|asked · no|asked · unknown|not asked' }
+          ]
+        }
+      ]
+    },
+    {
+      date:'2026-08-08', label:'Sat&nbsp;8&nbsp;Aug',
+      cls:'aura_only', rule:'delphi_aura', attenuated:false,
+      confirmedBy:'system', reviewStatus:'unreviewed',
+      note:'Aura with no head pain at all &mdash; still counts as a migraine day (Delphi rule 3), regardless of whether a headache follows. No pain observation exists for this date, only the aura symptom below.',
+      items:[
+        { type:'moment', id:'m-0808', time:'6:50&nbsp;AM', source:'typed',
+          note:'ICHD-3-qualifying aura, no headache followed &mdash; classifies aura_only, not none.',
+          fields:[
+            { label:'Aura', val:'asked · yes', tag:'lexical', type:'tristate',
+              options:'asked · yes|asked · no|asked · unknown|not asked' },
+            { label:'Aura type', val:'visual — scintillating scotoma', tag:'lexical', type:'text' },
+            { label:'Aura duration', val:'22 minutes', tag:'lexical', type:'text' }
+          ]
+        }
+      ]
+    }
+  ];
+
+  var TEASER = {
+    date:'2026-07-28', label:'Tue 28 Jul',
+    cls:'headache', rule:null, reviewStatus:'timed_out',
+    note:'Queued for review 20 days ago; the 14-day REVIEW_TIMEOUT elapsed with nobody looking. confirmed_by stays system &mdash; a timeout is never recorded as confirmation (FR-3.28).'
+  };
+
+  var NOW = new Date(2026, 7, 17, 8, 30);
+
+  /* ---------------- render ---------------- */
+  var scrollEl = document.getElementById('tl-scroll');
+  var relapseState = 'collapsed';
+
+  function classLabel(cls){
+    return { migraine:'Migraine day', headache:'Headache day', aura_only:'Aura-only day', none:'None' }[cls] || cls;
+  }
+
+  function reviewBadge(confirmedBy, reviewStatus){
+    var span = document.createElement('span');
+    span.className = 'badge-review';
+    if (reviewStatus === 'timed_out'){
+      span.classList.add('is-timedout');
+      span.textContent = 'system · timed out';
+    } else if (confirmedBy === 'user'){
+      span.classList.add('is-confirmed');
+      span.textContent = 'user · confirmed';
+    } else if (reviewStatus === 'user_reviewed'){
+      span.classList.add('is-reviewed');
+      span.textContent = 'system · reviewed';
+    } else {
+      span.classList.add('is-unreviewed');
+      span.textContent = 'system · unreviewed';
+    }
+    return span;
+  }
+
+  function buildDayRail(day){
+    var cls = day.clsFn ? 'migraine' : day.cls;
+    var rail = document.createElement('div');
+    rail.className = 'dayrail dayrail--' + cls + (day.attenuated ? ' is-attenuated' : '');
+
+    var main = document.createElement('div');
+    main.className = 'dayrail-main';
+
+    var top = document.createElement('div');
+    top.className = 'dayrail-top';
+    var dateEl = document.createElement('span');
+    dateEl.className = 'dayrail-date';
+    dateEl.innerHTML = day.label;
+    var classEl = document.createElement('span');
+    classEl.className = 'dayrail-class';
+    classEl.textContent = classLabel(cls);
+    top.appendChild(dateEl);
+    top.appendChild(classEl);
+    if (day.rule){
+      var ruleEl = document.createElement('span');
+      ruleEl.className = 'dayrail-rule';
+      ruleEl.textContent = day.rule;
+      top.appendChild(ruleEl);
+    }
+    if (day.attributedEpisode){
+      var epEl = document.createElement('span');
+      epEl.className = 'dayrail-episode';
+      epEl.innerHTML = 'attributed: ' + day.attributedEpisode;
+      top.appendChild(epEl);
+    }
+    main.appendChild(top);
+
+    var noteText = day.note;
+    if (day.relapse) noteText = RELAPSE_NOTE[relapseState][day.relapse];
+    if (noteText){
+      var noteEl = document.createElement('p');
+      noteEl.className = 'dayrail-note';
+      noteEl.innerHTML = noteText;
+      main.appendChild(noteEl);
+    }
+
+    if (day.showAdjust){
+      var stub = document.createElement('button');
+      stub.type = 'button';
+      stub.className = 'stub-btn';
+      stub.textContent = 'Adjust boundary →';
+      stub.addEventListener('click', function(){
+        showToast('Boundary override drawer (BoundaryPicker / BoundaryAdjuster) is Task 4 — not built yet.');
+      });
+      main.appendChild(stub);
+    }
+
+    rail.appendChild(main);
+
+    var side = document.createElement('div');
+    side.className = 'dayrail-side';
+    if (day.attenuated){
+      var at = document.createElement('span');
+      at.className = 'badge-atten';
+      at.textContent = 'attenuated';
+      at.title = 'Inside a recorded medication course window — confounds severity/observability, does not suppress the class.';
+      side.appendChild(at);
+    }
+    side.appendChild(reviewBadge(day.confirmedBy, day.reviewStatus));
+    rail.appendChild(side);
+
+    return rail;
+  }
+
+  function buildField(field){
+    var wrap = document.createElement('div');
+    wrap.className = 'receipt-field';
+
+    var label = document.createElement('span');
+    label.className = 'receipt-field-label';
+    label.innerHTML = field.label;
+
+    var val = document.createElement('span');
+    val.className = 'receipt-field-val';
+    val.dataset.field = field.label;
+    val.dataset.type = field.type;
+    if (field.options) val.dataset.options = field.options;
+    if (field.iso) val.dataset.iso = field.iso;
+
+    function paintTagAndText(tag, text){
+      val.querySelectorAll('.conf-tag, .field-text').forEach(function(n){ n.remove(); });
+      var tagEl = document.createElement('span');
+      tagEl.className = 'conf-tag ' + tagClass(tag);
+      tagEl.textContent = tag;
+      var txt = document.createElement('span');
+      txt.className = 'field-text' + (field.mono ? ' is-mono' : '');
+      txt.textContent = text;
+      val.insertBefore(txt, val.firstChild);
+      val.insertBefore(tagEl, val.firstChild);
+    }
+    paintTagAndText(field.tag, field.val);
+
+    if (field.history){
+      var marker = document.createElement('button');
+      marker.type = 'button';
+      marker.className = 'hist-marker';
+      marker.setAttribute('aria-expanded', 'false');
+      marker.textContent = 'corrected';
+      var expand = document.createElement('div');
+      expand.className = 'hist-expand';
+      expand.innerHTML =
+        '<span class="hist-old">was: <span class="conf-tag ' + tagClass(field.history.fromTag) + '">' + field.history.fromTag + '</span> <s>' + field.history.from + '</s></span>' +
+        '<span>' + field.history.at + ' — a new observation was written; the old value was never edited in place.</span>';
+      marker.addEventListener('click', function(){
+        var open = expand.classList.toggle('is-open');
+        marker.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      wrap.appendChild(label);
+      wrap.appendChild(val);
+      val.appendChild(marker);
+      wrap.appendChild(expand);
+    } else {
+      wrap.appendChild(label);
+      wrap.appendChild(val);
+    }
+
+    if (field.type !== 'none'){
+      var link = document.createElement('button');
+      link.type = 'button';
+      link.className = 'correct-link';
+      link.textContent = 'not quite?';
+      val.appendChild(link);
+      bindCorrection(link, field, paintTagAndText);
+    }
+
+    return wrap;
+  }
+
+  /* ---------- CorrectableField, typed by field shape ---------- */
+  function bindCorrection(link, field, paintTagAndText){
+    link.addEventListener('click', function(){
+      var wrap = link.closest('.receipt-field-val');
+      if (wrap.classList.contains('is-editing')) return;
+      var type = wrap.dataset.type || 'text';
+      var textEl = wrap.querySelector('.field-text');
+      var currentVal = textEl ? textEl.textContent : field.val;
+      wrap.classList.add('is-editing');
+      var savedHistMarker = wrap.querySelector('.hist-marker');
+      wrap.textContent = '';
+
+      function commit(val, note){
+        wrap.classList.remove('is-editing');
+        wrap.innerHTML = '';
+        paintTagAndText('user', val);
+        var newLink = document.createElement('button');
+        newLink.type = 'button';
+        newLink.className = 'correct-link';
+        newLink.textContent = 'not quite?';
+        wrap.appendChild(newLink);
+        if (savedHistMarker) wrap.appendChild(savedHistMarker);
+        bindCorrection(newLink, field, paintTagAndText);
+        showToast(note || (field.label + ' → “' + val + '”. A new observation, with the old one superseded — never edited in place.'));
+      }
+
+      if (type === 'severity'){
+        var idx = Math.max(0, SEVERITY.indexOf(currentVal));
+        var st = document.createElement('span');
+        st.className = 'stepper';
+        var down = document.createElement('button');
+        down.type = 'button'; down.textContent = '−';
+        down.setAttribute('aria-label', 'Less severe');
+        var out = document.createElement('span');
+        out.className = 'stepper-val';
+        var scale = document.createElement('span');
+        scale.className = 'stepper-scale';
+        SEVERITY.forEach(function(){ scale.appendChild(document.createElement('i')); });
+        var up = document.createElement('button');
+        up.type = 'button'; up.textContent = '+';
+        up.setAttribute('aria-label', 'More severe');
+        var ok = document.createElement('button');
+        ok.className = 'stepper-done'; ok.type = 'button'; ok.textContent = 'Save';
+        function paint(){
+          out.textContent = SEVERITY[idx];
+          down.disabled = idx === 0;
+          up.disabled = idx === SEVERITY.length - 1;
+          Array.prototype.forEach.call(scale.children, function(bar, i){ bar.classList.toggle('is-lit', i <= idx); });
+        }
+        down.addEventListener('click', function(){ if (idx > 0){ idx--; paint(); } });
+        up.addEventListener('click', function(){ if (idx < SEVERITY.length - 1){ idx++; paint(); } });
+        ok.addEventListener('click', function(){ commit(SEVERITY[idx]); });
+        paint();
+        st.appendChild(down); st.appendChild(scale); st.appendChild(out); st.appendChild(up); st.appendChild(ok);
+        wrap.appendChild(st);
+        return;
+      }
+
+      if (type === 'datetime'){
+        var box = document.createElement('span');
+        box.style.display = 'flex'; box.style.flexDirection = 'column'; box.style.gap = '.4rem';
+        box.style.width = '100%';
+        var dtRow = document.createElement('span');
+        dtRow.style.display = 'flex'; dtRow.style.gap = '.4rem'; dtRow.style.alignItems = 'center';
+        var dt = document.createElement('input');
+        dt.type = 'datetime-local';
+        dt.value = wrap.dataset.iso || '';
+        dt.style.background = 'var(--app-bg)'; dt.style.border = '1px solid var(--app-accent)';
+        dt.style.color = 'var(--app-ink)'; dt.style.borderRadius = '6px'; dt.style.padding = '.3rem .5rem';
+        dt.style.font = 'inherit'; dt.style.fontFamily = 'var(--f-mono)'; dt.style.fontSize = 'var(--fs-caption)';
+        dt.style.colorScheme = 'dark';
+        var save = document.createElement('button');
+        save.className = 'stepper-done'; save.type = 'button'; save.textContent = 'Save';
+        save.addEventListener('click', function(){
+          var iso = dt.value;
+          if (!iso){ commit(currentVal); return; }
+          var d = new Date(iso);
+          var shown = d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' }) +
+                      ', ' + d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+          commit(shown, field.label + ' → ' + shown + '. Moving this re-runs the six-hour backfill check.');
+        });
+        dtRow.appendChild(dt); dtRow.appendChild(save);
+        box.appendChild(dtRow);
+        wrap.appendChild(box);
+        dt.focus();
+        return;
+      }
+
+      if (type === 'enum' || type === 'tristate'){
+        var picker = document.createElement('span');
+        picker.className = 'chip-picker';
+        (wrap.dataset.options || '').split('|').forEach(function(opt){
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = opt;
+          if (opt === currentVal) b.classList.add('is-current');
+          b.addEventListener('click', function(){ commit(opt); });
+          picker.appendChild(b);
+        });
+        wrap.appendChild(picker);
+        return;
+      }
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'step-input';
+      input.value = currentVal;
+      wrap.appendChild(input);
+      input.focus();
+      input.select();
+      var done = false;
+      function finish(){
+        if (done) return;
+        done = true;
+        commit(input.value.trim() || currentVal);
+      }
+      input.addEventListener('blur', finish);
+      input.addEventListener('keydown', function(e){ if (e.key === 'Enter') input.blur(); });
+    });
+  }
+
+  function buildMoment(item){
+    var card = document.createElement('div');
+    card.className = 'momentcard' + (item.backfilled ? ' is-backfilled' : '');
+
+    var head = document.createElement('div');
+    head.className = 'mc-head';
+    var time = document.createElement('span');
+    time.className = 'mc-time';
+    time.innerHTML = item.time;
+    var source = document.createElement('span');
+    source.className = 'mc-source';
+    source.textContent = item.source;
+    head.appendChild(time);
+    head.appendChild(source);
+    card.appendChild(head);
+
+    item.fields.forEach(function(f){ card.appendChild(buildField(f)); });
+
+    if (item.backfilled){
+      var bf = document.createElement('div');
+      bf.className = 'mc-backfill';
+      bf.innerHTML = '<span>Backfilled — observed ' + item.time + ', logged ' + item.recordedAt + '. Past the six-hour BACKFILL_WINDOW, so it’s saved at reduced confidence. It still counts.</span>';
+      card.appendChild(bf);
+    }
+
+    if (item.note){
+      var note = document.createElement('div');
+      note.className = 'mc-note';
+      note.innerHTML = item.note;
+      card.appendChild(note);
+    }
+
+    return card;
+  }
+
+  function buildPassive(item){
+    var group = document.createElement('div');
+    group.style.display = 'flex'; group.style.flexDirection = 'column'; group.style.gap = '.4rem';
+    item.strips.forEach(function(s){
+      var row = document.createElement('div');
+      row.className = 'strip';
+      row.innerHTML =
+        '<span class="strip-what">' + s.what + ' <span class="feed-tag">' + s.feed + '</span></span>' +
+        '<span class="strip-val">' + s.val + '</span>';
+      group.appendChild(row);
+    });
+    return group;
+  }
+
+  function buildDayGroup(day){
+    var group = document.createElement('div');
+    group.className = 'day-group';
+    group.appendChild(buildDayRail(day));
+
+    if (day.items && day.items.length){
+      var rows = document.createElement('div');
+      rows.className = 'day-rows';
+      day.items.forEach(function(item){
+        if (item.type === 'moment') rows.appendChild(buildMoment(item));
+        else if (item.type === 'passive') rows.appendChild(buildPassive(item));
+        else if (item.type === 'empty'){
+          var e = document.createElement('p');
+          e.className = 'tl-empty';
+          e.textContent = item.text;
+          rows.appendChild(e);
+        }
+      });
+      group.appendChild(rows);
+    }
+    return group;
+  }
+
+  function render(){
+    scrollEl.textContent = '';
+    var i = 0;
+    while (i < DAYS.length){
+      var day = DAYS[i];
+      if (day.relapse === 13){
+        /* wrap the two ambiguous dates (Aug 13, Aug 12) in a connecting band */
+        var span = document.createElement('div');
+        span.className = 'episode-span' + (relapseState === 'collapsed' ? ' is-collapsed' : '');
+        var elabel = document.createElement('div');
+        elabel.className = 'episode-label';
+        elabel.innerHTML = '<b>' + RELAPSE_NOTE[relapseState].label + '</b>';
+        span.appendChild(elabel);
+        span.appendChild(buildDayGroup(DAYS[i]));
+        span.appendChild(buildDayGroup(DAYS[i+1]));
+        scrollEl.appendChild(span);
+        i += 2;
+        continue;
+      }
+      scrollEl.appendChild(buildDayGroup(day));
+      i++;
+    }
+
+    var divider = document.createElement('div');
+    divider.className = 'tl-older-divider';
+    divider.textContent = '10 days shown';
+    scrollEl.appendChild(divider);
+
+    var teaserRail = buildDayRail({
+      label: TEASER.label, cls: TEASER.cls, rule: TEASER.rule,
+      confirmedBy: 'system', reviewStatus: TEASER.reviewStatus, note: TEASER.note
+    });
+    scrollEl.appendChild(teaserRail);
+
+    var older = document.createElement('button');
+    older.type = 'button';
+    older.className = 'tl-older-btn';
+    older.textContent = 'Load earlier days';
+    older.addEventListener('click', function(){
+      showToast('Mockup only — this demo covers one representative window, not the full record.');
+    });
+    scrollEl.appendChild(older);
+  }
+
+  var relapseBtns = document.querySelectorAll('[data-relapse]');
+  var counterEl = document.getElementById('episode-counter');
+  relapseBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      relapseBtns.forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+      relapseState = btn.dataset.relapse;
+      counterEl.textContent = '2 migraine days either way · ' + (relapseState === 'collapsed' ? '1 episode' : '2 episodes');
+      render();
+    });
+  });
+
+  render();
+})();
+</script>

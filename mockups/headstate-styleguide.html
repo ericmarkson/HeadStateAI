@@ -18,6 +18,7 @@
     --app-bg:#121019; --app-surface:#1C1927; --app-surface-raised:#242032;
     --app-ink:#EDEAF2; --app-muted:#948FA6; --app-faint:#87839C; --app-border:#332F42;
     --app-accent:#D98A46; --app-accent-dim:#3B2A1C; --app-good:#7FA79D; --app-good-dim:#233330; --app-focus:#7DA2FF;
+    --rail-migraine:var(--app-accent); --rail-headache:#B98A52; --rail-aura:#8E86D6; --rail-none:var(--app-border);
 
     --doc-bg:#FCFAF5; --doc-ink:#211D1A; --doc-muted:#6E655B; --doc-faint:#756C5B;
     --doc-rule:#DCD1BE; --doc-accent:#A85A26; --doc-flag:#9C4A3A; --doc-flag-soft:#F1DFD3; --doc-focus:#2B57B0;
@@ -226,6 +227,44 @@
   .dt-edit input{background:var(--app-bg);border:1px solid var(--app-accent);color:var(--app-ink);border-radius:6px;padding:.35rem .5rem;font-family:var(--f-mono);font-size:var(--fs-caption)}
   .dt-warn{font-size:.68rem;color:var(--app-accent);line-height:1.45}
 
+  /* ---- added with Timeline (task 3) ---- */
+  .momentcard{background:var(--app-surface);border:1px solid var(--app-border);border-radius:var(--radius-card);padding:.85rem .95rem .9rem;width:100%;font-family:var(--f-body)}
+  .momentcard.is-backfilled{border-style:dashed;border-color:var(--app-accent-dim)}
+  .mc-head{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;margin-bottom:.55rem;flex-wrap:wrap}
+  .mc-time{font-family:var(--f-mono);font-size:.72rem;color:var(--app-ink);font-weight:600}
+  .mc-source{font-size:.66rem;color:var(--app-faint)}
+  .receipt-field-val{display:flex;align-items:center;gap:.45rem;font-size:var(--fs-body);flex-wrap:wrap;justify-content:flex-end}
+  .field-text{font-weight:500}
+  .field-text.is-mono{font-family:var(--f-mono);font-size:var(--fs-caption)}
+  .mc-backfill{margin-top:.6rem;padding-top:.55rem;border-top:1px dashed var(--app-accent-dim);font-size:.7rem;color:var(--app-accent);line-height:1.5;display:flex;gap:.4rem;align-items:flex-start}
+  .mc-backfill::before{content:'⏱';flex-shrink:0}
+  .correct-link{background:none;border:none;color:var(--app-muted);font-size:.7rem;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:0}
+  .correct-link:hover{color:var(--app-accent)}
+
+  .dayrail{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;padding:.55rem .7rem;border-radius:10px;border-left:3px solid var(--rail-none);background:var(--app-bg);width:100%}
+  .dayrail--migraine{border-left-color:var(--rail-migraine)}
+  .dayrail--headache{border-left-color:var(--rail-headache)}
+  .dayrail--aura_only{border-left-color:var(--rail-aura)}
+  .dayrail--none{border-left-color:var(--rail-none)}
+  .dayrail-main{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+  .dayrail-top{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
+  .dayrail-date{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--app-ink);font-weight:600;white-space:nowrap}
+  .dayrail-class{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  .dayrail--migraine .dayrail-class{color:var(--rail-migraine)}
+  .dayrail--headache .dayrail-class{color:var(--rail-headache)}
+  .dayrail--aura_only .dayrail-class{color:var(--rail-aura)}
+  .dayrail--none .dayrail-class{color:var(--app-faint)}
+  .dayrail-rule,.dayrail-episode{font-size:.64rem;color:var(--app-faint);font-family:var(--f-mono)}
+
+  .hist-marker{background:none;border:none;color:var(--app-muted);font-size:.62rem;font-family:var(--f-mono);text-decoration:underline dotted;text-underline-offset:2px;cursor:pointer;padding:0}
+  .hist-expand{display:flex;flex-direction:column;gap:.15rem;width:100%;margin-top:.35rem;padding:.45rem .55rem;background:var(--app-bg);border:1px solid var(--app-border);border-radius:8px;font-size:.7rem;color:var(--app-muted)}
+  .hist-old{color:var(--app-faint)}
+  .hist-old s{text-decoration:line-through}
+
+  .chip-picker{display:flex;gap:.35rem;flex-wrap:wrap;width:100%;padding:.2rem 0}
+  .chip-picker button{appearance:none;border:1px solid var(--app-border);background:var(--app-bg);color:var(--app-ink);font-size:.75rem;font-weight:500;padding:.35rem .6rem;border-radius:var(--radius-pill);cursor:pointer}
+  .chip-picker button.is-current{border-color:var(--app-accent);color:var(--app-accent)}
+
   .tag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem}
   .tag-swatch{border:1px solid var(--border);border-radius:10px;padding:.75rem .85rem;background:var(--surface-raised);display:flex;flex-direction:column;gap:.4rem}
   .tag-meaning{font-size:.72rem;color:var(--ink-muted);line-height:1.4}
@@ -241,7 +280,7 @@
   <div class="masthead">
     <span class="eyebrow">HeadState — design system</span>
     <h1>Three <em>worlds</em>, one product</h1>
-    <p>The tokens and component patterns behind the recall-summary, capture, checkpoint, onboarding and home mockups — extracted so the next screen draws from this instead of a fresh guess. Full rationale in <code>design-system.md</code>.</p>
+    <p>The tokens and component patterns behind the recall-summary, capture, checkpoint, onboarding, home and timeline mockups — extracted so the next screen draws from this instead of a fresh guess. Full rationale in <code>design-system.md</code>.</p>
     <p style="margin-top:.6rem"><b style="color:var(--ink)">Reviewer-only controls live in chrome, never inside a device/doc frame</b> — a state toggle or a play button depicts a control that doesn't exist in the real product. §04's SegmentedControl carries the one correction this rule caused.</p>
   </div>
 
@@ -498,6 +537,54 @@
           </div>
         </div>
         <div class="cell-foot"><span class="cell-name">CorrectableField — datetime</span><span class="cell-world">Device</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device">
+          <div class="chip-picker">
+            <button class="is-current">yes</button>
+            <button>no</button>
+            <button>unknown</button>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">CorrectableField — chip-picker</span><span class="cell-world">Device — added with Timeline, for enums and tri-state symptoms</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start">
+          <div class="momentcard">
+            <div class="mc-head"><span class="mc-time">Sat 16, 3:30&nbsp;PM</span><span class="mc-source">voice &middot; one utterance</span></div>
+            <div class="receipt-field"><span class="receipt-field-label">Severity</span><span class="receipt-field-val"><span class="conf-tag is-paraphrase">paraphrase</span><span class="field-text">severe</span></span></div>
+            <div class="receipt-field"><span class="receipt-field-label">Medication</span><span class="receipt-field-val"><span class="conf-tag">lexical</span><span class="field-text is-mono">Sumatriptan 100mg</span></span></div>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">MomentCard</span><span class="cell-world">Device &mdash; Receipt variant, one row per capture moment (D16)</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start;flex-direction:column;gap:.4rem">
+          <div class="strip"><span class="strip-what">Slept <span class="feed-tag">apple_health</span></span><span class="strip-val">6h 40m</span></div>
+          <div class="strip"><span class="strip-what">Pressure drop <span class="feed-tag">weatherkit</span></span><span class="strip-val">&minus;9&nbsp;hPa</span></div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">PassiveStrip</span><span class="cell-world">Device &mdash; reused verbatim from Home's ContextCard strip</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start;flex-direction:column;gap:.35rem">
+          <div class="dayrail dayrail--migraine"><div class="dayrail-main"><div class="dayrail-top"><span class="dayrail-date">Sat 16</span><span class="dayrail-class">Migraine day</span><span class="dayrail-rule">delphi_treated_30min</span></div></div></div>
+          <div class="dayrail dayrail--headache"><div class="dayrail-main"><div class="dayrail-top"><span class="dayrail-date">Fri 15</span><span class="dayrail-class">Headache day</span></div></div></div>
+          <div class="dayrail dayrail--aura_only"><div class="dayrail-main"><div class="dayrail-top"><span class="dayrail-date">Sat 8</span><span class="dayrail-class">Aura-only day</span><span class="dayrail-rule">delphi_aura</span></div></div></div>
+          <div class="dayrail dayrail--none"><div class="dayrail-main"><div class="dayrail-top"><span class="dayrail-date">Mon 11</span><span class="dayrail-class">None</span></div></div></div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">DayRail</span><span class="cell-world">Device &mdash; colored by <code>DAY_CLASS_PRECEDENCE</code>, never by color alone</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start;flex-direction:column;gap:.5rem">
+          <div class="receipt-field"><span class="receipt-field-label">Severity</span><span class="receipt-field-val"><span class="conf-tag is-user">user</span><span class="field-text">severe</span><button type="button" class="hist-marker" aria-expanded="false">corrected</button></span></div>
+          <div class="receipt-field"><span class="receipt-field-label">Severity</span><span class="receipt-field-val" style="width:100%;justify-content:flex-start"><span class="conf-tag is-user">user</span><span class="field-text">severe</span><button type="button" class="hist-marker" aria-expanded="true">corrected</button><div class="hist-expand is-open" style="display:flex"><span class="hist-old">was: <span class="conf-tag is-paraphrase">paraphrase</span> <s>moderate</s></span><span>Sat 3:41&nbsp;PM &mdash; a new observation was written; the old value was never edited in place.</span></div></span></div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">HistoryMarker &mdash; collapsed / expanded</span><span class="cell-world">Device &mdash; default collapsed, never navigates away</span></div>
       </div>
     </div>
   </section>
