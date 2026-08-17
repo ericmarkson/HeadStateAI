@@ -1,0 +1,1358 @@
+<title>Review Queue</title>
+<style>
+  @font-face{
+    font-family:'Fraunces';font-style:italic;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_ITALIC__) format('woff2');
+  }
+  @font-face{
+    font-family:'Fraunces';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_NORMAL__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Sans';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXSANS__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_400__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_500__) format('woff2');
+  }
+
+  /* ============ TOKENS (copied verbatim from timeline.html — design-system.md §5) ============ */
+  :root{
+    /* chrome — light (default / un-stamped) */
+    --surface:#F6F7F9;
+    --surface-raised:#FFFFFF;
+    --ink:#1B1C22;
+    --ink-muted:#5B5E68;
+    --ink-faint:#6A6C74;
+    --border:#DDE0E5;
+    --accent:#B5652A;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#F3E4D3;
+    --focus:#2B57B0;
+    --good:#3F6B62;
+    --good-soft:#E1EBE8;
+    --flag:#9C4A3A;
+    --flag-soft:#F3E1DD;
+
+    /* fixed device world — the phone screens (a "screenshot," not viewer-themed) */
+    --app-bg:#121019;
+    --app-surface:#1C1927;
+    --app-surface-raised:#242032;
+    --app-ink:#EDEAF2;
+    --app-muted:#948FA6;
+    --app-faint:#87839C;
+    --app-border:#332F42;
+    --app-accent:#D98A46;
+    --app-accent-dim:#3B2A1C;
+    --app-good:#7FA79D;
+    --app-good-dim:#233330;
+    --app-focus:#7DA2FF;
+    --app-flag:#C97A68;
+
+    /* fixed paper world — kept for token parity with the other mockups */
+    --doc-bg:#FCFAF5;
+    --doc-ink:#211D1A;
+    --doc-muted:#6E655B;
+    --doc-faint:#756C5B;
+    --doc-rule:#DCD1BE;
+    --doc-accent:#A85A26;
+    --doc-flag:#9C4A3A;
+    --doc-flag-soft:#F1DFD3;
+    --doc-focus:#2B57B0;
+
+    /* type */
+    --f-display:'Fraunces', ui-serif, Georgia, serif;
+    --f-body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --f-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+    --fs-eyebrow:.6875rem;
+    --fs-caption:.8125rem;
+    --fs-body:.9375rem;
+    --fs-body-lg:1.0625rem;
+    --fs-h3:1.1875rem;
+    --fs-h2:1.5rem;
+
+    --radius-doc:3px;
+    --radius-card:14px;
+    --radius-pill:999px;
+
+    /* DayRail class colors — carried for token parity with timeline.html; unused on
+       this screen (the review queue has no DayRail), kept rather than pruned per
+       design-system.md §5's "copy it verbatim" guidance. */
+    --rail-migraine:var(--app-accent);
+    --rail-headache:#B98A52;
+    --rail-aura:#8E86D6;
+    --rail-none:var(--app-border);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --surface:#15141C;
+      --surface-raised:#1D1B26;
+      --ink:#EDEAF2;
+      --ink-muted:#A9A5B8;
+      --ink-faint:#8A8699;
+      --border:#332F3F;
+      --accent:#D98A46;
+      --accent-ink:#1B1208;
+      --accent-soft:#3B2A1C;
+      --focus:#7DA2FF;
+      --good:#7FA79D;
+      --good-soft:#233330;
+      --flag:#C97A68;
+      --flag-soft:#3A241F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --surface:#15141C;
+    --surface-raised:#1D1B26;
+    --ink:#EDEAF2;
+    --ink-muted:#A9A5B8;
+    --ink-faint:#8A8699;
+    --border:#332F3F;
+    --accent:#D98A46;
+    --accent-ink:#1B1208;
+    --accent-soft:#3B2A1C;
+    --focus:#7DA2FF;
+    --good:#7FA79D;
+    --good-soft:#233330;
+    --flag:#C97A68;
+    --flag-soft:#3A241F;
+  }
+
+  /* ============ BASE ============ */
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--surface);
+    color:var(--ink);
+    font-family:var(--f-body);
+    font-size:var(--fs-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+  p{margin:0}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+  /* Fixed worlds pin their own focus color — the chrome --focus token flips with the
+     viewer's OS theme and fails contrast inside the always-dark device world. */
+  .device-screen :focus-visible{outline-color:var(--app-focus)}
+  .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
+
+  /* ============ SHELL ============ */
+  .shell{max-width:1180px;margin:0 auto;padding:2.25rem 1.5rem 4rem}
+  .shell-head{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:1.5rem;flex-wrap:wrap;margin-bottom:1.75rem;
+    padding-bottom:1.25rem;border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;flex-direction:column;gap:.3rem}
+  .brand-mark{font-family:var(--f-display);font-weight:600;font-size:1.375rem;letter-spacing:.01em}
+  .brand-mark em{font-style:italic;color:var(--accent)}
+  .brand-sub{font-size:var(--fs-caption);color:var(--ink-muted);max-width:44ch}
+
+  .lede{max-width:68ch;color:var(--ink-muted);font-size:var(--fs-body);margin-bottom:1.5rem}
+  .lede b{color:var(--ink);font-weight:600}
+
+  /* reviewer control bar — chrome world, explicitly outside the phone (design-system.md §1) */
+  .controls{
+    display:flex;flex-wrap:wrap;gap:1.25rem 2rem;
+    align-items:flex-start;
+    background:var(--surface-raised);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1rem 1.15rem;
+    margin-bottom:1.5rem;
+  }
+  .control-group{display:flex;flex-direction:column;gap:.45rem}
+  .control-label{
+    font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.09em;
+    font-weight:600;color:var(--ink-faint);
+  }
+  .switcher{
+    display:flex;gap:.25rem;padding:.25rem;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+    flex-wrap:wrap;
+  }
+  .switcher button{
+    appearance:none;border:none;background:transparent;color:var(--ink-muted);
+    font-size:var(--fs-caption);font-weight:500;
+    padding:.45rem .8rem;border-radius:var(--radius-pill);
+    cursor:pointer;white-space:nowrap;
+    transition:background .15s ease, color .15s ease;
+  }
+  .switcher button:hover{color:var(--ink)}
+  .switcher button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+  .controls-note{
+    flex:1 1 18rem;min-width:14rem;
+    font-size:.72rem;color:var(--ink-faint);line-height:1.55;
+    align-self:center;
+  }
+
+  .shell-foot{
+    margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--border);
+    font-size:var(--fs-caption);color:var(--ink-faint);
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  }
+
+  /* ============ DEVICE FRAME ============ */
+  .device-stage{display:flex;justify-content:center;padding:.5rem 0 1rem}
+  .device-frame{
+    width:min(390px, 100%);
+    border-radius:40px;padding:12px;
+    background:linear-gradient(155deg,#2A2735,#131019);
+    box-shadow:0 1px 1px rgba(0,0,0,.4), 0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .device-screen{
+    background:var(--app-bg);color:var(--app-ink);
+    border-radius:30px;overflow:hidden;
+    font-family:var(--f-body);
+    height:780px;
+    display:flex;flex-direction:column;position:relative;
+  }
+  .device-notch{height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .device-notch::before{
+    content:'';width:90px;height:6px;border-radius:99px;background:rgba(255,255,255,.14);
+  }
+
+  /* ---- fixed screen header ---- */
+  .rq-head{
+    flex-shrink:0;
+    padding:.15rem 1.15rem .7rem;
+    display:flex;flex-direction:column;gap:.35rem;
+    border-bottom:1px solid var(--app-border);
+  }
+  .rq-title{font-family:var(--f-display);font-weight:600;font-size:var(--fs-h3)}
+  .rq-sub{font-size:.72rem;color:var(--app-faint)}
+  .rq-stat{font-size:.72rem;color:var(--app-muted);margin-top:.15rem}
+  .rq-stat b{font-family:var(--f-mono);color:var(--app-ink)}
+
+  /* ---- batch bar — real in-product control (Tier-2 batched confirmation), device world ---- */
+  .rq-batchbar{
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:space-between;gap:.7rem;
+    padding:.6rem 1.15rem;
+    border-bottom:1px solid var(--app-border);
+    background:var(--app-surface);
+  }
+  .rq-batchbar[hidden]{display:none}
+  .rq-selectall{
+    display:flex;align-items:center;gap:.5rem;
+    font-size:var(--fs-caption);color:var(--app-muted);
+  }
+  .rq-checkbox{
+    width:18px;height:18px;flex-shrink:0;accent-color:var(--app-accent);cursor:pointer;
+  }
+  .rq-checkbox[disabled]{cursor:not-allowed;opacity:.4}
+  .rq-confirm-selected{
+    appearance:none;border:none;background:var(--app-accent);color:#1B1208;
+    font-size:.75rem;font-weight:600;padding:.5rem .9rem;border-radius:var(--radius-pill);
+    cursor:pointer;white-space:nowrap;
+  }
+  .rq-confirm-selected[disabled]{background:var(--app-border);color:var(--app-faint);cursor:not-allowed}
+
+  /* ---- scrollable queue list ---- */
+  .rq-scroll{
+    flex:1;overflow-y:auto;min-height:0;
+    padding:.9rem 1.15rem 1.4rem;
+    display:flex;flex-direction:column;gap:.75rem;
+  }
+  .rq-scroll::-webkit-scrollbar{width:6px}
+  .rq-scroll::-webkit-scrollbar-thumb{background:var(--app-border);border-radius:99px}
+
+  /* ---- queue item card ---- */
+  .rq-item{
+    display:flex;gap:.65rem;align-items:flex-start;
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.85rem .95rem .9rem;
+  }
+  .rq-item.is-timedout{border-style:dashed}
+  .rq-item.is-resolved{border-color:var(--app-good-dim)}
+  .rq-item-select{padding-top:.2rem;flex-shrink:0}
+  .rq-item-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:.5rem}
+  .rq-item-top{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+  .rq-item-kindwrap{display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap}
+  .rq-item-kind{
+    font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--app-accent);
+  }
+  .rq-item-date{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--app-ink);font-weight:600}
+  .rq-item-queued{font-size:.66rem;color:var(--app-faint);font-family:var(--f-mono)}
+  .rq-item-summary{font-size:var(--fs-body);color:var(--app-ink);line-height:1.5}
+  .rq-item-summary b{font-weight:600;color:var(--app-accent)}
+  .rq-item-rule{font-size:.75rem;color:var(--app-muted);line-height:1.5}
+  .rq-item-stats{
+    display:flex;gap:1rem;flex-wrap:wrap;font-size:.75rem;color:var(--app-muted);
+    padding:.15rem 0;
+  }
+  .rq-item-stats b{font-family:var(--f-mono);color:var(--app-ink);font-weight:600}
+  .rq-item-note{
+    font-size:.72rem;color:var(--app-faint);line-height:1.5;
+    border-top:1px dashed var(--app-border);padding-top:.5rem;
+  }
+  .rq-item-actions{display:flex;gap:.55rem;flex-wrap:wrap;padding-top:.15rem}
+  .rq-btn{
+    appearance:none;border:1px solid var(--app-border);background:var(--app-bg);
+    color:var(--app-ink);font-size:.75rem;font-weight:600;
+    padding:.5rem .85rem;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .rq-btn:hover{border-color:var(--app-accent)}
+  .rq-btn-primary{
+    background:var(--app-good-dim);border-color:var(--app-good-dim);color:var(--app-good);
+  }
+  .rq-btn-primary:hover{border-color:var(--app-good)}
+  .rq-btn-ghost{
+    background:transparent;border-style:dashed;color:var(--app-muted);
+  }
+  .rq-btn[disabled]{opacity:.45;cursor:not-allowed;border-color:var(--app-border);color:var(--app-faint);background:transparent}
+
+  /* ---- badge-review, reused verbatim from timeline.html — this IS the point of the screen ---- */
+  .badge-review{
+    font-size:.62rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.03em;
+    padding:.14rem .45rem;border-radius:5px;white-space:nowrap;flex-shrink:0;
+  }
+  .badge-review.is-unreviewed{color:var(--app-faint);border:1px dotted var(--app-faint)}
+  .badge-review.is-reviewed{color:var(--app-good);border:1px solid var(--app-good-dim);background:var(--app-good-dim)}
+  .badge-review.is-confirmed{color:var(--app-accent);border:1px solid var(--app-accent-dim);background:var(--app-accent-dim)}
+  .badge-review.is-timedout{color:var(--app-faint);border:1px dashed var(--app-faint)}
+
+  /* ---- receipt-field / CorrectableField, reused verbatim from timeline.html.
+     design-system.md §6 (D16): "used identically on the Timeline, the recall summary,
+     and the review queue — not a bespoke pattern per surface." ---- */
+  .receipt-field{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:.6rem;padding:.4rem 0;
+    border-top:1px solid var(--app-border);flex-wrap:wrap;
+  }
+  .receipt-field:first-of-type{border-top:none}
+  .receipt-field-label{color:var(--app-muted);font-size:var(--fs-caption);flex-shrink:0;display:flex;align-items:center;gap:.3rem}
+  .receipt-field-val{
+    display:flex;align-items:center;gap:.45rem;
+    font-size:var(--fs-body);flex-wrap:wrap;justify-content:flex-end;
+  }
+  .receipt-field-val.is-editing{width:100%;justify-content:flex-start;padding-top:.15rem}
+  .field-text{font-weight:500}
+
+  .conf-tag{
+    font-size:.62rem;font-family:var(--f-mono);
+    text-transform:uppercase;letter-spacing:.03em;
+    padding:.14rem .4rem;border-radius:5px;
+    color:var(--app-muted);border:1px solid var(--app-border);white-space:nowrap;
+  }
+  /* Closed tag vocabulary — design-system.md §4. Every value gets its own
+     treatment; two provenances must never render identically. */
+  .conf-tag.is-paraphrase{color:var(--app-accent);border-color:var(--app-accent-dim);background:var(--app-accent-dim)}
+  .conf-tag.is-resolved{color:var(--app-good);border-color:var(--app-good-dim);background:var(--app-good-dim)}
+  .conf-tag.is-reduced{color:var(--app-accent);border-color:var(--app-accent);background:var(--app-accent-dim)}
+  .conf-tag.is-system{color:var(--app-faint);border-style:dotted;border-color:var(--app-faint);background:transparent}
+  .conf-tag.is-user{color:var(--app-ink);border-color:var(--app-muted)}
+  .conf-tag.is-nosource{color:var(--app-faint);border-style:dashed}
+
+  .correct-link{
+    background:none;border:none;color:var(--app-muted);
+    font-size:.7rem;text-decoration:underline;text-underline-offset:2px;
+    cursor:pointer;padding:0;
+  }
+  .correct-link:hover{color:var(--app-accent)}
+
+  .stepper{display:flex;align-items:center;gap:.5rem;width:100%;padding:.15rem 0}
+  .stepper button{
+    appearance:none;width:30px;height:30px;flex-shrink:0;
+    border:1px solid var(--app-border);background:var(--app-bg);
+    color:var(--app-ink);font-size:1rem;font-weight:600;line-height:1;
+    border-radius:8px;cursor:pointer;
+  }
+  .stepper button:hover:not([disabled]){border-color:var(--app-accent)}
+  .stepper button[disabled]{opacity:.35;cursor:not-allowed}
+  .stepper-val{flex:1;text-align:center;font-weight:600;font-size:var(--fs-body)}
+  .stepper-scale{display:flex;gap:2px;flex:0 0 auto}
+  .stepper-scale i{display:block;width:14px;height:4px;border-radius:2px;background:var(--app-border)}
+  .stepper-scale i.is-lit{background:var(--app-accent)}
+  .stepper-done{
+    appearance:none;border:none;background:var(--app-accent);color:#1B1208;
+    font-size:.7rem;font-weight:600;padding:.3rem .6rem;border-radius:6px;cursor:pointer;
+  }
+
+  .chip-picker{display:flex;gap:.35rem;flex-wrap:wrap;width:100%;padding:.2rem 0}
+  .chip-picker button{
+    appearance:none;border:1px solid var(--app-border);background:var(--app-bg);
+    color:var(--app-ink);font-size:.75rem;font-weight:500;
+    padding:.35rem .6rem;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .chip-picker button:hover{border-color:var(--app-accent)}
+  .chip-picker button.is-current{border-color:var(--app-accent);color:var(--app-accent)}
+
+  .step-input{
+    background:var(--app-bg);border:1px solid var(--app-accent);color:var(--app-ink);
+    border-radius:6px;padding:.3rem .5rem;font:inherit;width:9.5rem;
+  }
+
+  /* ---- Boundary-override drawer: BoundaryPicker (Tier 1) / BoundaryAdjuster (Tier 2), D17/D18.
+     Reused verbatim from timeline.html — a 48h-rule queue item is a second entry point onto the
+     SAME override write, never a second interaction (FR-3.23–3.25b). Generalised to open against
+     whichever item id triggered it, since this screen can have more than one such item. ---- */
+  .boundary-scrim{
+    position:absolute;inset:0;background:rgba(8,6,14,.6);
+    opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:30;
+  }
+  .boundary-scrim.is-open{opacity:1;pointer-events:auto}
+  .boundary-drawer{
+    position:absolute;left:0;right:0;bottom:0;max-height:82%;
+    background:var(--app-surface);border-radius:20px 20px 0 0;
+    padding:1rem 1.15rem 1.3rem;
+    display:flex;flex-direction:column;gap:.75rem;
+    transform:translateY(100%);transition:transform .25s ease;
+    overflow-y:auto;z-index:31;
+    box-shadow:0 -12px 30px rgba(0,0,0,.35);
+  }
+  .boundary-drawer.is-open{transform:translateY(0)}
+  .boundary-drawer[aria-hidden="true"]{visibility:hidden}
+  .boundary-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+  .boundary-title{font-family:var(--f-display);font-weight:600;font-size:var(--fs-body-lg)}
+  .boundary-close{
+    appearance:none;border:none;background:var(--app-bg);color:var(--app-faint);
+    width:1.8rem;height:1.8rem;flex-shrink:0;border-radius:99px;font-size:1.1rem;line-height:1;cursor:pointer;
+  }
+  .boundary-close:hover{color:var(--app-ink)}
+  .boundary-sub{font-size:.76rem;color:var(--app-faint);line-height:1.5;margin:0}
+  .boundary-candidates{display:flex;flex-direction:column;gap:.5rem}
+  .boundary-candidate{
+    appearance:none;text-align:left;border:1px solid var(--app-border);background:var(--app-bg);
+    border-radius:12px;padding:.65rem .8rem;cursor:pointer;width:100%;
+    display:flex;flex-direction:column;gap:.25rem;font:inherit;
+  }
+  .boundary-candidate:hover{border-color:var(--app-accent)}
+  .boundary-candidate.is-picked{border-color:var(--app-good);background:var(--app-good-dim)}
+  .boundary-candidate-title{font-family:var(--f-mono);font-size:.72rem;color:var(--app-accent);font-weight:600}
+  .boundary-candidate.is-picked .boundary-candidate-title{color:var(--app-good)}
+  .boundary-candidate-rule{font-size:.78rem;color:var(--app-ink);line-height:1.45}
+  .boundary-tier2-link{
+    appearance:none;background:none;border:none;color:var(--app-faint);
+    font-size:.72rem;text-decoration:underline dotted;text-underline-offset:2px;
+    cursor:pointer;padding:.2rem 0;align-self:flex-start;font:inherit;
+  }
+  .boundary-tier2-link:hover{color:var(--app-accent)}
+  .boundary-adjuster{display:flex;flex-direction:column;gap:.6rem}
+  .boundary-dt-row{display:flex;flex-direction:column;gap:.3rem}
+  .boundary-dt-label{font-size:.7rem;color:var(--app-faint);text-transform:uppercase;letter-spacing:.03em}
+  .boundary-dt-input{
+    background:var(--app-bg);border:1px solid var(--app-accent);color:var(--app-ink);
+    border-radius:6px;padding:.4rem .55rem;font:inherit;font-family:var(--f-mono);
+    font-size:var(--fs-caption);color-scheme:dark;
+  }
+  .boundary-dt-input.is-invalid{border-color:var(--app-flag)}
+  .boundary-dt-hint{font-size:.68rem;color:var(--app-faint);line-height:1.45;margin:0}
+  .boundary-error{
+    font-size:.72rem;color:var(--app-flag);line-height:1.45;margin:0;
+    border:1px dashed var(--app-flag);border-radius:8px;padding:.4rem .55rem;
+  }
+
+  /* ---- empty-queue state ---- */
+  .rq-empty{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:.6rem;text-align:center;padding:2.5rem 1.5rem;color:var(--app-faint);
+  }
+  .rq-empty-glyph{font-size:1.8rem;color:var(--app-border)}
+  .rq-empty-title{font-family:var(--f-display);font-weight:600;font-size:var(--fs-body-lg);color:var(--app-muted)}
+  .rq-empty-sub{font-size:.8rem;line-height:1.55;max-width:26rem}
+
+  .annotation{
+    display:flex;gap:.55rem;align-items:flex-start;
+    border:1px dashed var(--border);border-radius:10px;
+    padding:.7rem .85rem;font-size:.78rem;color:var(--ink-faint);line-height:1.55;
+    max-width:60rem;margin:0 auto 1rem;
+  }
+  .annotation b{color:var(--ink)}
+  .annotation code{font-family:var(--f-mono);font-size:.92em;color:var(--ink-muted)}
+
+  .toast{
+    position:fixed;left:50%;bottom:1.75rem;
+    transform:translate(-50%, 12px);
+    background:var(--ink);color:var(--surface);
+    font-size:var(--fs-caption);padding:.7rem 1.1rem;border-radius:10px;
+    opacity:0;pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:50;max-width:min(32rem, calc(100vw - 2rem));text-align:center;
+  }
+  .toast.is-visible{opacity:1;transform:translate(-50%, 0)}
+
+  @media (max-width:640px){
+    .shell{padding:1.5rem 1rem 3rem}
+    .controls{flex-direction:column;gap:1rem}
+  }
+</style>
+
+<div class="shell">
+
+  <div class="shell-head">
+    <div class="brand">
+      <div class="brand-mark">Head<em>State</em></div>
+      <div class="brand-sub">Screen mockup &mdash; Review queue, the Tier-2 batched confirmation surface</div>
+    </div>
+  </div>
+
+  <p class="lede"><b>A routine backlog, not a gate.</b> 48-hour-rule recurrences and candidate status migrainosus classifications are displayed immediately and queued here for confirmation &mdash; they never block capture or recall (tech-spec.md &sect;5.7). This is <b>not</b> the mandatory document gate (FR-3.30, step 7) &mdash; that force-surfaces unconfirmed items only when a prior-authorisation packet is requested. This screen is a normal, dismissible, always-accessible list, and the primary user&rsquo;s gate here is exactly as un-relaxed as anyone else&rsquo;s.</p>
+
+  <div class="controls">
+    <div class="control-group">
+      <span class="control-label">Demo state</span>
+      <div class="switcher" role="group" aria-label="Queue demo state">
+        <button type="button" aria-pressed="true" data-demo="items">Queue has items</button>
+        <button type="button" aria-pressed="false" data-demo="empty">Queue empty</button>
+      </div>
+    </div>
+    <p class="controls-note">Reviewer-only, chrome world &mdash; lets this one mockup show both states side by side; nothing inside the phone frame depicts a control that doesn&rsquo;t exist in the product (design-system.md &sect;1). The batch-select bar and per-item actions below the notch <i>are</i> real, in-product controls.</p>
+  </div>
+
+  <div class="device-stage">
+    <div class="device-frame"><div class="device-screen">
+      <div class="device-notch"></div>
+
+      <div class="rq-head">
+        <span class="rq-title">Review queue</span>
+        <span class="rq-sub">Tier 2 &middot; 48-hour-rule &amp; status migrainosus &middot; batched confirmation</span>
+        <span class="rq-stat" id="rq-stat"></span>
+      </div>
+
+      <div class="rq-batchbar" id="rq-batchbar">
+        <label class="rq-selectall">
+          <input type="checkbox" class="rq-checkbox" id="rq-selectall-cb">
+          <span id="rq-selectall-label">Select all pending</span>
+        </label>
+        <button type="button" class="rq-confirm-selected" id="rq-confirm-selected" disabled>Confirm selected</button>
+      </div>
+
+      <div class="rq-scroll" id="rq-scroll"></div>
+
+    </div></div>
+  </div>
+
+  <div class="annotation">
+    <span>&#9670;</span>
+    <span><b>The 48-hour-rule items reuse Timeline&rsquo;s BoundaryPicker/BoundaryAdjuster verbatim</b> (design-system.md &sect;4, D17/D18) &mdash; &ldquo;Choose a different reading&rdquo; below opens the same drawer, writing the same override. Confirming a row as-is (singly or via batch) and picking the alternate reading in the drawer are two entry points onto <i>one</i> write, never two competing interactions for the same decision.</span>
+  </div>
+
+  <div class="annotation" style="border-color:var(--border)">
+    <span>&#9670;</span>
+    <span><b>Batching only ever accepts the system&rsquo;s current proposed reading as-is.</b> An item needing the alternate reading or a manual boundary always routes through its own per-item drawer &mdash; selecting it for batch confirmation never silently resolves that ambiguity on the item&rsquo;s behalf (invariant 7). <b>Status migrainosus items are never batch-eligible</b> &mdash; ICHD-3 doesn&rsquo;t decide between it and the ordinary-episode reading, so there is no &ldquo;current proposed reading&rdquo; a batch action could honestly accept; each one requires its own explicit confirm/reject.</span>
+  </div>
+
+  <div class="annotation" style="border-color:var(--border)">
+    <span>&#9670;</span>
+    <span>FR-3.31&rsquo;s metrics &mdash; correction rate, backlog size, timeout rate &mdash; are instrumented server-side. This screen intentionally doesn&rsquo;t render them as UI chrome; it isn&rsquo;t an analytics dashboard.</span>
+  </div>
+
+  <div class="shell-foot">
+    <span>Mockup only &mdash; not wired to the derivation engine or a backend.</span>
+    <span>tech-spec.md &sect;5.7 &middot; frd.md FR-3.23&ndash;3.31 &middot; design-system.md &sect;7</span>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 3200);
+  }
+
+  /* Closed vocabulary — design-system.md §4. Every value maps to a distinct
+     treatment; anything unmapped is a bug, not a default. */
+  var TAG_CLASS = {
+    'lexical':    '',
+    'paraphrase': 'is-paraphrase',
+    'user':       'is-user',
+    'no source':  'is-nosource',
+    'resolved':   'is-resolved',
+    'system':     'is-system',
+    'reduced':    'is-reduced'
+  };
+  function tagClass(tag){
+    if (!(tag in TAG_CLASS)) throw new Error('Unknown confidence tag: ' + tag);
+    return TAG_CLASS[tag];
+  }
+
+  var SEVERITY = ['mild', 'moderate', 'severe'];
+
+  function reviewBadge(confirmedBy, reviewStatus){
+    var span = document.createElement('span');
+    span.className = 'badge-review';
+    if (reviewStatus === 'timed_out'){
+      span.classList.add('is-timedout');
+      span.textContent = 'system · timed out';
+    } else if (confirmedBy === 'user'){
+      span.classList.add('is-confirmed');
+      span.textContent = 'user · confirmed';
+    } else if (reviewStatus === 'user_reviewed'){
+      span.classList.add('is-reviewed');
+      span.textContent = 'system · reviewed';
+    } else {
+      span.classList.add('is-unreviewed');
+      span.textContent = 'system · unreviewed';
+    }
+    return span;
+  }
+
+  /* ---------------- CorrectableField (D16, reused verbatim from timeline.html) ---------------- */
+  function buildField(field){
+    var wrap = document.createElement('div');
+    wrap.className = 'receipt-field';
+
+    var label = document.createElement('span');
+    label.className = 'receipt-field-label';
+    label.innerHTML = field.label;
+
+    var val = document.createElement('span');
+    val.className = 'receipt-field-val';
+    val.dataset.type = field.type;
+    if (field.options) val.dataset.options = field.options;
+
+    function paintTagAndText(tag, text){
+      val.querySelectorAll('.conf-tag, .field-text').forEach(function(n){ n.remove(); });
+      var tagEl = document.createElement('span');
+      tagEl.className = 'conf-tag ' + tagClass(tag);
+      tagEl.textContent = tag;
+      var txt = document.createElement('span');
+      txt.className = 'field-text';
+      txt.textContent = text;
+      val.insertBefore(txt, val.firstChild);
+      val.insertBefore(tagEl, val.firstChild);
+    }
+    paintTagAndText(field.tag, field.val);
+
+    wrap.appendChild(label);
+    wrap.appendChild(val);
+
+    if (field.type !== 'none'){
+      var link = document.createElement('button');
+      link.type = 'button';
+      link.className = 'correct-link';
+      link.textContent = 'not quite?';
+      val.appendChild(link);
+      bindCorrection(link, field, paintTagAndText);
+    }
+
+    return wrap;
+  }
+
+  function bindCorrection(link, field, paintTagAndText){
+    link.addEventListener('click', function(){
+      var wrap = link.closest('.receipt-field-val');
+      if (wrap.classList.contains('is-editing')) return;
+      var type = wrap.dataset.type || 'text';
+      var textEl = wrap.querySelector('.field-text');
+      var currentVal = textEl ? textEl.textContent : field.val;
+      wrap.classList.add('is-editing');
+      wrap.textContent = '';
+
+      function commit(val){
+        wrap.classList.remove('is-editing');
+        wrap.innerHTML = '';
+        paintTagAndText('user', val);
+        var newLink = document.createElement('button');
+        newLink.type = 'button';
+        newLink.className = 'correct-link';
+        newLink.textContent = 'not quite?';
+        wrap.appendChild(newLink);
+        bindCorrection(newLink, field, paintTagAndText);
+        showToast(field.label + ' → “' + val + '”. A new observation, with the old one superseded — never edited in place.');
+      }
+
+      if (type === 'severity'){
+        var idx = Math.max(0, SEVERITY.indexOf(currentVal));
+        var st = document.createElement('span');
+        st.className = 'stepper';
+        var down = document.createElement('button');
+        down.type = 'button'; down.textContent = '−';
+        down.setAttribute('aria-label', 'Less severe');
+        var out = document.createElement('span');
+        out.className = 'stepper-val';
+        var scale = document.createElement('span');
+        scale.className = 'stepper-scale';
+        SEVERITY.forEach(function(){ scale.appendChild(document.createElement('i')); });
+        var up = document.createElement('button');
+        up.type = 'button'; up.textContent = '+';
+        up.setAttribute('aria-label', 'More severe');
+        var ok = document.createElement('button');
+        ok.className = 'stepper-done'; ok.type = 'button'; ok.textContent = 'Save';
+        function paint(){
+          out.textContent = SEVERITY[idx];
+          down.disabled = idx === 0;
+          up.disabled = idx === SEVERITY.length - 1;
+          Array.prototype.forEach.call(scale.children, function(bar, i){ bar.classList.toggle('is-lit', i <= idx); });
+        }
+        down.addEventListener('click', function(){ if (idx > 0){ idx--; paint(); } });
+        up.addEventListener('click', function(){ if (idx < SEVERITY.length - 1){ idx++; paint(); } });
+        ok.addEventListener('click', function(){ commit(SEVERITY[idx]); });
+        paint();
+        st.appendChild(down); st.appendChild(scale); st.appendChild(out); st.appendChild(up); st.appendChild(ok);
+        wrap.appendChild(st);
+        return;
+      }
+
+      if (type === 'tristate'){
+        var picker = document.createElement('span');
+        picker.className = 'chip-picker';
+        (wrap.dataset.options || '').split('|').forEach(function(opt){
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = opt;
+          if (opt === currentVal) b.classList.add('is-current');
+          b.addEventListener('click', function(){ commit(opt); });
+          picker.appendChild(b);
+        });
+        wrap.appendChild(picker);
+        return;
+      }
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'step-input';
+      input.value = currentVal;
+      wrap.appendChild(input);
+      input.focus();
+      input.select();
+      var done = false;
+      function finish(){
+        if (done) return;
+        done = true;
+        commit(input.value.trim() || currentVal);
+      }
+      input.addEventListener('blur', finish);
+      input.addEventListener('keydown', function(e){ if (e.key === 'Enter') input.blur(); });
+    });
+  }
+
+  /* ---------------- data model ----------------
+     Invented sample data for the mockup, dated to sit alongside timeline.html's Aug 2026
+     fixtures without overlapping them. Item 1 reuses Timeline's own Aug 12–13 sub-48h
+     recurrence outright (same dates, same rule, same default reading) so this doesn't
+     read as a disconnected screen. */
+
+  var RELAPSE = {
+    collapsed: { title: 'relapse_collapsed', label: 'One episode, Aug 12–13 — relapse of the same attack' },
+    split:     { title: 'relapse_split',     label: 'Two distinct episodes, Aug 12 and Aug 13' }
+  };
+
+  var ITEMS = [
+    {
+      id: 'q-0812',
+      kind: '48h-rule',
+      dateLabel: 'Aug 12–13',
+      queuedLabel: 'Queued 4 days ago',
+      confirmedBy: 'system', reviewStatus: 'unreviewed',
+      variant: 'collapsed', /* system's current reading — matches timeline.html's default */
+      candidates: {
+        collapsed: 'Recurrence ~15h after the Aug 12 attack ended, inside the 48h RECURRENCE_AMBIGUOUS_WINDOW — read as one continuing relapse.',
+        split: 'Reads the Aug 13 morning onset as a new, separate attack rather than a relapse of Aug 12.'
+      },
+      tier2Default: { start: '2026-08-12T14:00', end: '2026-08-13T10:00' },
+      rule: 'Governing rule: DISTINCT_ATTACK_SEPARATION requires ≥48h headache-free to count as distinct attacks (ICHD-3, Definition of Terms). This recurrence fell short of that, so ICHD-3 declines to resolve it — both readings are already computed.',
+      fields: [
+        { label: 'Severity (Aug 13 attack)', val: 'severe', tag: 'paraphrase', type: 'severity' }
+      ]
+    },
+    {
+      id: 'q-0724',
+      kind: 'status_migrainosus',
+      dateLabel: 'Jul 24–27',
+      queuedLabel: 'Queued 6 days ago',
+      confirmedBy: 'system', reviewStatus: 'unreviewed',
+      resolvedAs: null, /* null | 'status_migrainosus' | 'primary' */
+      /* Raw episode bounds and the one recorded remission window, so duration and longest-
+         remission are computed at render time from the actual timestamps (invariant 6) rather
+         than hand-typed strings a reviewer would have to trust blind. */
+      start: '2026-07-24T08:00', end: '2026-07-27T14:20',
+      remissionStart: '2026-07-25T20:00', remissionEnd: '2026-07-26T05:10',
+      fields: [
+        { label: 'Debilitating (self-reported)', val: 'asked · yes', tag: 'lexical', type: 'tristate',
+          options: 'asked · yes|asked · no|asked · unknown|not asked' }
+      ]
+    },
+    {
+      id: 'q-0720',
+      kind: '48h-rule',
+      dateLabel: 'Jul 20–21',
+      queuedLabel: 'Queued 28 days ago',
+      confirmedBy: 'system', reviewStatus: 'timed_out',
+      variant: 'split',
+      candidates: {
+        collapsed: 'Read as one continuing episode across the ~13.5h onset-to-onset gap.',
+        split: 'System’s current reading — reads the Jul 21 mid-morning onset as a new, separate attack.'
+      },
+      tier2Default: { start: '2026-07-20T21:10', end: '2026-07-21T10:40' },
+      rule: 'Governing rule: DISTINCT_ATTACK_SEPARATION requires ≥48h headache-free. The ~13.5h onset-to-onset gap upper-bounds a shorter headache-free interval inside it, and that interval fell well short of 48h either way — so ICHD-3 declines to resolve it, and both readings are already computed.',
+      fields: [
+        { label: 'Severity (Jul 21 attack)', val: 'moderate', tag: 'lexical', type: 'severity' }
+      ]
+    }
+  ];
+
+  var demoState = 'items'; /* 'items' | 'empty' — chrome-world reviewer toggle only */
+  var selected = {}; /* itemId -> true, only for items that can still accept a bulk confirm */
+
+  /* ---------------- boundary-override drawer: BoundaryPicker (Tier 1) / BoundaryAdjuster (Tier 2), D17/D18.
+     Same component as timeline.html, generalised to open against whichever queue item
+     triggered it — a second entry point onto the same override write, not a second
+     interaction. Whichever item is open governs its OWN display; there is no reviewer-only
+     toggle on this screen to ever disagree with (unlike timeline.html's relapseState demo
+     toggle, which this screen deliberately does not carry into the device world). ---------------- */
+  var boundaryItemId = null;
+  var boundaryTier = 1;
+  var lastTrigger = null;
+
+  var deviceScreenEl = document.querySelector('.device-screen');
+  var boundaryScrim = document.createElement('div');
+  boundaryScrim.className = 'boundary-scrim';
+  var boundaryDrawer = document.createElement('div');
+  boundaryDrawer.className = 'boundary-drawer';
+  boundaryDrawer.setAttribute('role', 'dialog');
+  boundaryDrawer.setAttribute('aria-modal', 'true');
+  boundaryDrawer.setAttribute('aria-label', 'Choose the episode boundary reading');
+  boundaryDrawer.setAttribute('aria-hidden', 'true');
+  deviceScreenEl.appendChild(boundaryScrim);
+  deviceScreenEl.appendChild(boundaryDrawer);
+
+  function findItem(id){
+    for (var i = 0; i < ITEMS.length; i++) if (ITEMS[i].id === id) return ITEMS[i];
+    return null;
+  }
+
+  function fmtHM(ms){
+    var totalMin = Math.round(ms / 60000);
+    var h = Math.floor(totalMin / 60), m = totalMin % 60;
+    return h + 'h ' + m + 'm';
+  }
+  function fmtBoundaryDt(iso){
+    var d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' }) +
+           ', ' + d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  }
+
+  /* Plausible-length edit check (CLAUDE.md "Borrow this published spec") — not a
+     clinical threshold, a plain sanity bound on one episode's span. */
+  function validateBoundarySpan(startIso, endIso){
+    if (!startIso || !endIso) return { ok:false, message:'Both start and end are required.' };
+    var start = new Date(startIso), end = new Date(endIso);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return { ok:false, message:'Enter a valid date and time for both fields.' };
+    if (end <= start) return { ok:false, message:'End must be after start.' };
+    var days = (end - start) / 86400000;
+    if (days > 30) return { ok:false, message:'That span is over 30 days — too long to be one episode boundary. Double-check the dates.' };
+    return { ok:true };
+  }
+
+  function closeBoundaryDrawer(){
+    boundaryScrim.classList.remove('is-open');
+    boundaryDrawer.classList.remove('is-open');
+    boundaryDrawer.setAttribute('aria-hidden', 'true');
+    if (lastTrigger && typeof lastTrigger.focus === 'function') lastTrigger.focus();
+  }
+
+  function openBoundaryDrawer(itemId, trigger){
+    boundaryItemId = itemId;
+    lastTrigger = trigger || document.activeElement;
+    boundaryTier = 1;
+    paintBoundaryDrawer();
+    boundaryScrim.classList.add('is-open');
+    boundaryDrawer.classList.add('is-open');
+    boundaryDrawer.removeAttribute('aria-hidden');
+    var first = boundaryTier === 1
+      ? boundaryDrawer.querySelector('.boundary-candidate')
+      : boundaryDrawer.querySelector('.boundary-dt-input');
+    if (first) first.focus();
+  }
+
+  boundaryScrim.addEventListener('click', closeBoundaryDrawer);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && boundaryDrawer.classList.contains('is-open')) closeBoundaryDrawer();
+  });
+
+  function pickTier1(variant){
+    var item = findItem(boundaryItemId);
+    if (!item) return;
+    item.variant = variant;
+    item.confirmedBy = 'user';
+    item.reviewStatus = 'user_reviewed';
+    delete selected[item.id];
+    closeBoundaryDrawer();
+    render();
+    showToast('Boundary set: ' + RELAPSE[variant].title + '. The episode now carries confirmed_by: user.');
+  }
+
+  function pickTier2(startIso, endIso){
+    var item = findItem(boundaryItemId);
+    if (!item) return;
+    item.variant = null;
+    item.manualSpan = { start: fmtBoundaryDt(startIso), end: fmtBoundaryDt(endIso) };
+    item.confirmedBy = 'user';
+    item.reviewStatus = 'user_reviewed';
+    delete selected[item.id];
+    closeBoundaryDrawer();
+    render();
+    showToast('Boundary set manually: ' + item.manualSpan.start + ' → ' + item.manualSpan.end + '. The episode now carries confirmed_by: user.');
+  }
+
+  function paintBoundaryDrawer(){
+    boundaryDrawer.textContent = '';
+    var item = findItem(boundaryItemId);
+    if (!item) return;
+
+    var head = document.createElement('div');
+    head.className = 'boundary-head';
+    var title = document.createElement('span');
+    title.className = 'boundary-title';
+    title.textContent = boundaryTier === 1 ? 'Which reading is right? (' + item.dateLabel + ')' : 'Set the boundary manually';
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'boundary-close';
+    close.setAttribute('aria-label', 'Close');
+    close.innerHTML = '&times;';
+    close.addEventListener('click', closeBoundaryDrawer);
+    head.appendChild(title);
+    head.appendChild(close);
+    boundaryDrawer.appendChild(head);
+
+    if (boundaryTier === 1){
+      var sub = document.createElement('p');
+      sub.className = 'boundary-sub';
+      sub.innerHTML = 'ICHD-3 declines to resolve a recurrence under 48h headache-free (tech-spec.md §5.3) &mdash; both readings below are already computed. Pick the one that matches what actually happened.';
+      boundaryDrawer.appendChild(sub);
+
+      var opts = document.createElement('div');
+      opts.className = 'boundary-candidates';
+      ['collapsed', 'split'].forEach(function(variant){
+        var picked = item.variant === variant;
+        var card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'boundary-candidate' + (picked ? ' is-picked' : '');
+        var t = document.createElement('span');
+        t.className = 'boundary-candidate-title';
+        t.textContent = RELAPSE[variant].title + (picked ? ' — picked' : '');
+        var r = document.createElement('span');
+        r.className = 'boundary-candidate-rule';
+        r.innerHTML = RELAPSE[variant].label + ' — ' + item.candidates[variant];
+        card.appendChild(t);
+        card.appendChild(r);
+        card.addEventListener('click', function(){ pickTier1(variant); });
+        opts.appendChild(card);
+      });
+      boundaryDrawer.appendChild(opts);
+
+      var deeper = document.createElement('button');
+      deeper.type = 'button';
+      deeper.className = 'boundary-tier2-link';
+      deeper.textContent = 'Neither of these — adjust manually →';
+      deeper.addEventListener('click', function(){ boundaryTier = 2; paintBoundaryDrawer(); });
+      boundaryDrawer.appendChild(deeper);
+    } else {
+      var sub2 = document.createElement('p');
+      sub2.className = 'boundary-sub';
+      sub2.innerHTML = 'A genuinely manual edit, for a boundary that matches neither computed reading &mdash; one tap deeper than picking a candidate, and more deliberate (D17 Tier 2).';
+      boundaryDrawer.appendChild(sub2);
+
+      var form = document.createElement('div');
+      form.className = 'boundary-adjuster';
+
+      function dtField(labelText, defaultIso){
+        var row = document.createElement('label');
+        row.className = 'boundary-dt-row';
+        var lab = document.createElement('span');
+        lab.className = 'boundary-dt-label';
+        lab.textContent = labelText;
+        var input = document.createElement('input');
+        input.type = 'datetime-local';
+        input.className = 'boundary-dt-input';
+        input.value = defaultIso;
+        row.appendChild(lab);
+        row.appendChild(input);
+        form.appendChild(row);
+        return input;
+      }
+
+      var startInput = dtField('Episode start', item.tier2Default.start);
+      var endInput = dtField('Episode end', item.tier2Default.end);
+      boundaryDrawer.appendChild(form);
+
+      var errorEl = document.createElement('p');
+      errorEl.className = 'boundary-error';
+      errorEl.style.display = 'none';
+      boundaryDrawer.appendChild(errorEl);
+
+      var hint = document.createElement('p');
+      hint.className = 'boundary-dt-hint';
+      hint.textContent = 'Starting point: the two attacks’ own onset times — not a computed boundary. Edit freely.';
+      boundaryDrawer.appendChild(hint);
+
+      var save = document.createElement('button');
+      save.type = 'button';
+      save.className = 'stepper-done';
+      save.textContent = 'Save boundary';
+      save.addEventListener('click', function(){
+        var check = validateBoundarySpan(startInput.value, endInput.value);
+        startInput.classList.toggle('is-invalid', !check.ok);
+        endInput.classList.toggle('is-invalid', !check.ok);
+        if (!check.ok){
+          errorEl.textContent = check.message;
+          errorEl.style.display = '';
+          return;
+        }
+        errorEl.style.display = 'none';
+        pickTier2(startInput.value, endInput.value);
+      });
+      boundaryDrawer.appendChild(save);
+
+      var back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'boundary-tier2-link';
+      back.textContent = '← Back to the two computed readings';
+      back.addEventListener('click', function(){ boundaryTier = 1; paintBoundaryDrawer(); });
+      boundaryDrawer.appendChild(back);
+    }
+  }
+
+  /* ---------------- per-item confirm actions (not the drawer — accept-as-computed path) ---------------- */
+  function confirm48h(item){
+    item.confirmedBy = 'user';
+    item.reviewStatus = 'user_reviewed';
+    delete selected[item.id];
+    render();
+    showToast('Confirmed: ' + RELAPSE[item.variant].title + ' for ' + item.dateLabel + '.');
+  }
+
+  function confirmStatusMigrainosus(item, resolvedAs){
+    item.resolvedAs = resolvedAs;
+    item.confirmedBy = 'user';
+    item.reviewStatus = 'user_reviewed';
+    delete selected[item.id];
+    render();
+    showToast(resolvedAs === 'status_migrainosus'
+      ? 'Confirmed: status migrainosus, ' + item.dateLabel + '.'
+      : 'Confirmed: ordinary continuing episode, not status migrainosus — ' + item.dateLabel + '.');
+  }
+
+  function isSettled(item){ return item.confirmedBy === 'user'; }
+  function isPending(item){ return !isSettled(item); }
+  /* status_migrainosus has no single "system's current reading" to accept — both outcomes
+     are equally live candidates (FR-3.17), so it is never eligible for the bulk path and is
+     excluded here rather than in the render layer, to keep this the one source of truth. */
+  function isBatchEligible(item){ return isPending(item) && item.kind === '48h-rule'; }
+
+  /* ---------------- batch bar ---------------- */
+  function bulkConfirmSelected(){
+    var ids = Object.keys(selected);
+    if (!ids.length) return;
+    ids.forEach(function(id){
+      var item = findItem(id);
+      if (!item || !isBatchEligible(item)) return;
+      item.confirmedBy = 'user';
+      item.reviewStatus = 'user_reviewed';
+      /* item.variant is left exactly as-is — bulk confirm only ever accepts the
+         system's current proposed reading, never the alternate one. */
+    });
+    selected = {};
+    render();
+    showToast('Confirmed ' + ids.length + ' item' + (ids.length === 1 ? '' : 's') + ' as shown.');
+  }
+
+  /* ---------------- item cards ---------------- */
+  function build48hItem(item){
+    var card = document.createElement('div');
+    card.className = 'rq-item' + (item.reviewStatus === 'timed_out' ? ' is-timedout' : '') + (isSettled(item) ? ' is-resolved' : '');
+
+    var selectWrap = document.createElement('div');
+    selectWrap.className = 'rq-item-select';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'rq-checkbox';
+    cb.setAttribute('aria-label', 'Select ' + item.dateLabel + ' for batch confirmation');
+    if (isSettled(item)){
+      cb.disabled = true;
+    } else {
+      cb.checked = !!selected[item.id];
+      cb.addEventListener('change', function(){
+        if (cb.checked) selected[item.id] = true; else delete selected[item.id];
+        updateBatchBar();
+      });
+    }
+    selectWrap.appendChild(cb);
+    card.appendChild(selectWrap);
+
+    var body = document.createElement('div');
+    body.className = 'rq-item-body';
+
+    var top = document.createElement('div');
+    top.className = 'rq-item-top';
+    var kindWrap = document.createElement('div');
+    kindWrap.className = 'rq-item-kindwrap';
+    var kind = document.createElement('span');
+    kind.className = 'rq-item-kind';
+    kind.textContent = '48-hour rule';
+    var date = document.createElement('span');
+    date.className = 'rq-item-date';
+    date.textContent = item.dateLabel;
+    var queued = document.createElement('span');
+    queued.className = 'rq-item-queued';
+    queued.textContent = item.queuedLabel;
+    kindWrap.appendChild(kind);
+    kindWrap.appendChild(date);
+    kindWrap.appendChild(queued);
+    top.appendChild(kindWrap);
+    top.appendChild(reviewBadge(item.confirmedBy, item.reviewStatus));
+    body.appendChild(top);
+
+    var summary = document.createElement('p');
+    summary.className = 'rq-item-summary';
+    if (item.manualSpan){
+      summary.innerHTML = 'Boundary set manually: <b>' + item.manualSpan.start + ' → ' + item.manualSpan.end + '</b>';
+    } else {
+      summary.innerHTML = 'System reading: <b>' + RELAPSE[item.variant].title + '</b> — ' + RELAPSE[item.variant].label;
+    }
+    body.appendChild(summary);
+
+    var rule = document.createElement('p');
+    rule.className = 'rq-item-rule';
+    rule.textContent = item.rule;
+    body.appendChild(rule);
+
+    item.fields.forEach(function(f){ body.appendChild(buildField(f)); });
+
+    if (item.reviewStatus === 'timed_out'){
+      var note = document.createElement('p');
+      note.className = 'rq-item-note';
+      note.textContent = 'The 14-day REVIEW_TIMEOUT elapsed with nobody looking — confirmed_by stayed system, it was never recorded as a human confirmation (FR-3.28). Still fully actionable: confirming now records confirmed_by: user exactly as it would have on day one.';
+      body.appendChild(note);
+    }
+
+    if (!isSettled(item)){
+      var actions = document.createElement('div');
+      actions.className = 'rq-item-actions';
+      var confirmBtn = document.createElement('button');
+      confirmBtn.type = 'button';
+      confirmBtn.className = 'rq-btn rq-btn-primary';
+      confirmBtn.textContent = 'Confirm this reading';
+      confirmBtn.addEventListener('click', function(){ confirm48h(item); });
+      var altBtn = document.createElement('button');
+      altBtn.type = 'button';
+      altBtn.className = 'rq-btn';
+      altBtn.textContent = 'Choose a different reading →';
+      altBtn.addEventListener('click', function(){ openBoundaryDrawer(item.id, altBtn); });
+      actions.appendChild(confirmBtn);
+      actions.appendChild(altBtn);
+      body.appendChild(actions);
+    } else {
+      var changeWrap = document.createElement('div');
+      changeWrap.className = 'rq-item-actions';
+      var changeBtn = document.createElement('button');
+      changeBtn.type = 'button';
+      changeBtn.className = 'rq-btn rq-btn-ghost';
+      changeBtn.textContent = 'Confirmed by you — change →';
+      changeBtn.addEventListener('click', function(){ openBoundaryDrawer(item.id, changeBtn); });
+      changeWrap.appendChild(changeBtn);
+      body.appendChild(changeWrap);
+    }
+
+    card.appendChild(body);
+    return card;
+  }
+
+  function buildStatusMigrainosusItem(item){
+    var card = document.createElement('div');
+    card.className = 'rq-item' + (isSettled(item) ? ' is-resolved' : '');
+
+    var selectWrap = document.createElement('div');
+    selectWrap.className = 'rq-item-select';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'rq-checkbox';
+    cb.disabled = true;
+    cb.checked = false;
+    cb.setAttribute('aria-label', 'Not batch-eligible — status migrainosus requires individual review');
+    cb.title = 'Not batch-eligible — status migrainosus requires individual review';
+    /* Never wired to `selected`: status migrainosus has no single "system's current
+       reading" for a bulk action to honestly accept (invariant 7) — see the batch-bar
+       annotation above the queue. Always confirmed/rejected per item. */
+    selectWrap.appendChild(cb);
+    card.appendChild(selectWrap);
+
+    var body = document.createElement('div');
+    body.className = 'rq-item-body';
+
+    var top = document.createElement('div');
+    top.className = 'rq-item-top';
+    var kindWrap = document.createElement('div');
+    kindWrap.className = 'rq-item-kindwrap';
+    var kind = document.createElement('span');
+    kind.className = 'rq-item-kind';
+    kind.textContent = 'Status migrainosus';
+    var date = document.createElement('span');
+    date.className = 'rq-item-date';
+    date.textContent = item.dateLabel;
+    var queued = document.createElement('span');
+    queued.className = 'rq-item-queued';
+    queued.textContent = item.queuedLabel;
+    kindWrap.appendChild(kind);
+    kindWrap.appendChild(date);
+    kindWrap.appendChild(queued);
+    top.appendChild(kindWrap);
+    top.appendChild(reviewBadge(item.confirmedBy, item.reviewStatus));
+    body.appendChild(top);
+
+    var summary = document.createElement('p');
+    summary.className = 'rq-item-summary';
+    if (item.resolvedAs === 'status_migrainosus'){
+      summary.innerHTML = 'Confirmed as <b>status migrainosus</b> — ICHD-3 1.4.1.';
+    } else if (item.resolvedAs === 'primary'){
+      summary.innerHTML = 'Confirmed as an <b>ordinary continuing episode</b> — status migrainosus rejected.';
+    } else {
+      summary.innerHTML = 'Candidate <b>status migrainosus</b>, competing with the ordinary continuing-episode reading — ICHD-3 doesn’t decide between them, it directs surfacing both (FR-3.17).';
+    }
+    body.appendChild(summary);
+
+    var durationMs = new Date(item.end) - new Date(item.start);
+    var remissionMs = new Date(item.remissionEnd) - new Date(item.remissionStart);
+    var stats = document.createElement('div');
+    stats.className = 'rq-item-stats';
+    stats.innerHTML =
+      '<span>Duration <b class="u-numeric">' + fmtHM(durationMs) + '</b> <span style="color:var(--app-faint)">(&gt;72h required)</span></span>' +
+      '<span>Longest remission <b class="u-numeric">' + fmtHM(remissionMs) + '</b> <span style="color:var(--app-faint)">(≤12h tolerated)</span></span>';
+    body.appendChild(stats);
+
+    var rule = document.createElement('p');
+    rule.className = 'rq-item-rule';
+    rule.textContent = 'Computed against STATUS_MIGRAINOSUS_MIN_DURATION / STATUS_MIGRAINOSUS_MAX_REMISSION (ICHD-3 1.4.1). "Typical of your prior attacks" is not computable from the schema and is not evaluated by the system — that judgment is surfaced for you, not decided for you (FR-3.16). If this period’s medication days separately meet MOH criteria, ICHD-3 directs coding MOH plus the underlying migraine type instead — surfaced, not decided here (FR-3.17).';
+    body.appendChild(rule);
+
+    item.fields.forEach(function(f){ body.appendChild(buildField(f)); });
+
+    if (!isSettled(item)){
+      var actions = document.createElement('div');
+      actions.className = 'rq-item-actions';
+      var confirmBtn = document.createElement('button');
+      confirmBtn.type = 'button';
+      confirmBtn.className = 'rq-btn rq-btn-primary';
+      confirmBtn.textContent = 'Confirm status migrainosus';
+      confirmBtn.addEventListener('click', function(){ confirmStatusMigrainosus(item, 'status_migrainosus'); });
+      var rejectBtn = document.createElement('button');
+      rejectBtn.type = 'button';
+      rejectBtn.className = 'rq-btn';
+      rejectBtn.textContent = 'Not status migrainosus — ordinary episode';
+      rejectBtn.addEventListener('click', function(){ confirmStatusMigrainosus(item, 'primary'); });
+      actions.appendChild(confirmBtn);
+      actions.appendChild(rejectBtn);
+      body.appendChild(actions);
+    } else {
+      var changeWrap = document.createElement('div');
+      changeWrap.className = 'rq-item-actions';
+      var changeBtn = document.createElement('button');
+      changeBtn.type = 'button';
+      changeBtn.className = 'rq-btn rq-btn-ghost';
+      changeBtn.textContent = 'Confirmed by you — change →';
+      changeBtn.addEventListener('click', function(){
+        item.resolvedAs = item.resolvedAs === 'status_migrainosus' ? 'primary' : 'status_migrainosus';
+        render();
+        showToast('Changed to: ' + (item.resolvedAs === 'status_migrainosus' ? 'status migrainosus' : 'ordinary continuing episode') + '.');
+      });
+      changeWrap.appendChild(changeBtn);
+      body.appendChild(changeWrap);
+    }
+
+    card.appendChild(body);
+    return card;
+  }
+
+  /* ---------------- render ---------------- */
+  var scrollEl = document.getElementById('rq-scroll');
+  var batchbarEl = document.getElementById('rq-batchbar');
+  var statEl = document.getElementById('rq-stat');
+  var selectAllCb = document.getElementById('rq-selectall-cb');
+  var selectAllLabel = document.getElementById('rq-selectall-label');
+  var confirmSelectedBtn = document.getElementById('rq-confirm-selected');
+
+  function updateBatchBar(){
+    var eligible = ITEMS.filter(isBatchEligible);
+    var selectedCount = Object.keys(selected).length;
+    confirmSelectedBtn.disabled = selectedCount === 0;
+    confirmSelectedBtn.textContent = selectedCount === 0 ? 'Confirm selected' : 'Confirm selected (' + selectedCount + ')';
+    selectAllCb.disabled = eligible.length === 0;
+    selectAllCb.checked = eligible.length > 0 && selectedCount === eligible.length;
+    selectAllLabel.textContent = eligible.length === 0 ? 'Nothing left to select' : 'Select all eligible (' + eligible.length + ')';
+  }
+
+  selectAllCb.addEventListener('change', function(){
+    var eligible = ITEMS.filter(isBatchEligible);
+    if (selectAllCb.checked){
+      eligible.forEach(function(item){ selected[item.id] = true; });
+    } else {
+      selected = {};
+    }
+    render();
+  });
+
+  confirmSelectedBtn.addEventListener('click', bulkConfirmSelected);
+
+  function render(){
+    scrollEl.textContent = '';
+
+    if (demoState === 'empty'){
+      batchbarEl.hidden = true;
+      statEl.textContent = 'Nothing pending.';
+      var empty = document.createElement('div');
+      empty.className = 'rq-empty';
+      empty.innerHTML =
+        '<span class="rq-empty-glyph">&#10003;</span>' +
+        '<span class="rq-empty-title">Nothing pending</span>' +
+        '<span class="rq-empty-sub">Tier-2 items appear here the moment they’re computed &mdash; a 48-hour-rule recurrence, or a candidate status migrainosus classification. There’s nothing to review right now.</span>';
+      scrollEl.appendChild(empty);
+      return;
+    }
+
+    batchbarEl.hidden = false;
+
+    var pendingCount = ITEMS.filter(isPending).length;
+    var timedOutCount = ITEMS.filter(function(i){ return i.reviewStatus === 'timed_out' && isPending(i); }).length;
+    var statParts = ['<b class="u-numeric">' + pendingCount + '</b> pending'];
+    if (timedOutCount) statParts.push('<b class="u-numeric">' + timedOutCount + '</b> timed out');
+    statEl.innerHTML = statParts.join(' · ');
+
+    ITEMS.forEach(function(item){
+      var card = item.kind === '48h-rule' ? build48hItem(item) : buildStatusMigrainosusItem(item);
+      scrollEl.appendChild(card);
+    });
+
+    updateBatchBar();
+  }
+
+  var demoBtns = document.querySelectorAll('[data-demo]');
+  demoBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      demoBtns.forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+      demoState = btn.dataset.demo;
+      selected = {};
+      render();
+    });
+  });
+
+  render();
+})();
+</script>

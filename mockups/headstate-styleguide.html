@@ -282,6 +282,37 @@
   .boundary-episode-badge{border-width:1.5px}
   .boundary-episode-badge::before{content:'episode · ';opacity:.7;font-weight:400}
 
+  /* ---- badge-review — introduced with Timeline/task 4 (D16/D18) but never added to this
+     stylesheet; the gallery cell at #boundary-badge below was rendering unstyled until now ---- */
+  .badge-review{font-size:.62rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.03em;padding:.14rem .45rem;border-radius:5px;white-space:nowrap;flex-shrink:0}
+  .badge-review.is-unreviewed{color:var(--app-faint);border:1px dotted var(--app-faint)}
+  .badge-review.is-reviewed{color:var(--app-good);border:1px solid var(--app-good-dim);background:var(--app-good-dim)}
+  .badge-review.is-confirmed{color:var(--app-accent);border:1px solid var(--app-accent-dim);background:var(--app-accent-dim)}
+  .badge-review.is-timedout{color:var(--app-faint);border:1px dashed var(--app-faint)}
+
+  /* ---- added with the review queue, Tier-2 batched confirmation (task 5) ---- */
+  .rq-batchbar{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.6rem .95rem;border-bottom:1px solid var(--app-border);background:var(--app-surface);border-radius:var(--radius-card) var(--radius-card) 0 0}
+  .rq-selectall{display:flex;align-items:center;gap:.5rem;font-size:var(--fs-caption);color:var(--app-muted)}
+  .rq-checkbox{width:18px;height:18px;flex-shrink:0;accent-color:var(--app-accent);cursor:pointer}
+  .rq-checkbox[disabled]{cursor:not-allowed;opacity:.4}
+  .rq-confirm-selected{appearance:none;border:none;background:var(--app-accent);color:#1B1208;font-size:.75rem;font-weight:600;padding:.5rem .9rem;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap}
+  .rq-confirm-selected[disabled]{background:var(--app-border);color:var(--app-faint);cursor:not-allowed}
+  .rq-item{display:flex;gap:.65rem;align-items:flex-start;background:var(--app-surface);border:1px solid var(--app-border);border-radius:var(--radius-card);padding:.85rem .95rem .9rem}
+  .rq-item.is-timedout{border-style:dashed}
+  .rq-item-select{padding-top:.2rem;flex-shrink:0}
+  .rq-item-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:.5rem}
+  .rq-item-top{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+  .rq-item-kindwrap{display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap}
+  .rq-item-kind{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--app-accent)}
+  .rq-item-date{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--app-ink);font-weight:600}
+  .rq-item-queued{font-size:.66rem;color:var(--app-faint);font-family:var(--f-mono)}
+  .rq-item-summary{font-size:var(--fs-body);color:var(--app-ink);line-height:1.5}
+  .rq-item-summary b{font-weight:600;color:var(--app-accent)}
+  .rq-item-actions{display:flex;gap:.55rem;flex-wrap:wrap;padding-top:.15rem}
+  .rq-btn{appearance:none;border:1px solid var(--app-border);background:var(--app-bg);color:var(--app-ink);font-size:.75rem;font-weight:600;padding:.5rem .85rem;border-radius:var(--radius-pill);cursor:pointer}
+  .rq-btn:hover{border-color:var(--app-accent)}
+  .rq-btn-primary{background:var(--app-good-dim);border-color:var(--app-good-dim);color:var(--app-good)}
+
   .tag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem}
   .tag-swatch{border:1px solid var(--border);border-radius:10px;padding:.75rem .85rem;background:var(--surface-raised);display:flex;flex-direction:column;gap:.4rem}
   .tag-meaning{font-size:.72rem;color:var(--ink-muted);line-height:1.4}
@@ -629,6 +660,36 @@
           <span class="badge-review is-confirmed boundary-episode-badge">user &middot; confirmed</span>
         </div>
         <div class="cell-foot"><span class="cell-name">badge-review &mdash; episode-scoped modifier</span><span class="cell-world">Device &mdash; an override sets the episode's own <code>confirmed_by</code> (D18); day-row badges are untouched unless separately overridden</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start">
+          <div class="rq-item is-timedout">
+            <div class="rq-item-select"><input type="checkbox" class="rq-checkbox" checked></div>
+            <div class="rq-item-body">
+              <div class="rq-item-top">
+                <div class="rq-item-kindwrap"><span class="rq-item-kind">48h-rule</span><span class="rq-item-date">Jul 20&ndash;21</span><span class="rq-item-queued">Queued 28 days ago</span></div>
+                <span class="badge-review is-timedout">system &middot; timed out</span>
+              </div>
+              <p class="rq-item-summary">Currently read as <b>relapse_split</b> &mdash; two distinct attacks.</p>
+              <div class="rq-item-actions">
+                <button type="button" class="rq-btn rq-btn-primary" disabled>Confirm this reading</button>
+                <button type="button" class="rq-btn" disabled>Choose a different reading &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">ReviewQueueItem &mdash; 48h-rule, timed out</span><span class="cell-world">Device &mdash; still fully confirmable past <code>REVIEW_TIMEOUT</code> (FR-3.28); confirming now still records <code>confirmed_by: user</code></span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start;padding:0">
+          <div class="rq-batchbar" style="width:100%">
+            <label class="rq-selectall"><input type="checkbox" class="rq-checkbox">Select all eligible (2)</label>
+            <button type="button" class="rq-confirm-selected" disabled>Confirm selected</button>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">BatchBar</span><span class="cell-world">Device &mdash; only accepts each item's current system reading in bulk; status migrainosus is never selectable here (no single reading to honestly accept, invariant 7)</span></div>
       </div>
     </div>
   </section>
