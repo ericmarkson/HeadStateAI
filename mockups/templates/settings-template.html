@@ -1,0 +1,1083 @@
+<title>Settings &amp; Sharing</title>
+<style>
+  @font-face{
+    font-family:'Fraunces';font-style:italic;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_ITALIC__) format('woff2');
+  }
+  @font-face{
+    font-family:'Fraunces';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_NORMAL__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Sans';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXSANS__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_400__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_500__) format('woff2');
+  }
+
+  /* ============ TOKENS (copied verbatim from review-queue.html — design-system.md §5) ============ */
+  :root{
+    /* chrome — light (default / un-stamped) */
+    --surface:#F6F7F9;
+    --surface-raised:#FFFFFF;
+    --ink:#1B1C22;
+    --ink-muted:#5B5E68;
+    --ink-faint:#6A6C74;
+    --border:#DDE0E5;
+    --accent:#B5652A;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#F3E4D3;
+    --focus:#2B57B0;
+    --good:#3F6B62;
+    --good-soft:#E1EBE8;
+    --flag:#9C4A3A;
+    --flag-soft:#F3E1DD;
+
+    /* fixed device world — the phone screens (a "screenshot," not viewer-themed) */
+    --app-bg:#121019;
+    --app-surface:#1C1927;
+    --app-surface-raised:#242032;
+    --app-ink:#EDEAF2;
+    --app-muted:#948FA6;
+    --app-faint:#87839C;
+    --app-border:#332F42;
+    --app-accent:#D98A46;
+    --app-accent-dim:#3B2A1C;
+    --app-good:#7FA79D;
+    --app-good-dim:#233330;
+    --app-focus:#7DA2FF;
+    --app-flag:#C97A68;
+
+    /* fixed paper world — kept for token parity with the other mockups */
+    --doc-bg:#FCFAF5;
+    --doc-ink:#211D1A;
+    --doc-muted:#6E655B;
+    --doc-faint:#756C5B;
+    --doc-rule:#DCD1BE;
+    --doc-accent:#A85A26;
+    --doc-flag:#9C4A3A;
+    --doc-flag-soft:#F1DFD3;
+    --doc-focus:#2B57B0;
+
+    /* type */
+    --f-display:'Fraunces', ui-serif, Georgia, serif;
+    --f-body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --f-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+    --fs-eyebrow:.6875rem;
+    --fs-caption:.8125rem;
+    --fs-body:.9375rem;
+    --fs-body-lg:1.0625rem;
+    --fs-h3:1.1875rem;
+    --fs-h2:1.5rem;
+
+    --radius-doc:3px;
+    --radius-card:14px;
+    --radius-pill:999px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --surface:#15141C;
+      --surface-raised:#1D1B26;
+      --ink:#EDEAF2;
+      --ink-muted:#A9A5B8;
+      --ink-faint:#8A8699;
+      --border:#332F3F;
+      --accent:#D98A46;
+      --accent-ink:#1B1208;
+      --accent-soft:#3B2A1C;
+      --focus:#7DA2FF;
+      --good:#7FA79D;
+      --good-soft:#233330;
+      --flag:#C97A68;
+      --flag-soft:#3A241F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --surface:#15141C;
+    --surface-raised:#1D1B26;
+    --ink:#EDEAF2;
+    --ink-muted:#A9A5B8;
+    --ink-faint:#8A8699;
+    --border:#332F3F;
+    --accent:#D98A46;
+    --accent-ink:#1B1208;
+    --accent-soft:#3B2A1C;
+    --focus:#7DA2FF;
+    --good:#7FA79D;
+    --good-soft:#233330;
+    --flag:#C97A68;
+    --flag-soft:#3A241F;
+  }
+
+  /* ============ BASE ============ */
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--surface);
+    color:var(--ink);
+    font-family:var(--f-body);
+    font-size:var(--fs-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+  p{margin:0}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+  /* Fixed worlds pin their own focus color — the chrome --focus token flips with the
+     viewer's OS theme and fails contrast inside the always-dark device world. */
+  .device-screen :focus-visible{outline-color:var(--app-focus)}
+  .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
+
+  /* ============ SHELL ============ */
+  .shell{max-width:1180px;margin:0 auto;padding:2.25rem 1.5rem 4rem}
+  .shell-head{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:1.5rem;flex-wrap:wrap;margin-bottom:1.75rem;
+    padding-bottom:1.25rem;border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;flex-direction:column;gap:.3rem}
+  .brand-mark{font-family:var(--f-display);font-weight:600;font-size:1.375rem;letter-spacing:.01em}
+  .brand-mark em{font-style:italic;color:var(--accent)}
+  .brand-sub{font-size:var(--fs-caption);color:var(--ink-muted);max-width:44ch}
+
+  .lede{max-width:68ch;color:var(--ink-muted);font-size:var(--fs-body);margin-bottom:1.5rem}
+  .lede b{color:var(--ink);font-weight:600}
+
+  /* reviewer control bar — chrome world, explicitly outside the phone (design-system.md §1) */
+  .controls{
+    display:flex;flex-wrap:wrap;gap:1.25rem 2rem;
+    align-items:flex-start;
+    background:var(--surface-raised);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1rem 1.15rem;
+    margin-bottom:1.5rem;
+  }
+  .control-group{display:flex;flex-direction:column;gap:.45rem}
+  .control-label{
+    font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.09em;
+    font-weight:600;color:var(--ink-faint);
+  }
+  .switcher{
+    display:flex;gap:.25rem;padding:.25rem;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+    flex-wrap:wrap;
+  }
+  .switcher button{
+    appearance:none;border:none;background:transparent;color:var(--ink-muted);
+    font-size:var(--fs-caption);font-weight:500;
+    padding:.45rem .8rem;border-radius:var(--radius-pill);
+    cursor:pointer;white-space:nowrap;
+    transition:background .15s ease, color .15s ease;
+  }
+  .switcher button:hover{color:var(--ink)}
+  .switcher button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+  .controls-note{
+    flex:1 1 18rem;min-width:14rem;
+    font-size:.72rem;color:var(--ink-faint);line-height:1.55;
+    align-self:center;
+  }
+
+  .shell-foot{
+    margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--border);
+    font-size:var(--fs-caption);color:var(--ink-faint);
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  }
+
+  /* ============ DEVICE FRAME ============ */
+  .device-stage{display:flex;justify-content:center;padding:.5rem 0 1rem}
+  .device-frame{
+    width:min(390px, 100%);
+    border-radius:40px;padding:12px;
+    background:linear-gradient(155deg,#2A2735,#131019);
+    box-shadow:0 1px 1px rgba(0,0,0,.4), 0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .device-screen{
+    background:var(--app-bg);color:var(--app-ink);
+    border-radius:30px;overflow:hidden;
+    font-family:var(--f-body);
+    min-height:720px;
+    display:flex;flex-direction:column;position:relative;
+  }
+  .device-notch{height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .device-notch::before{
+    content:'';width:90px;height:6px;border-radius:99px;background:rgba(255,255,255,.14);
+  }
+  .app-body{padding:.25rem 1.15rem 1.4rem;flex:1;display:flex;flex-direction:column;gap:1rem}
+
+  /* ---- shared app type (reused from onboarding.html) ---- */
+  .app-title{
+    font-family:var(--f-display);font-weight:600;font-size:1.4rem;line-height:1.2;letter-spacing:-.01em;
+  }
+  .app-title em{font-style:italic;color:var(--app-accent)}
+  .app-lede{font-size:var(--fs-body);color:var(--app-muted);line-height:1.55}
+  .app-lede b{color:var(--app-ink);font-weight:600}
+  .app-hint{font-size:.75rem;color:var(--app-faint);line-height:1.5}
+
+  /* ---- settings section scaffolding ---- */
+  .settings-section{display:flex;flex-direction:column;gap:.7rem}
+  .settings-subhead{
+    font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.08em;
+    font-weight:600;color:var(--app-faint);margin-top:.15rem;
+  }
+
+  /* ---- ConsentScope (reused verbatim from onboarding.html) ---- */
+  .scope{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.9rem 1rem 1rem;
+    display:flex;flex-direction:column;gap:.55rem;
+  }
+  .scope-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem}
+  .scope-name{font-size:var(--fs-body-lg);font-weight:600;line-height:1.25}
+  .scope-key{
+    flex-shrink:0;
+    font-family:var(--f-mono);font-size:.6rem;
+    color:var(--app-faint);
+    border:1px solid var(--app-border);
+    padding:.2rem .38rem;border-radius:5px;
+    white-space:nowrap;
+  }
+  .scope-body{font-size:var(--fs-caption);color:var(--app-muted);line-height:1.55}
+  .scope-ifno{
+    font-size:var(--fs-caption);
+    color:var(--app-faint);
+    line-height:1.55;
+    border-top:1px dashed var(--app-border);
+    padding-top:.55rem;
+  }
+  .scope-ifno b{color:var(--app-muted);font-weight:600}
+  /* equal weight: identical geometry, identical resting treatment (FR-7.3). In Settings a
+     decision already exists for most cards, so "equal weight" governs the two buttons'
+     styling, not which one currently reads as active — see design-system.md §4. */
+  .scope-choice{display:flex;gap:.5rem}
+  .scope-choice button{
+    flex:1 1 0;
+    appearance:none;
+    border:1px solid var(--app-border);
+    background:var(--app-bg);
+    color:var(--app-ink);
+    font-size:var(--fs-body);
+    font-weight:600;
+    padding:.7rem .5rem;
+    border-radius:10px;
+    cursor:pointer;
+    text-align:center;
+  }
+  .scope-choice button:hover{border-color:var(--app-faint)}
+  .scope-choice button[aria-pressed="true"][data-decision="grant"]{
+    background:var(--app-good-dim);border-color:var(--app-good);color:var(--app-good);
+  }
+  .scope-choice button[aria-pressed="true"][data-decision="withdraw"]{
+    background:var(--app-surface-raised);border-color:var(--app-muted);color:var(--app-ink);
+  }
+  /* Deviation from onboarding.html: onboarding hides the stamp until answered, because
+     blank there means "not yet reached in this flow." Settings must always show the
+     *current* decision, including "not yet decided" for research_aggregate — never blank. */
+  .scope-stamp{
+    font-family:var(--f-mono);font-size:.62rem;
+    color:var(--app-faint);
+    display:block;
+  }
+
+  /* ---- device permission rows (reused verbatim from onboarding.html) ---- */
+  .perm{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.85rem .95rem .95rem;
+    display:flex;flex-direction:column;gap:.6rem;
+  }
+  .perm.is-blocked{opacity:.55}
+  .perm-say{font-size:var(--fs-body);font-weight:500;line-height:1.4}
+  .perm-why{font-size:.75rem;color:var(--app-faint);line-height:1.5}
+  .perm-choice{display:flex;gap:.5rem}
+  .perm-choice button{
+    flex:1 1 0;
+    appearance:none;border:1px solid var(--app-border);
+    background:var(--app-bg);color:var(--app-ink);
+    font-size:var(--fs-caption);font-weight:600;
+    padding:.6rem .5rem;border-radius:10px;cursor:pointer;
+  }
+  .perm-choice button:hover{border-color:var(--app-faint)}
+  .perm-choice button[aria-pressed="true"]{
+    background:var(--app-good-dim);border-color:var(--app-good);color:var(--app-good);
+  }
+  .perm-choice button[disabled]{cursor:not-allowed;color:var(--app-faint)}
+  .perm-choice button[disabled]:hover{border-color:var(--app-border)}
+  .perm-gated{
+    font-size:.72rem;color:var(--app-accent);line-height:1.5;
+    display:none;
+  }
+  .perm.is-blocked .perm-gated{display:block}
+
+  /* ---- integration/connection card (new — Settings-only, "current state" variant of .perm) ---- */
+  .conn{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.85rem .95rem .95rem;
+    display:flex;flex-direction:column;gap:.65rem;
+  }
+  .conn-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem}
+  .conn-name{font-size:var(--fs-body);font-weight:600;line-height:1.3}
+  .conn-state{
+    flex-shrink:0;font-size:.64rem;font-family:var(--f-mono);text-transform:uppercase;
+    letter-spacing:.04em;padding:.2rem .5rem;border-radius:99px;white-space:nowrap;
+    border:1px solid var(--app-border);color:var(--app-faint);
+  }
+  .conn-state.is-connected{color:var(--app-good);border-color:var(--app-good-dim);background:var(--app-good-dim)}
+  .conn-state.is-ambiguous{color:var(--app-accent);border-color:var(--app-accent-dim);background:var(--app-accent-dim)}
+  .conn-state.is-off{color:var(--app-faint)}
+  .conn-detail{font-size:var(--fs-caption);color:var(--app-muted);line-height:1.55}
+  .conn-detail b{color:var(--app-ink);font-weight:600}
+  .conn-actions{display:flex;gap:.5rem;flex-wrap:wrap;padding-top:.1rem}
+  .conn-btn{
+    appearance:none;border:1px solid var(--app-border);background:var(--app-bg);
+    color:var(--app-ink);font-size:.75rem;font-weight:600;
+    padding:.5rem .85rem;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .conn-btn:hover{border-color:var(--app-accent)}
+  .conn-btn.is-quiet{background:transparent;color:var(--app-muted)}
+  .conn-btn[disabled]{opacity:.4;cursor:not-allowed}
+  .conn-variant{display:none;flex-direction:column;gap:.6rem}
+  .conn-variant.is-on{display:flex}
+
+  /* ---- ConsentReceipt (reused verbatim from onboarding.html) ---- */
+  .cr{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.9rem 1rem 1rem;
+  }
+  .receipt-head{
+    font-size:var(--fs-eyebrow);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--app-faint);
+    font-weight:600;
+    margin-bottom:.2rem;
+    display:flex;justify-content:space-between;gap:.6rem;
+  }
+  .cr-scroll{max-height:17rem;overflow-y:auto;margin-top:.2rem}
+  .cr-scroll::-webkit-scrollbar{width:6px}
+  .cr-scroll::-webkit-scrollbar-thumb{background:var(--app-border);border-radius:99px}
+  .cr-row{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:.4rem .6rem;
+    padding:.42rem 0;
+    border-top:1px solid var(--app-border);
+    align-items:baseline;
+  }
+  .cr-row:first-of-type{border-top:none}
+  .cr-scope{font-family:var(--f-mono);font-size:.7rem;color:var(--app-muted);word-break:break-all}
+  .cr-decision{
+    font-size:.68rem;font-weight:700;font-family:var(--f-mono);
+    text-transform:uppercase;letter-spacing:.04em;
+    padding:.16rem .42rem;border-radius:5px;
+    border:1px solid var(--app-border);color:var(--app-faint);
+    white-space:nowrap;
+  }
+  .cr-decision.is-grant{color:var(--app-good);border-color:var(--app-good);background:var(--app-good-dim)}
+  .cr-decision.is-withdraw{color:var(--app-ink);border-color:var(--app-muted)}
+  .cr-stamp{
+    grid-column:1 / -1;
+    font-family:var(--f-mono);font-size:.6rem;color:var(--app-faint);
+  }
+  .cr-foot{
+    margin-top:.7rem;padding-top:.65rem;
+    border-top:1px dashed var(--app-border);
+    font-size:.72rem;color:var(--app-faint);line-height:1.55;
+  }
+
+  /* ---- export links (new) ---- */
+  .explink{
+    background:var(--app-surface);border:1px solid var(--app-border);
+    border-radius:var(--radius-card);padding:.8rem .9rem .9rem;
+    display:flex;flex-direction:column;gap:.55rem;
+  }
+  .explink.is-inert{opacity:.6;border-style:dashed}
+  .explink-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+  .explink-id{font-family:var(--f-mono);font-size:.7rem;color:var(--app-muted);word-break:break-all}
+  .explink-badge{
+    font-size:.64rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.04em;
+    padding:.16rem .45rem;border-radius:5px;white-space:nowrap;
+    border:1px solid var(--app-border);color:var(--app-faint);flex-shrink:0;
+  }
+  .explink-badge.is-active{color:var(--app-good);border-color:var(--app-good-dim);background:var(--app-good-dim)}
+  .explink-badge.is-expired{color:var(--app-faint);border-style:dashed}
+  .explink-badge.is-revoked{color:var(--app-flag);border-color:var(--app-flag)}
+  .explink-meta{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font-size:.75rem;color:var(--app-muted)}
+  .explink-meta b{font-family:var(--f-mono);color:var(--app-ink);font-weight:600}
+  .explink-disclose{
+    font-size:.7rem;color:var(--app-faint);line-height:1.5;
+    border-top:1px dashed var(--app-border);padding-top:.5rem;
+  }
+  .explink-actions{display:flex;gap:.5rem}
+
+  /* ---- privacy policy row (new) ---- */
+  .policy-row{
+    display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;
+    background:var(--app-surface);border:1px solid var(--app-border);
+    border-radius:var(--radius-card);padding:.8rem .95rem;
+  }
+  .policy-row a{color:var(--app-accent);text-decoration:underline;text-underline-offset:2px;font-weight:600;font-size:var(--fs-body)}
+  .policy-row span{font-size:.72rem;color:var(--app-faint);max-width:26rem}
+
+  /* ---- Annotation (reused verbatim) ---- */
+  .annotation{
+    display:flex;gap:.55rem;align-items:flex-start;
+    border:1px dashed var(--border);border-radius:10px;
+    padding:.7rem .85rem;font-size:.78rem;color:var(--ink-faint);line-height:1.55;
+    max-width:60rem;margin:0 auto;
+  }
+  .annotation b{color:var(--ink)}
+  .annotation code{font-family:var(--f-mono);font-size:.92em;color:var(--ink-muted)}
+  .annotation.is-stack + .annotation.is-stack{margin-top:-.6rem}
+
+  .device-annotation{
+    display:flex;gap:.55rem;align-items:flex-start;
+    border:1px dashed var(--app-border);border-radius:10px;
+    padding:.6rem .75rem;font-size:.73rem;color:var(--app-faint);line-height:1.5;
+  }
+  .device-annotation b{color:var(--app-muted)}
+  .device-annotation code{font-family:var(--f-mono);font-size:.92em;color:var(--app-muted)}
+
+  .toast{
+    position:fixed;left:50%;bottom:1.75rem;
+    transform:translate(-50%, 12px);
+    background:var(--ink);color:var(--surface);
+    font-size:var(--fs-caption);padding:.7rem 1.1rem;border-radius:10px;
+    opacity:0;pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:50;max-width:min(32rem, calc(100vw - 2rem));text-align:center;
+  }
+  .toast.is-visible{opacity:1;transform:translate(-50%, 0)}
+
+  @media (max-width:640px){
+    .shell{padding:1.5rem 1rem 3rem}
+    .controls{flex-direction:column;gap:1rem}
+  }
+</style>
+
+<div class="shell">
+
+  <div class="shell-head">
+    <div class="brand">
+      <div class="brand-mark">Head<em>State</em></div>
+      <div class="brand-sub">Screen mockup &mdash; Settings: integrations, consent and sharing</div>
+    </div>
+  </div>
+
+  <p class="lede"><b>Everything from onboarding lives here afterwards, on the same components.</b> ConsentScope and ConsentReceipt are reused verbatim (design-system.md &sect;4/&sect;7) &mdash; the difference is that every card below already shows a <i>current</i> decision instead of a blank one, and changing it appends to the append-only history rather than gating a first-run flow. Integration rows show real current-connection state, not a first-ask. StepRail is intentionally absent: Settings is not a bounded linear flow, so a progress indicator has nothing to measure.</p>
+
+  <div class="controls">
+    <div class="control-group">
+      <span class="control-label">Health data demo state</span>
+      <div class="switcher" id="health-demo" role="group" aria-label="Health connection demo state">
+        <button type="button" aria-pressed="true" data-demo="data">Connected</button>
+        <button type="button" aria-pressed="false" data-demo="zero">Zero records</button>
+        <button type="button" aria-pressed="false" data-demo="off">Not connected</button>
+        <button type="button" aria-pressed="false" data-demo="off-install">No Health Connect</button>
+        <button type="button" aria-pressed="false" data-demo="window">Past read window</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <span class="control-label">Notification demo state</span>
+      <div class="switcher" id="notif-demo" role="group" aria-label="Notification demo state">
+        <button type="button" aria-pressed="true" data-demo="granted">Allowed</button>
+        <button type="button" aria-pressed="false" data-demo="denied">Not allowed</button>
+        <button type="button" aria-pressed="false" data-demo="revoked">Exact-alarm revoked</button>
+      </div>
+    </div>
+    <p class="controls-note">Reviewer-only, chrome world &mdash; lets this one mockup show every FR-4.x integration state side by side (design-system.md &sect;1). Everything below the notch &mdash; connect/disconnect, the consent cards, the export-link revoke action &mdash; is a real in-product control.</p>
+  </div>
+
+  <div class="device-stage">
+    <div class="device-frame"><div class="device-screen">
+      <div class="device-notch"></div>
+      <div class="app-body">
+
+        <div class="app-title">Settings</div>
+
+        <!-- ================= INTEGRATIONS ================= -->
+        <div class="settings-section">
+          <p class="app-lede">Device permissions, as they actually stand right now.</p>
+
+          <div class="settings-subhead">Health data</div>
+          <div class="conn">
+            <div class="conn-top">
+              <span class="conn-name">Apple Health / Health Connect</span>
+              <span class="conn-state is-connected" id="health-state-pill">Connected</span>
+            </div>
+
+            <div class="conn-variant is-on" data-conn-var="data">
+              <p class="conn-detail">Sleep and rest hours read from <b>Apple Health</b>. Last successful read <b>7:41&nbsp;AM today</b>.</p>
+              <p class="conn-detail">Reads happen in the foreground, when you open the app &mdash; <b>HeadState does no background syncing</b>, so this is only ever as fresh as your last visit, never near-real-time (FR-4.9).</p>
+              <div class="conn-actions"><button class="conn-btn" type="button" data-conn-act="disconnect">Disconnect</button></div>
+            </div>
+
+            <div class="conn-variant" data-conn-var="zero">
+              <p class="conn-detail">Last read attempt (7:41&nbsp;AM today) returned <b>zero records</b>.</p>
+              <p class="conn-detail">Apple deliberately makes read-denial indistinguishable from &ldquo;no data exists&rdquo; &mdash; both return the same empty answer, so this is <b>ambiguous, not a denial</b> (FR-4.2). If you expect sleep data here, checking the Health app&rsquo;s own sharing screen is the only way to know which case this is.</p>
+              <div class="conn-actions">
+                <button class="conn-btn" type="button" data-conn-act="open-health">Open Health settings</button>
+                <button class="conn-btn is-quiet" type="button" data-conn-act="disconnect">Disconnect</button>
+              </div>
+            </div>
+
+            <div class="conn-variant" data-conn-var="off">
+              <p class="conn-detail">Not connected. Connect and HeadState stops asking about sleep every morning.</p>
+              <div class="conn-actions"><button class="conn-btn" type="button" data-conn-act="connect">Connect</button></div>
+            </div>
+
+            <div class="conn-variant" data-conn-var="off-install">
+              <p class="conn-detail">Not connected. On this device (Android&nbsp;13), <b>Health Connect is a separate app, not part of the OS</b> &mdash; it is not installed yet (FR-4.3).</p>
+              <div class="conn-actions">
+                <button class="conn-btn" type="button" data-conn-act="install">Install Health Connect</button>
+                <button class="conn-btn is-quiet" type="button" data-conn-act="connect">Already installed &mdash; open it</button>
+              </div>
+            </div>
+
+            <div class="conn-variant" data-conn-var="window">
+              <p class="conn-detail">Connected. Last read <b>7:41&nbsp;AM today</b>, foreground only.</p>
+              <p class="conn-detail">Health Connect only hands over the <b>last 30 days</b>. Anything before <b>Fri 17&nbsp;Jul isn&rsquo;t missing &mdash; it&rsquo;s unavailable</b> under the current grant (FR-4.4).</p>
+              <div class="conn-actions">
+                <button class="conn-btn" type="button" data-conn-act="history">Request extended history</button>
+                <button class="conn-btn is-quiet" type="button" data-conn-act="disconnect">Disconnect</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-subhead">Morning reminder</div>
+          <div class="conn">
+            <div class="conn-top">
+              <span class="conn-name">Morning checkpoint notification</span>
+              <span class="conn-state is-connected" id="notif-state-pill">Allowed</span>
+            </div>
+
+            <div class="conn-variant is-on" data-notif-var="granted">
+              <p class="conn-detail">Allowed. One knock each morning, never in the evening &mdash; an evening question cannot see the waking state a morning prompt needs.</p>
+              <div class="conn-actions"><button class="conn-btn is-quiet" type="button" data-conn-act="disable-notif">Turn off</button></div>
+            </div>
+
+            <div class="conn-variant" data-notif-var="denied">
+              <p class="conn-detail">Not allowed. The morning checkpoint still runs in-app the next time you open HeadState &mdash; you just will not be nudged to.</p>
+              <div class="conn-actions"><button class="conn-btn" type="button" data-conn-act="allow-notif">Allow notifications</button></div>
+            </div>
+
+            <div class="conn-variant" data-notif-var="revoked">
+              <p class="conn-detail"><b>Android revoked exact-alarm scheduling</b> since you last opened the app.</p>
+              <p class="conn-detail">Pending medication-response follow-ups that depended on it &mdash; the 30&ndash;60&nbsp;minute and 2-hour checks &mdash; <b>were lost, not silently rescheduled</b> (FR-4.5). Re-request below; anything from before this moment stays lost.</p>
+              <div class="conn-actions"><button class="conn-btn" type="button" data-conn-act="reallow-notif">Re-request exact-alarm permission</button></div>
+            </div>
+          </div>
+
+          <div class="settings-subhead">Weather &amp; location</div>
+          <div class="perm" id="perm-weather">
+            <p class="perm-say">Pull weather so I can stop asking about pressure changes.</p>
+            <p class="perm-why">City-level only. Tied to the <b>collect_location</b> scope below, exactly as onboarding demonstrated &mdash; decline it there and this permission is never even requested from the OS.</p>
+            <p class="perm-gated">You declined coarse location below, so there is nothing to ask the operating system for. Grant it again and this comes back.</p>
+            <div class="perm-choice" role="group" aria-label="Weather">
+              <button type="button" aria-pressed="true" data-weather-choice="on">Use my city</button>
+              <button type="button" aria-pressed="false" data-weather-choice="off">Not now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= COLLECTION CONSENT ================= -->
+        <div class="settings-section">
+          <div class="app-title">What I <em>keep</em></div>
+          <p class="app-lede">Two decisions, kept separate &mdash; the split FR-7.4 requires, not merged into one settings list.</p>
+
+          <div class="scope" data-scope="collect_symptom_data">
+            <div class="scope-head">
+              <span class="scope-name">Your symptoms, medications and timing</span>
+              <span class="scope-key">collect_symptom_data</span>
+            </div>
+            <p class="scope-body">The record itself: what you log, when it happened, and when you logged it &mdash; kept as two separate timestamps, because a Tuesday migraine written down on Thursday is still a Tuesday migraine.</p>
+            <p class="scope-ifno"><b>If you decline:</b> there is nothing left to keep &mdash; this is the one thing HeadState cannot work around. Withdrawing it now, after your account already holds a record, means deleting the account outright. <b>That deletion flow is not built yet</b> &mdash; tech-spec.md &sect;7.20 records the schema for it (<code>deletion_requested_at</code>, per-user key wrapping), not the working path. Declining below only tells you that, honestly, rather than pretending to withdraw something it cannot yet withdraw.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for collect_symptom_data">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="scope" data-scope="collect_location">
+            <div class="scope-head">
+              <span class="scope-name">Coarse location</span>
+              <span class="scope-key">collect_location</span>
+            </div>
+            <p class="scope-body">City-level only, and only so a day can carry the weather and barometric pressure that went with it. No precise position, no history of where you&rsquo;ve been.</p>
+            <p class="scope-ifno"><b>If you decline:</b> every other part of the app is unchanged. Logging, the recall summary, headache days, migraine days, medication-overuse counting &mdash; all identical. A day just won&rsquo;t have weather next to it.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for collect_location">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+        </div>
+
+        <!-- ================= SHARING CONSENT ================= -->
+        <div class="settings-section">
+          <div class="app-title">What can <em>leave</em></div>
+          <p class="app-lede">Four ways data can go outward. Declining any or all of them leaves logging, recall and day classification fully working (FR-7.5).</p>
+
+          <div class="scope" data-scope="share_assistant_connector">
+            <div class="scope-head">
+              <span class="scope-name">Log through Claude, ChatGPT or Siri</span>
+              <span class="scope-key">share_assistant_connector</span>
+            </div>
+            <p class="scope-body">Lets you log by talking to an assistant you already use. Your words, and whatever the record sends back, travel through that company&rsquo;s servers. <b style="color:var(--app-ink)">Whether they keep any of it is undocumented, and I&rsquo;m not going to tell you it isn&rsquo;t.</b> Granted one assistant at a time, never all at once &mdash; consent is checked per platform (FR-6.2), so allowing this covers <b>Claude</b> only; ChatGPT and Gemini would each need their own grant.</p>
+            <p class="scope-ifno"><b>If you decline:</b> voice and text logging inside HeadState is untouched, including offline.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for share_assistant_connector">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="scope" data-scope="share_export_link">
+            <div class="scope-head">
+              <span class="scope-name">Send the summary as a link</span>
+              <span class="scope-key">share_export_link</span>
+            </div>
+            <p class="scope-body">A single-use web link for a clinic that won&rsquo;t take a PDF. Expires in 24 hours by default (selectable up to 72), has a view limit, and every open is logged &mdash; including the ones that fail. Revoking a link stops future opens; it can&rsquo;t retract a page someone has already read, downloaded or screenshotted.</p>
+            <p class="scope-ifno"><b>If you decline:</b> you can still print the summary, save it as a PDF, or hand over your phone. The recall page itself is unaffected. Any links already created stay listed below, but no new ones can be made.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for share_export_link">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="scope" data-scope="share_health_platform">
+            <div class="scope-head">
+              <span class="scope-name">Write migraine days back to Apple Health</span>
+              <span class="scope-key">share_health_platform</span>
+            </div>
+            <p class="scope-body">Pushes your day classifications outward into the Health app, where other apps you&rsquo;ve authorised can see them. This is data going out. Reading your sleep <i>in</i> is the separate integration above.</p>
+            <p class="scope-ifno"><b>If you decline:</b> nothing else changes, and reading sleep in still works if it is allowed above.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for share_health_platform">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="scope" data-scope="research_aggregate">
+            <div class="scope-head">
+              <span class="scope-name">Let de-identified patterns help check HeadState&rsquo;s own rules</span>
+              <span class="scope-key">research_aggregate</span>
+            </div>
+            <p class="scope-body">Lets de-identified, aggregated patterns from your record &mdash; day classifications, and which of the algorithm&rsquo;s proposals you accepted or overrode &mdash; be pooled to check whether HeadState&rsquo;s clinical rules (episode boundaries, day-count thresholds) hold up in practice. Never your free-text notes, never a verbatim utterance. This is a research-and-development use, not enrollment in a study, and it is not the same as <code>sale</code> &mdash; that is a separate, unimplemented control pending legal review, and allowing this does not touch it.</p>
+            <p class="scope-ifno"><b>If you decline:</b> nothing changes about your own logging, recall or day counts &mdash; this scope only controls whether your data contributes to the aggregate pool used to check the rules themselves.</p>
+            <div class="scope-choice" role="group" aria-label="Consent for research_aggregate">
+              <button type="button" aria-pressed="false" data-decision="grant">Allow</button>
+              <button type="button" aria-pressed="false" data-decision="withdraw">Decline</button>
+            </div>
+            <span class="scope-stamp"></span>
+          </div>
+
+          <div class="device-annotation">
+            <span>&#9670;</span>
+            <span><b>New here, not on the onboarding six-screen flow.</b> Onboarding said <code>research_aggregate</code> belongs in Settings, after the product has earned the question &mdash; this is that screen. <code>sale</code> exists in the schema and renders no control at all, here or anywhere, pending counsel.</span>
+          </div>
+        </div>
+
+        <!-- ================= CONSENT HISTORY ================= -->
+        <div class="settings-section">
+          <div class="app-title">Consent history</div>
+          <p class="app-lede">The full <code>consent_events</code> log &mdash; append-only. Every change above wrote a new row here; none of them edited or replaced an old one.</p>
+          <div class="cr" id="consent-receipt">
+            <div class="receipt-head"><span>All scopes, all time</span><span class="u-numeric" id="history-count"></span></div>
+            <div class="cr-scroll"><div id="history-rows"></div></div>
+            <p class="cr-foot">Change a decision above and watch it land here immediately &mdash; that is the append-only claim onboarding made, demonstrated rather than just stated. <code>share_health_platform</code> below shows a grant, a withdrawal, a re-grant and a second withdrawal &mdash; four rows, one scope, nothing overwritten.</p>
+          </div>
+        </div>
+
+        <!-- ================= EXPORT LINKS ================= -->
+        <div class="settings-section">
+          <div class="app-title">Export links</div>
+          <p class="app-lede">Single-use web links for a clinic that won&rsquo;t take a PDF (tech-spec.md &sect;4.3). Default expiry 24h, selectable to 72h; capped to 3 views; revocable, never unlimited.</p>
+          <div id="explinks"></div>
+        </div>
+
+        <!-- ================= PRIVACY POLICY ================= -->
+        <div class="settings-section">
+          <div class="app-title">Privacy policy</div>
+          <div class="policy-row">
+            <a href="/policy/consumer-health" data-policy="chd">Consumer Health Data Privacy Policy</a>
+            <span>Standalone route, separately linked, distinct from the general policy below (FR-7.6) &mdash; drawn from the same versioned <code>consent_policy_versions</code> rows as the scopes above (FR-7.7).</span>
+          </div>
+          <div class="policy-row">
+            <a href="/policy/privacy" data-policy="general">General Privacy Policy</a>
+            <span>Everything outside consumer health data.</span>
+          </div>
+        </div>
+
+      </div>
+    </div></div>
+  </div>
+
+  <div class="annotation">
+    <span>&#9670;</span>
+    <span>This screen does not render the audit log or breach-detection tooling. <code>audit_log</code> rows (FR-7.8/7.9) hold no clinical content to show &mdash; <code>request_summary</code> is shape only &mdash; and the schema-verification/monitoring behind FR-7.21/7.22 is internal alerting with no user-facing surface. Both are backend-only by design, not an omission from this mockup.</span>
+  </div>
+
+  <div class="shell-foot">
+    <span>Mockup only &mdash; not wired to a consent store, a backend, or the derivation engine.</span>
+    <span>frd.md &sect;4 &amp; &sect;7 &middot; tech-spec.md &sect;4.1/&sect;4.3/&sect;10.1&ndash;10.3 &middot; design-system.md &sect;4/&sect;7</span>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- toast ---------- */
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 3600);
+  }
+
+  /* ---------- timestamp helpers ---------- */
+  function stamp(d){
+    d = d || new Date();
+    function p(n){ return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+           ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  function toDate(v){ return (typeof v === 'string') ? new Date(v.replace(' ', 'T')) : v; }
+  function fmtDT(v){
+    var d = toDate(v);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var h = d.getHours(); var ampm = h >= 12 ? 'PM' : 'AM'; var h12 = h % 12; if (h12 === 0) h12 = 12;
+    var min = (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + h12 + ':' + min + ' ' + ampm;
+  }
+  /* Fixed "now" tied to the fixture data's authorship date, so relative labels
+     ("6 days ago") stay sensible regardless of when this static file is opened. */
+  var NOW = new Date('2026-08-17T15:00:00');
+  function relDays(v){
+    var d = toDate(v);
+    var days = Math.floor((NOW - d) / 86400000);
+    if (days <= 0) return 'today';
+    if (days === 1) return 'yesterday';
+    return days + ' days ago';
+  }
+  function addHours(v, h){
+    var d = new Date(toDate(v).getTime());
+    d.setHours(d.getHours() + h);
+    return d;
+  }
+
+  var CURRENT_POLICY = 'chd-2026.02';
+
+  /* ==================== CONSENT ==================== */
+  var COLLECT_SCOPES = ['collect_symptom_data', 'collect_location'];
+  var SHARE_SCOPES = ['share_assistant_connector', 'share_export_link', 'share_health_platform', 'research_aggregate'];
+  var ALL_SCOPES = COLLECT_SCOPES.concat(SHARE_SCOPES);
+
+  /* consent_current — the derived projection, one row per scope, this is what every
+     card renders. research_aggregate starts null: "not yet decided," never blank. */
+  var consentCurrent = {
+    collect_symptom_data:      { decision: 'grant',    at: '2026-02-03 09:14:02', policy: 'chd-2026.01', method: 'onboarding' },
+    collect_location:          { decision: 'grant',    at: '2026-02-03 09:14:41', policy: 'chd-2026.01', method: 'onboarding' },
+    share_assistant_connector: { decision: 'grant',    at: '2026-02-03 09:16:03', policy: 'chd-2026.01', method: 'onboarding', target: 'claude' },
+    share_export_link:         { decision: 'grant',    at: '2026-02-03 09:16:20', policy: 'chd-2026.01', method: 'onboarding' },
+    share_health_platform:     { decision: 'withdraw', at: '2026-08-01 19:03:44', policy: 'chd-2026.02', method: 'settings' },
+    research_aggregate:        null
+  };
+
+  /* consent_events — the append-only legal record. Every card above is a projection
+     of the LATEST row here for its scope; nothing here is ever edited or removed. */
+  var consentHistory = [
+    { scope: 'collect_symptom_data',      decision: 'grant',    at: '2026-02-03 09:14:02', policy: 'chd-2026.01', method: 'onboarding' },
+    { scope: 'collect_location',          decision: 'grant',    at: '2026-02-03 09:14:41', policy: 'chd-2026.01', method: 'onboarding' },
+    { scope: 'share_assistant_connector', decision: 'grant',    at: '2026-02-03 09:16:03', policy: 'chd-2026.01', method: 'onboarding', target: 'claude' },
+    { scope: 'share_export_link',         decision: 'grant',    at: '2026-02-03 09:16:20', policy: 'chd-2026.01', method: 'onboarding' },
+    { scope: 'share_health_platform',     decision: 'grant',    at: '2026-02-03 09:16:35', policy: 'chd-2026.01', method: 'onboarding' },
+    { scope: 'share_health_platform',     decision: 'withdraw', at: '2026-06-10 14:02:11', policy: 'chd-2026.02', method: 'settings' },
+    { scope: 'share_health_platform',     decision: 'grant',    at: '2026-07-22 08:47:30', policy: 'chd-2026.02', method: 'settings' },
+    { scope: 'share_health_platform',     decision: 'withdraw', at: '2026-08-01 19:03:44', policy: 'chd-2026.02', method: 'settings' }
+  ];
+
+  function renderScope(scope){
+    var card = document.querySelector('.scope[data-scope="' + scope + '"]');
+    if (!card) return;
+    var rec = consentCurrent[scope];
+    var buttons = card.querySelectorAll('.scope-choice button');
+    buttons.forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+    var stampEl = card.querySelector('.scope-stamp');
+    if (rec){
+      var target = card.querySelector('.scope-choice button[data-decision="' + rec.decision + '"]');
+      if (target) target.setAttribute('aria-pressed', 'true');
+      stampEl.textContent = 'consent_events · ' + rec.decision + ' · ' + rec.at +
+        ' · policy ' + rec.policy + (rec.target ? ' · target: ' + rec.target : '');
+    } else {
+      stampEl.textContent = 'not yet decided · no consent_events row written';
+    }
+  }
+
+  function renderHistory(){
+    var host = document.getElementById('history-rows');
+    host.textContent = '';
+    var sorted = consentHistory.slice().sort(function(a, b){ return a.at < b.at ? 1 : -1; });
+    sorted.forEach(function(rec){
+      var row = document.createElement('div');
+      row.className = 'cr-row';
+
+      var name = document.createElement('span');
+      name.className = 'cr-scope';
+      name.textContent = rec.scope + (rec.target ? ' · ' + rec.target : '');
+
+      var dec = document.createElement('span');
+      dec.className = 'cr-decision ' + (rec.decision === 'grant' ? 'is-grant' : 'is-withdraw');
+      dec.textContent = rec.decision === 'grant' ? 'granted' : 'withdrawn';
+
+      row.appendChild(name);
+      row.appendChild(dec);
+
+      var st = document.createElement('span');
+      st.className = 'cr-stamp';
+      st.textContent = rec.at + ' · policy ' + rec.policy + ' · ' + rec.method;
+      row.appendChild(st);
+
+      host.appendChild(row);
+    });
+    document.getElementById('history-count').textContent = sorted.length + ' row' + (sorted.length === 1 ? '' : 's');
+  }
+
+  ALL_SCOPES.forEach(renderScope);
+  renderHistory();
+
+  document.querySelectorAll('.scope').forEach(function(card){
+    var scope = card.dataset.scope;
+    var buttons = Array.prototype.slice.call(card.querySelectorAll('.scope-choice button'));
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var decision = btn.dataset.decision;
+
+        /* collect_symptom_data has no real "decline" path once an account exists —
+           that would mean deleting the account, and FR-7.20's destroy/tombstone flow
+           is not built yet. A silent no-op would misrepresent a capability that does
+           not exist; refusing to fake it is the honest choice (see scope-ifno copy). */
+        if (scope === 'collect_symptom_data' && decision === 'withdraw'){
+          showToast('Withdrawing this means deleting your account outright, and that flow is not built yet (tech-spec.md section 7.20 has the schema, not the path). Nothing changed.');
+          return;
+        }
+
+        var rec = { scope: scope, decision: decision, at: stamp(), policy: CURRENT_POLICY, method: 'settings' };
+        consentCurrent[scope] = rec;
+        consentHistory.push(rec);
+        renderScope(scope);
+        renderHistory();
+        if (scope === 'collect_location') syncWeather();
+        showToast(scope + ' → ' + decision + '. New consent_events row appended in Consent history below.');
+      });
+    });
+  });
+
+  /* ---------- consent gates the OS prompt (reused pattern from onboarding.html) ---------- */
+  var weatherCard = document.getElementById('perm-weather');
+  function syncWeather(){
+    var loc = consentCurrent.collect_location;
+    var blocked = !!loc && loc.decision === 'withdraw'; /* matches onboarding.html's identical
+      gate: an undecided (null) scope leaves weather unblocked, not fail-closed — keep this
+      permissive default identical across both screens rather than silently diverging */
+    weatherCard.classList.toggle('is-blocked', blocked);
+    weatherCard.querySelectorAll('.perm-choice button').forEach(function(b){
+      b.disabled = blocked;
+      if (blocked) b.setAttribute('aria-pressed', 'false');
+    });
+  }
+  weatherCard.querySelectorAll('.perm-choice button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if (btn.disabled) return;
+      weatherCard.querySelectorAll('.perm-choice button').forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+    });
+  });
+  syncWeather();
+
+  /* ==================== INTEGRATIONS DEMO STATE ==================== */
+  var healthMap = {
+    data:          { label: 'Connected',              cls: 'is-connected' },
+    zero:          { label: 'Connected · ambiguous', cls: 'is-ambiguous' },
+    off:           { label: 'Not connected',           cls: 'is-off' },
+    'off-install': { label: 'Not connected',           cls: 'is-off' },
+    window:        { label: 'Connected · limited history', cls: 'is-connected' }
+  };
+  var healthVariants = Array.prototype.slice.call(document.querySelectorAll('[data-conn-var]'));
+  var healthPill = document.getElementById('health-state-pill');
+  function setHealthDemo(val){
+    healthVariants.forEach(function(v){ v.classList.toggle('is-on', v.dataset.connVar === val); });
+    var m = healthMap[val];
+    healthPill.textContent = m.label;
+    healthPill.className = 'conn-state ' + m.cls;
+  }
+  var healthBtns = Array.prototype.slice.call(document.querySelectorAll('#health-demo [data-demo]'));
+  healthBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      healthBtns.forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+      setHealthDemo(btn.dataset.demo);
+    });
+  });
+  setHealthDemo('data');
+
+  var notifMap = {
+    granted: { label: 'Allowed',     cls: 'is-connected' },
+    denied:  { label: 'Not allowed', cls: 'is-off' },
+    revoked: { label: 'Revoked',     cls: 'is-ambiguous' }
+  };
+  var notifVariants = Array.prototype.slice.call(document.querySelectorAll('[data-notif-var]'));
+  var notifPill = document.getElementById('notif-state-pill');
+  function setNotifDemo(val){
+    notifVariants.forEach(function(v){ v.classList.toggle('is-on', v.dataset.notifVar === val); });
+    var m = notifMap[val];
+    notifPill.textContent = m.label;
+    notifPill.className = 'conn-state ' + m.cls;
+  }
+  var notifBtns = Array.prototype.slice.call(document.querySelectorAll('#notif-demo [data-demo]'));
+  notifBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      notifBtns.forEach(function(b){ b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+      setNotifDemo(btn.dataset.demo);
+    });
+  });
+  setNotifDemo('granted');
+
+  var CONN_ACT_MSG = {
+    'disconnect':    'Disconnected. HeadState stops reading health data until you reconnect; nothing already recorded is deleted.',
+    'connect':       'This would open the native permission prompt. Mockup only — there is no OS dialog to show here.',
+    'open-health':   'This would deep-link to the Health app’s sharing screen. Mockup only.',
+    'install':       'This would open the Health Connect listing in the Play Store (FR-4.3). Mockup only.',
+    'history':       'Requested extended history — Health Connect grants this per-request, subject to its own OS prompt (FR-4.4). Mockup only.',
+    'disable-notif': 'Morning notification turned off. The in-app checkpoint still runs next time you open HeadState.',
+    'allow-notif':   'This would open the native notification permission prompt. Mockup only.',
+    'reallow-notif': 'Re-requested exact-alarm permission. Any reminder lost before this moment stays lost — nothing is silently reconstructed.'
+  };
+  document.querySelectorAll('[data-conn-act]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      showToast(CONN_ACT_MSG[btn.dataset.connAct] || 'Mockup only.');
+    });
+  });
+
+  /* ==================== EXPORT LINKS ==================== */
+  var exportLinks = [
+    { id: 'link_8f2a1c', created: '2026-08-17 09:02:00', expiresH: 24, maxViews: 3, views: 1, pin: true,  status: 'active',  revokedAt: null },
+    { id: 'link_63dd0a', created: '2026-08-16 16:40:00', expiresH: 72, maxViews: 3, views: 0, pin: false, status: 'active',  revokedAt: null },
+    { id: 'link_2b90ee', created: '2026-08-10 11:15:00', expiresH: 24, maxViews: 3, views: 2, pin: false, status: 'expired', revokedAt: null },
+    { id: 'link_a410f7', created: '2026-08-13 08:00:00', expiresH: 72, maxViews: 3, views: 1, pin: true,  status: 'revoked', revokedAt: '2026-08-14 10:22:00' }
+  ];
+
+  function renderExportLinks(){
+    var host = document.getElementById('explinks');
+    host.textContent = '';
+
+    exportLinks.forEach(function(link){
+      var card = document.createElement('div');
+      card.className = 'explink' + (link.status !== 'active' ? ' is-inert' : '');
+
+      var top = document.createElement('div');
+      top.className = 'explink-top';
+      var idEl = document.createElement('span');
+      idEl.className = 'explink-id';
+      idEl.textContent = link.id + ' · created ' + fmtDT(link.created);
+      var badge = document.createElement('span');
+      badge.className = 'explink-badge is-' + link.status;
+      var expiresDate = addHours(link.created, link.expiresH);
+      if (link.status === 'active') badge.textContent = 'active';
+      else if (link.status === 'expired') badge.textContent = 'expired · ' + relDays(expiresDate);
+      else badge.textContent = 'revoked · ' + relDays(link.revokedAt);
+      top.appendChild(idEl);
+      top.appendChild(badge);
+      card.appendChild(top);
+
+      var meta = document.createElement('div');
+      meta.className = 'explink-meta';
+      function metaSpan(html){
+        var s = document.createElement('span');
+        s.innerHTML = html;
+        meta.appendChild(s);
+      }
+      if (link.status === 'revoked'){
+        metaSpan('Revoked <b>' + fmtDT(link.revokedAt) + '</b>');
+      } else if (link.status === 'expired'){
+        metaSpan('Expired <b>' + fmtDT(expiresDate) + '</b>');
+      } else {
+        metaSpan('Expires <b>' + fmtDT(expiresDate) + '</b> (' + link.expiresH + 'h)');
+      }
+      metaSpan('Views <b>' + link.views + '</b> of <b>' + link.maxViews + '</b>');
+      metaSpan('PIN <b>' + (link.pin ? 'set' : 'none') + '</b>');
+      card.appendChild(meta);
+
+      if (link.status === 'active'){
+        var actions = document.createElement('div');
+        actions.className = 'explink-actions';
+        var btn = document.createElement('button');
+        btn.className = 'conn-btn';
+        btn.type = 'button';
+        btn.textContent = 'Revoke';
+        btn.addEventListener('click', function(){
+          /* One-way transition: revoked links never re-render with a Revoke button,
+             so this can never fire twice and there is no "un-revoke" anywhere. */
+          link.status = 'revoked';
+          link.revokedAt = stamp(NOW); /* the fixed demo clock, not the real one — see NOW's own
+            comment: relDays() reads against NOW, so stamping a live click with the real clock
+            would make "revoked · today" wrong for any reviewer opening this file on a later date */
+          renderExportLinks();
+          showToast('Link ' + link.id + ' revoked. This stops future access only — content already viewed, downloaded or screenshotted is not retracted (FR-7.12).');
+        });
+        actions.appendChild(btn);
+        card.appendChild(actions);
+
+        var disclose = document.createElement('p');
+        disclose.className = 'explink-disclose';
+        disclose.textContent = 'Revoking stops future access only — it does not retract anything already viewed, downloaded or screenshotted.';
+        card.appendChild(disclose);
+      }
+
+      host.appendChild(card);
+    });
+  }
+  renderExportLinks();
+
+  /* ---------- policy links (reused pattern from onboarding.html) ---------- */
+  document.querySelectorAll('[data-policy]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      showToast(a.dataset.policy === 'chd'
+        ? 'Standalone route /policy/consumer-health — separate document, separately linked (FR-7.6).'
+        : 'Separate route /policy/privacy — the general policy, distinct from the consumer health one.');
+    });
+  });
+
+})();
+</script>

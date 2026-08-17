@@ -313,6 +313,31 @@
   .rq-btn:hover{border-color:var(--app-accent)}
   .rq-btn-primary{background:var(--app-good-dim);border-color:var(--app-good-dim);color:var(--app-good)}
 
+  /* ---- added with Settings, integrations + consent/sharing (task 6) ---- */
+  .conn{background:var(--app-surface);border:1px solid var(--app-border);border-radius:var(--radius-card);padding:.85rem .95rem .95rem;display:flex;flex-direction:column;gap:.65rem}
+  .conn-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem}
+  .conn-name{font-size:var(--fs-body);font-weight:600;line-height:1.3}
+  .conn-state{flex-shrink:0;font-size:.64rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.04em;padding:.2rem .5rem;border-radius:99px;white-space:nowrap;border:1px solid var(--app-border);color:var(--app-faint)}
+  .conn-state.is-connected{color:var(--app-good);border-color:var(--app-good-dim);background:var(--app-good-dim)}
+  .conn-state.is-ambiguous{color:var(--app-accent);border-color:var(--app-accent-dim);background:var(--app-accent-dim)}
+  .conn-detail{font-size:var(--fs-caption);color:var(--app-muted);line-height:1.55}
+  .conn-detail b{color:var(--app-ink);font-weight:600}
+  .conn-actions{display:flex;gap:.5rem;flex-wrap:wrap;padding-top:.1rem}
+  .conn-btn{appearance:none;border:1px solid var(--app-border);background:var(--app-bg);color:var(--app-ink);font-size:.75rem;font-weight:600;padding:.5rem .85rem;border-radius:var(--radius-pill);cursor:pointer}
+  .conn-btn:hover{border-color:var(--app-accent)}
+  .conn-btn.is-quiet{background:transparent;color:var(--app-muted)}
+  .explink{background:var(--app-surface);border:1px solid var(--app-border);border-radius:var(--radius-card);padding:.8rem .9rem .9rem;display:flex;flex-direction:column;gap:.55rem}
+  .explink.is-inert{opacity:.6;border-style:dashed}
+  .explink-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+  .explink-id{font-family:var(--f-mono);font-size:.7rem;color:var(--app-muted);word-break:break-all}
+  .explink-badge{font-size:.64rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.04em;padding:.16rem .45rem;border-radius:5px;white-space:nowrap;border:1px solid var(--app-border);color:var(--app-faint);flex-shrink:0}
+  .explink-badge.is-active{color:var(--app-good);border-color:var(--app-good-dim);background:var(--app-good-dim)}
+  .explink-badge.is-revoked{color:var(--app-flag);border-color:var(--app-flag)}
+  .explink-meta{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font-size:.75rem;color:var(--app-muted)}
+  .explink-meta b{font-family:var(--f-mono);color:var(--app-ink);font-weight:600}
+  .explink-disclose{font-size:.7rem;color:var(--app-faint);line-height:1.5;border-top:1px dashed var(--app-border);padding-top:.5rem}
+  .explink-actions{display:flex;gap:.5rem}
+
   .tag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem}
   .tag-swatch{border:1px solid var(--border);border-radius:10px;padding:.75rem .85rem;background:var(--surface-raised);display:flex;flex-direction:column;gap:.4rem}
   .tag-meaning{font-size:.72rem;color:var(--ink-muted);line-height:1.4}
@@ -520,6 +545,28 @@
           </div>
         </div>
         <div class="cell-foot"><span class="cell-name">ConsentReceipt</span><span class="cell-world">Device — onboarding close, Settings</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start;flex-direction:column;gap:.5rem">
+          <div class="conn">
+            <div class="conn-top"><span class="conn-name">Health data</span><span class="conn-state is-ambiguous">ambiguous</span></div>
+            <p class="conn-detail">No sleep records read back this month. This may mean access was declined, or it may mean nothing happened to record &mdash; HealthKit doesn&rsquo;t distinguish the two (FR-4.2), so neither do we.</p>
+            <div class="conn-actions"><button class="conn-btn" type="button">Open Health settings</button><button class="conn-btn is-quiet" type="button">Disconnect</button></div>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">ConnectionCard &mdash; ambiguous state</span><span class="cell-world">Device (Settings) &mdash; never renders a confident &ldquo;access denied&rdquo; (FR-4.2)</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start;flex-direction:column;gap:.5rem">
+          <div class="explink">
+            <div class="explink-top"><span class="explink-id">export/8f2a&hellip;c091</span><span class="explink-badge is-revoked">revoked</span></div>
+            <div class="explink-meta"><span>Created <b>Aug 12</b></span><span>Viewed <b>2</b> of 3</span></div>
+            <p class="explink-disclose">Revoking stops future access only &mdash; content already viewed, downloaded or screenshotted is not retracted (FR-7.12).</p>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">ExportLinkRow &mdash; revoked</span><span class="cell-world">Device (Settings) &mdash; one-way transition, disclosure stays in the copy, not just at click time</span></div>
       </div>
 
       <div class="cell">
