@@ -52,6 +52,7 @@
     --app-good:#7FA79D;
     --app-good-dim:#233330;
     --app-focus:#7DA2FF;
+    --app-flag:#C97A68;
 
     /* fixed paper world — kept for token parity with the other mockups */
     --doc-bg:#FCFAF5;
@@ -193,6 +194,7 @@
   }
   .switcher button:hover{color:var(--ink)}
   .switcher button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+  .switcher button[disabled]{opacity:.4;cursor:not-allowed}
   .controls-note{
     flex:1 1 18rem;min-width:14rem;
     font-size:.72rem;color:var(--ink-faint);line-height:1.55;
@@ -298,10 +300,74 @@
   .badge-review.is-confirmed{color:var(--app-accent);border:1px solid var(--app-accent-dim);background:var(--app-accent-dim)}
   .badge-review.is-timedout{color:var(--app-faint);border:1px dashed var(--app-faint)}
 
-  .stub-btn{
-    appearance:none;border:1px dashed var(--app-border);background:transparent;
-    color:var(--app-faint);font-size:.66rem;font-weight:600;
-    padding:.3rem .6rem;border-radius:var(--radius-pill);cursor:not-allowed;
+  .boundary-open-btn{
+    appearance:none;border:1px dashed var(--app-accent);background:transparent;
+    color:var(--app-accent);font-size:.66rem;font-weight:600;
+    padding:.3rem .6rem;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .boundary-open-btn:hover{background:var(--app-accent-dim)}
+  .boundary-set-btn{
+    appearance:none;border:1px solid var(--app-good-dim);background:var(--app-good-dim);
+    color:var(--app-good);font-size:.66rem;font-weight:600;
+    padding:.3rem .6rem;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .boundary-set-btn:hover{border-color:var(--app-good)}
+
+  /* ---- Boundary-override drawer: BoundaryPicker (Tier 1) / BoundaryAdjuster (Tier 2), D17/D18 ---- */
+  .boundary-scrim{
+    position:absolute;inset:0;background:rgba(8,6,14,.6);
+    opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:30;
+  }
+  .boundary-scrim.is-open{opacity:1;pointer-events:auto}
+  .boundary-drawer{
+    position:absolute;left:0;right:0;bottom:0;max-height:82%;
+    background:var(--app-surface);border-radius:20px 20px 0 0;
+    padding:1rem 1.15rem 1.3rem;
+    display:flex;flex-direction:column;gap:.75rem;
+    transform:translateY(100%);transition:transform .25s ease;
+    overflow-y:auto;z-index:31;
+    box-shadow:0 -12px 30px rgba(0,0,0,.35);
+  }
+  .boundary-drawer.is-open{transform:translateY(0)}
+  .boundary-drawer[aria-hidden="true"]{visibility:hidden}
+  .boundary-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+  .boundary-title{font-family:var(--f-display);font-weight:600;font-size:var(--fs-body-lg)}
+  .boundary-close{
+    appearance:none;border:none;background:var(--app-bg);color:var(--app-faint);
+    width:1.8rem;height:1.8rem;flex-shrink:0;border-radius:99px;font-size:1.1rem;line-height:1;cursor:pointer;
+  }
+  .boundary-close:hover{color:var(--app-ink)}
+  .boundary-sub{font-size:.76rem;color:var(--app-faint);line-height:1.5;margin:0}
+  .boundary-candidates{display:flex;flex-direction:column;gap:.5rem}
+  .boundary-candidate{
+    appearance:none;text-align:left;border:1px solid var(--app-border);background:var(--app-bg);
+    border-radius:12px;padding:.65rem .8rem;cursor:pointer;width:100%;
+    display:flex;flex-direction:column;gap:.25rem;font:inherit;
+  }
+  .boundary-candidate:hover{border-color:var(--app-accent)}
+  .boundary-candidate.is-picked{border-color:var(--app-good);background:var(--app-good-dim)}
+  .boundary-candidate-title{font-family:var(--f-mono);font-size:.72rem;color:var(--app-accent);font-weight:600}
+  .boundary-candidate.is-picked .boundary-candidate-title{color:var(--app-good)}
+  .boundary-candidate-rule{font-size:.78rem;color:var(--app-ink);line-height:1.45}
+  .boundary-tier2-link{
+    appearance:none;background:none;border:none;color:var(--app-faint);
+    font-size:.72rem;text-decoration:underline dotted;text-underline-offset:2px;
+    cursor:pointer;padding:.2rem 0;align-self:flex-start;font:inherit;
+  }
+  .boundary-tier2-link:hover{color:var(--app-accent)}
+  .boundary-adjuster{display:flex;flex-direction:column;gap:.6rem}
+  .boundary-dt-row{display:flex;flex-direction:column;gap:.3rem}
+  .boundary-dt-label{font-size:.7rem;color:var(--app-faint);text-transform:uppercase;letter-spacing:.03em}
+  .boundary-dt-input{
+    background:var(--app-bg);border:1px solid var(--app-accent);color:var(--app-ink);
+    border-radius:6px;padding:.4rem .55rem;font:inherit;font-family:var(--f-mono);
+    font-size:var(--fs-caption);color-scheme:dark;
+  }
+  .boundary-dt-input.is-invalid{border-color:var(--app-flag)}
+  .boundary-dt-hint{font-size:.68rem;color:var(--app-faint);line-height:1.45;margin:0}
+  .boundary-error{
+    font-size:.72rem;color:var(--app-flag);line-height:1.45;margin:0;
+    border:1px dashed var(--app-flag);border-radius:8px;padding:.4rem .55rem;
   }
 
   /* connecting band for a two-date episode span (relapse toggle) */
@@ -315,6 +381,8 @@
     font-size:.68rem;color:var(--app-faint);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
   }
   .episode-label b{color:var(--app-muted);font-weight:600}
+  .boundary-episode-badge{border-width:1.5px}
+  .boundary-episode-badge::before{content:'episode · ';opacity:.7;font-weight:400}
 
   /* ---- empty-day row ---- */
   .tl-empty{
@@ -533,7 +601,7 @@
 
   <div class="annotation">
     <span>&#9670;</span>
-    <span><b>The boundary-override drawer (BoundaryPicker / BoundaryAdjuster, D17) is not built yet.</b> &ldquo;Adjust boundary&rdquo; below is a visibly inert stub, not a working control &mdash; it is design-system.md §7 Task 4, sequenced after this screen. Tapping it names that rather than pretending to open something.</span>
+    <span><b>The boundary-override drawer (BoundaryPicker / BoundaryAdjuster, D17) is built &mdash; design-system.md §7 Task 4.</b> Tap &ldquo;Adjust boundary&rdquo; on the Aug&nbsp;13 rail below. Picking a computed reading (Tier&nbsp;1) or setting a manual start/end (Tier&nbsp;2) sets <code>confirmed_by: user</code> on the <i>episode</i>, shown next to the episode label &mdash; not on the individual day rows, since a boundary override doesn&rsquo;t extend to <code>day_classifications</code> rows unless those are separately overridden (tech-spec.md §5.4).</span>
   </div>
 
   <div class="annotation" style="border-color:var(--border)">
@@ -793,6 +861,236 @@
   var scrollEl = document.getElementById('tl-scroll');
   var relapseState = 'collapsed';
 
+  /* Once a real Tier-1 override exists, IT governs what's displayed for the Aug 12/13
+     episode — never the reviewer-only toggle's relapseState. Without this, toggling the
+     reviewer control after an override is set could show a "confirmed" badge next to text
+     describing the wrong reading. The toggle itself is disabled once an override exists
+     (see pickTier1/pickTier2 below) so this is belt-and-suspenders, not the only guard. */
+  function effectiveVariant(){
+    return (boundaryOverride && boundaryOverride.tier === 1) ? boundaryOverride.variant : relapseState;
+  }
+
+  /* ---------------- boundary-override drawer: BoundaryPicker (Tier 1) / BoundaryAdjuster (Tier 2), D17/D18 ----------------
+     Not the same control as the reviewer-only relapse toggle above (chrome world, demo-only). This drawer is the
+     device-world, in-product interaction a real user would use to resolve a sub-48h recurrence — see design-system.md §4. */
+  var boundaryOverride = null; // null | {tier:1, variant:'collapsed'|'split'} | {tier:2, startIso, endIso, startShown, endShown}
+  var boundaryTier = 1; // which tier the open drawer is currently showing
+  var lastTrigger = null; // element to return focus to when the drawer closes
+
+  var deviceScreenEl = document.querySelector('.device-screen');
+  var boundaryScrim = document.createElement('div');
+  boundaryScrim.className = 'boundary-scrim';
+  var boundaryDrawer = document.createElement('div');
+  boundaryDrawer.className = 'boundary-drawer';
+  boundaryDrawer.setAttribute('role', 'dialog');
+  boundaryDrawer.setAttribute('aria-modal', 'true');
+  boundaryDrawer.setAttribute('aria-label', 'Adjust episode boundary');
+  boundaryDrawer.setAttribute('aria-hidden', 'true');
+  deviceScreenEl.appendChild(boundaryScrim);
+  deviceScreenEl.appendChild(boundaryDrawer);
+
+  function fmtBoundaryDt(iso){
+    var d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' }) +
+           ', ' + d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  }
+
+  /* Plausible-length edit check (CLAUDE.md "Borrow this published spec" — a manual
+     start/end edit needs one). Not a clinical threshold: a plain sanity bound on a
+     single episode's span, not dressed up as anything more precise than that. */
+  function validateBoundarySpan(startIso, endIso){
+    if (!startIso || !endIso) return { ok:false, message:'Both start and end are required.' };
+    var start = new Date(startIso), end = new Date(endIso);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return { ok:false, message:'Enter a valid date and time for both fields.' };
+    if (end <= start) return { ok:false, message:'End must be after start.' };
+    var days = (end - start) / 86400000;
+    if (days > 30) return { ok:false, message:'That span is over 30 days — too long to be one episode boundary. Double-check the dates.' };
+    return { ok:true };
+  }
+
+  function closeBoundaryDrawer(){
+    boundaryScrim.classList.remove('is-open');
+    boundaryDrawer.classList.remove('is-open');
+    boundaryDrawer.setAttribute('aria-hidden', 'true');
+    if (lastTrigger && typeof lastTrigger.focus === 'function') lastTrigger.focus();
+  }
+
+  function openBoundaryDrawer(trigger){
+    lastTrigger = trigger || document.activeElement;
+    boundaryTier = boundaryOverride ? boundaryOverride.tier : 1;
+    paintBoundaryDrawer();
+    boundaryScrim.classList.add('is-open');
+    boundaryDrawer.classList.add('is-open');
+    boundaryDrawer.removeAttribute('aria-hidden');
+    var first = boundaryTier === 1
+      ? boundaryDrawer.querySelector('.boundary-candidate')
+      : boundaryDrawer.querySelector('.boundary-dt-input');
+    if (first) first.focus();
+  }
+
+  boundaryScrim.addEventListener('click', closeBoundaryDrawer);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && boundaryDrawer.classList.contains('is-open')) closeBoundaryDrawer();
+  });
+
+  /* Once any override is set, the reviewer-only toggle no longer drives this episode's
+     display (see effectiveVariant() above) — lock it so the page can't show a "pressed"
+     state that visibly disagrees with what's actually stored. */
+  function lockRelapseToggle(){
+    relapseBtns.forEach(function(b){
+      b.disabled = true;
+      b.title = 'This episode’s boundary is now set below — the toggle no longer changes its display.';
+    });
+  }
+
+  function pickTier1(variant){
+    boundaryOverride = { tier: 1, variant: variant };
+    closeBoundaryDrawer();
+    /* Nice-to-have: syncs the reviewer-only toggle to match what was just resolved.
+       Still a distinct control — this does not make the toggle part of the drawer. */
+    relapseState = variant;
+    relapseBtns.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.relapse === variant ? 'true' : 'false'); });
+    lockRelapseToggle();
+    counterEl.textContent = '2 migraine days either way · ' + (variant === 'collapsed' ? '1 episode' : '2 episodes');
+    render();
+    showToast('Boundary set: ' + (variant === 'collapsed' ? 'relapse_collapsed' : 'relapse_split') + '. The episode now carries confirmed_by: user.');
+  }
+
+  function pickTier2(startIso, endIso){
+    boundaryOverride = {
+      tier: 2, startIso: startIso, endIso: endIso,
+      startShown: fmtBoundaryDt(startIso), endShown: fmtBoundaryDt(endIso)
+    };
+    closeBoundaryDrawer();
+    lockRelapseToggle();
+    counterEl.textContent = '2 migraine days either way · boundary set manually';
+    render();
+    showToast('Boundary set manually: ' + boundaryOverride.startShown + ' → ' + boundaryOverride.endShown + '. The episode now carries confirmed_by: user.');
+  }
+
+  function paintBoundaryDrawer(){
+    boundaryDrawer.textContent = '';
+
+    var head = document.createElement('div');
+    head.className = 'boundary-head';
+    var title = document.createElement('span');
+    title.className = 'boundary-title';
+    title.textContent = boundaryTier === 1 ? 'Which reading is right?' : 'Set the boundary manually';
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'boundary-close';
+    close.setAttribute('aria-label', 'Close');
+    close.innerHTML = '&times;';
+    close.addEventListener('click', closeBoundaryDrawer);
+    head.appendChild(title);
+    head.appendChild(close);
+    boundaryDrawer.appendChild(head);
+
+    if (boundaryTier === 1){
+      var sub = document.createElement('p');
+      sub.className = 'boundary-sub';
+      sub.innerHTML = 'ICHD-3 declines to resolve a recurrence under 48h headache-free (§5.3) &mdash; both readings below are already computed. Pick the one that matches what actually happened.';
+      boundaryDrawer.appendChild(sub);
+
+      var opts = document.createElement('div');
+      opts.className = 'boundary-candidates';
+      ['collapsed', 'split'].forEach(function(variant){
+        var picked = boundaryOverride && boundaryOverride.tier === 1 && boundaryOverride.variant === variant;
+        var card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'boundary-candidate' + (picked ? ' is-picked' : '');
+        var t = document.createElement('span');
+        t.className = 'boundary-candidate-title';
+        t.textContent = (variant === 'collapsed' ? 'relapse_collapsed' : 'relapse_split') + (picked ? ' — picked' : '');
+        var r = document.createElement('span');
+        r.className = 'boundary-candidate-rule';
+        r.innerHTML = RELAPSE_NOTE[variant].label + ' — ' + RELAPSE_NOTE[variant][12];
+        card.appendChild(t);
+        card.appendChild(r);
+        card.addEventListener('click', function(){ pickTier1(variant); });
+        opts.appendChild(card);
+      });
+      boundaryDrawer.appendChild(opts);
+
+      var deeper = document.createElement('button');
+      deeper.type = 'button';
+      deeper.className = 'boundary-tier2-link';
+      deeper.textContent = 'Neither of these — adjust manually →';
+      deeper.addEventListener('click', function(){ boundaryTier = 2; paintBoundaryDrawer(); });
+      boundaryDrawer.appendChild(deeper);
+    } else {
+      var sub2 = document.createElement('p');
+      sub2.className = 'boundary-sub';
+      sub2.innerHTML = 'A genuinely manual edit, for a boundary that matches neither computed reading &mdash; one tap deeper than picking a candidate, and more deliberate (D17 Tier 2).';
+      boundaryDrawer.appendChild(sub2);
+
+      var form = document.createElement('div');
+      form.className = 'boundary-adjuster';
+
+      function dtField(labelText, defaultIso){
+        var row = document.createElement('label');
+        row.className = 'boundary-dt-row';
+        var lab = document.createElement('span');
+        lab.className = 'boundary-dt-label';
+        lab.textContent = labelText;
+        var input = document.createElement('input');
+        input.type = 'datetime-local';
+        input.className = 'boundary-dt-input';
+        input.value = defaultIso;
+        row.appendChild(lab);
+        row.appendChild(input);
+        form.appendChild(row);
+        return input;
+      }
+
+      /* Neutral starting point, not a claimed computed boundary: the two attacks' own onset
+         times already visible on the Timeline (2:00 PM Aug 12, 10:00 AM Aug 13) — see the hint
+         below. Once a manual boundary is saved, reopening shows that saved value instead. */
+      var startDefault = (boundaryOverride && boundaryOverride.tier === 2) ? boundaryOverride.startIso : '2026-08-12T14:00';
+      var endDefault = (boundaryOverride && boundaryOverride.tier === 2) ? boundaryOverride.endIso : '2026-08-13T10:00';
+      var startInput = dtField('Episode start', startDefault);
+      var endInput = dtField('Episode end', endDefault);
+      boundaryDrawer.appendChild(form);
+
+      var errorEl = document.createElement('p');
+      errorEl.className = 'boundary-error';
+      errorEl.style.display = 'none';
+      boundaryDrawer.appendChild(errorEl);
+
+      var hint = document.createElement('p');
+      hint.className = 'boundary-dt-hint';
+      hint.textContent = (boundaryOverride && boundaryOverride.tier === 2)
+        ? 'Your last saved boundary.'
+        : 'Starting point: the two attacks’ own onset times — not a computed boundary. Edit freely.';
+      boundaryDrawer.appendChild(hint);
+
+      var save = document.createElement('button');
+      save.type = 'button';
+      save.className = 'stepper-done';
+      save.textContent = 'Save boundary';
+      save.addEventListener('click', function(){
+        var check = validateBoundarySpan(startInput.value, endInput.value);
+        startInput.classList.toggle('is-invalid', !check.ok);
+        endInput.classList.toggle('is-invalid', !check.ok);
+        if (!check.ok){
+          errorEl.textContent = check.message;
+          errorEl.style.display = '';
+          return;
+        }
+        errorEl.style.display = 'none';
+        pickTier2(startInput.value, endInput.value);
+      });
+      boundaryDrawer.appendChild(save);
+
+      var back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'boundary-tier2-link';
+      back.textContent = '← Back to the two computed readings';
+      back.addEventListener('click', function(){ boundaryTier = 1; paintBoundaryDrawer(); });
+      boundaryDrawer.appendChild(back);
+    }
+  }
+
   function classLabel(cls){
     return { migraine:'Migraine day', headache:'Headache day', aura_only:'Aura-only day', none:'None' }[cls] || cls;
   }
@@ -849,7 +1147,7 @@
     main.appendChild(top);
 
     var noteText = day.note;
-    if (day.relapse) noteText = RELAPSE_NOTE[relapseState][day.relapse];
+    if (day.relapse) noteText = RELAPSE_NOTE[effectiveVariant()][day.relapse];
     if (noteText){
       var noteEl = document.createElement('p');
       noteEl.className = 'dayrail-note';
@@ -858,14 +1156,12 @@
     }
 
     if (day.showAdjust){
-      var stub = document.createElement('button');
-      stub.type = 'button';
-      stub.className = 'stub-btn';
-      stub.textContent = 'Adjust boundary →';
-      stub.addEventListener('click', function(){
-        showToast('Boundary override drawer (BoundaryPicker / BoundaryAdjuster) is Task 4 — not built yet.');
-      });
-      main.appendChild(stub);
+      var adjustBtn = document.createElement('button');
+      adjustBtn.type = 'button';
+      adjustBtn.className = boundaryOverride ? 'boundary-set-btn' : 'boundary-open-btn';
+      adjustBtn.textContent = boundaryOverride ? 'Boundary set by you — change' : 'Adjust boundary →';
+      adjustBtn.addEventListener('click', function(){ openBoundaryDrawer(adjustBtn); });
+      main.appendChild(adjustBtn);
     }
 
     rail.appendChild(main);
@@ -1150,10 +1446,17 @@
       if (day.relapse === 13){
         /* wrap the two ambiguous dates (Aug 13, Aug 12) in a connecting band */
         var span = document.createElement('div');
-        span.className = 'episode-span' + (relapseState === 'collapsed' ? ' is-collapsed' : '');
+        span.className = 'episode-span' + (effectiveVariant() === 'collapsed' ? ' is-collapsed' : '');
         var elabel = document.createElement('div');
         elabel.className = 'episode-label';
-        elabel.innerHTML = '<b>' + RELAPSE_NOTE[relapseState].label + '</b>';
+        var labelText = boundaryOverride && boundaryOverride.tier === 2
+          ? 'Boundary set manually — ' + boundaryOverride.startShown + ' &rarr; ' + boundaryOverride.endShown
+          : RELAPSE_NOTE[effectiveVariant()].label;
+        elabel.innerHTML = '<b>' + labelText + '</b>';
+        var epBadge = reviewBadge(boundaryOverride ? 'user' : 'system', boundaryOverride ? 'user_reviewed' : 'unreviewed');
+        epBadge.classList.add('boundary-episode-badge');
+        epBadge.title = 'This episode’s confirmed_by/review_status — separate from each day’s own row (tech-spec.md §5.4).';
+        elabel.appendChild(epBadge);
         span.appendChild(elabel);
         span.appendChild(buildDayGroup(DAYS[i]));
         span.appendChild(buildDayGroup(DAYS[i+1]));
