@@ -1,0 +1,1407 @@
+<title>Prior-Authorization Report</title>
+<style>
+  @font-face{
+    font-family:'Fraunces';font-style:italic;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_ITALIC__) format('woff2');
+  }
+  @font-face{
+    font-family:'Fraunces';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_NORMAL__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Sans';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXSANS__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_400__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_500__) format('woff2');
+  }
+
+  /* ============ TOKENS (copied verbatim — design-system.md §5) ============ */
+  :root{
+    --surface:#F6F7F9; --surface-raised:#FFFFFF;
+    --ink:#1B1C22; --ink-muted:#5B5E68; --ink-faint:#6A6C74;
+    --border:#DDE0E5;
+    --accent:#B5652A; --accent-ink:#FFFFFF; --accent-soft:#F3E4D3;
+    --focus:#2B57B0;
+    --good:#3F6B62; --good-soft:#E1EBE8;
+    --flag:#9C4A3A; --flag-soft:#F3E1DD;
+
+    --app-bg:#121019; --app-surface:#1C1927; --app-surface-raised:#242032;
+    --app-ink:#EDEAF2; --app-muted:#948FA6; --app-faint:#87839C;
+    --app-border:#332F42; --app-accent:#D98A46; --app-accent-dim:#3B2A1C;
+    --app-good:#7FA79D; --app-good-dim:#233330; --app-focus:#7DA2FF; --app-flag:#C97A68;
+
+    --doc-bg:#FCFAF5; --doc-ink:#211D1A; --doc-muted:#6E655B; --doc-faint:#756C5B;
+    --doc-rule:#DCD1BE; --doc-accent:#A85A26; --doc-flag:#9C4A3A; --doc-flag-soft:#F1DFD3;
+    --doc-focus:#2B57B0;
+
+    --f-display:'Fraunces', ui-serif, Georgia, serif;
+    --f-body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --f-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+    --fs-eyebrow:.6875rem; --fs-caption:.8125rem; --fs-body:.9375rem;
+    --fs-body-lg:1.0625rem; --fs-h3:1.1875rem; --fs-h2:1.5rem;
+
+    --radius-doc:3px; --radius-card:14px; --radius-pill:999px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --surface:#15141C; --surface-raised:#1D1B26;
+      --ink:#EDEAF2; --ink-muted:#A9A5B8; --ink-faint:#8A8699;
+      --border:#332F3F; --accent:#D98A46; --accent-ink:#1B1208; --accent-soft:#3B2A1C;
+      --focus:#7DA2FF; --good:#7FA79D; --good-soft:#233330; --flag:#C97A68; --flag-soft:#3A241F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --surface:#15141C; --surface-raised:#1D1B26;
+    --ink:#EDEAF2; --ink-muted:#A9A5B8; --ink-faint:#8A8699;
+    --border:#332F3F; --accent:#D98A46; --accent-ink:#1B1208; --accent-soft:#3B2A1C;
+    --focus:#7DA2FF; --good:#7FA79D; --good-soft:#233330; --flag:#C97A68; --flag-soft:#3A241F;
+  }
+
+  /* ============ BASE ============ */
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  [hidden]{display:none !important}
+  body{
+    margin:0; background:var(--surface); color:var(--ink);
+    font-family:var(--f-body); font-size:var(--fs-body); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+  p{margin:0}
+  button{font:inherit;color:inherit}
+  table{border-collapse:collapse}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+  .device-screen :focus-visible{outline-color:var(--app-focus)}
+  .doc-sheet :focus-visible{outline-color:var(--doc-focus)}
+  .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
+
+  /* ============ SHELL ============ */
+  .shell{max-width:1180px;margin:0 auto;padding:2.25rem 1.5rem 4rem}
+  .shell-head{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;
+    margin-bottom:1.75rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;flex-direction:column;gap:.3rem}
+  .brand-mark{font-family:var(--f-display);font-weight:600;font-size:1.375rem;letter-spacing:.01em}
+  .brand-mark em{font-style:italic;color:var(--accent)}
+  .brand-sub{font-size:var(--fs-caption);color:var(--ink-muted);max-width:44ch}
+
+  .lede{max-width:70ch;color:var(--ink-muted);font-size:var(--fs-body);margin-bottom:1.5rem}
+  .lede b{color:var(--ink);font-weight:600}
+
+  .shell-foot{
+    margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--border);
+    font-size:var(--fs-caption);color:var(--ink-faint);
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  }
+
+  .annotation{
+    display:flex;gap:.55rem;align-items:flex-start;
+    border:1px dashed var(--border);border-radius:10px;
+    padding:.7rem .85rem;font-size:.78rem;color:var(--ink-faint);line-height:1.55;
+    max-width:64rem;margin:0 auto 1rem;
+  }
+  .annotation b{color:var(--ink)}
+  .annotation code{font-family:var(--f-mono);font-size:.92em;color:var(--ink-muted)}
+
+  /* ============ DEVICE FRAME ============ */
+  .device-stage{display:flex;justify-content:center;padding:.5rem 0 1rem}
+  .device-frame{
+    width:min(390px, 100%);border-radius:40px;padding:12px;
+    background:linear-gradient(155deg,#2A2735,#131019);
+    box-shadow:0 1px 1px rgba(0,0,0,.4), 0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .device-screen{
+    background:var(--app-bg);color:var(--app-ink);border-radius:30px;overflow:hidden;
+    font-family:var(--f-body);height:840px;display:flex;flex-direction:column;position:relative;
+  }
+  .device-notch{height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .device-notch::before{content:'';width:90px;height:6px;border-radius:99px;background:rgba(255,255,255,.14)}
+
+  /* ---- criterion picker — real in-product control, device world ---- */
+  .crit-picker{flex-shrink:0;padding:.15rem 1.15rem .75rem;display:flex;flex-direction:column;gap:.45rem;border-bottom:1px solid var(--app-border)}
+  .crit-picker-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--app-faint);font-weight:600}
+  .crit-options{display:flex;flex-direction:column;gap:.4rem}
+  .crit-option{
+    appearance:none;text-align:left;border:1px solid var(--app-border);background:var(--app-bg);
+    color:var(--app-ink);border-radius:10px;padding:.5rem .65rem;cursor:pointer;font:inherit;
+    display:flex;flex-direction:column;gap:.15rem;width:100%;
+  }
+  .crit-option:hover{border-color:var(--app-accent)}
+  .crit-option.is-active{border-color:var(--app-accent);background:var(--app-accent-dim)}
+  .crit-option-name{font-weight:600;font-size:.8rem}
+  .crit-option.is-active .crit-option-name{color:var(--app-accent)}
+  .crit-option-desc{font-size:.67rem;color:var(--app-faint);line-height:1.4}
+
+  /* ---- fixed screen header ---- */
+  .rq-head{flex-shrink:0;padding:.6rem 1.15rem .6rem;display:flex;flex-direction:column;gap:.3rem;border-bottom:1px solid var(--app-border)}
+  .rq-title{font-family:var(--f-display);font-weight:600;font-size:var(--fs-h3)}
+  .rq-sub{font-size:.72rem;color:var(--app-faint)}
+  .rq-stat{font-size:.72rem;color:var(--app-muted);margin-top:.1rem}
+  .rq-stat b{font-family:var(--f-mono);color:var(--app-ink)}
+
+  .rq-batchbar{
+    flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:.7rem;
+    padding:.55rem 1.15rem;border-bottom:1px solid var(--app-border);background:var(--app-surface);
+  }
+  .rq-batchbar[hidden]{display:none}
+  .rq-selectall{display:flex;align-items:center;gap:.5rem;font-size:var(--fs-caption);color:var(--app-muted)}
+  .rq-checkbox{width:18px;height:18px;flex-shrink:0;accent-color:var(--app-accent);cursor:pointer}
+  .rq-checkbox[disabled]{cursor:not-allowed;opacity:.4}
+  .rq-confirm-selected{
+    appearance:none;border:none;background:var(--app-accent);color:#1B1208;
+    font-size:.75rem;font-weight:600;padding:.5rem .9rem;border-radius:var(--radius-pill);
+    cursor:pointer;white-space:nowrap;
+  }
+  .rq-confirm-selected[disabled]{background:var(--app-border);color:var(--app-faint);cursor:not-allowed}
+
+  .rq-scroll{flex:1;overflow-y:auto;min-height:0;padding:.85rem 1.15rem 1rem;display:flex;flex-direction:column;gap:.7rem}
+  .rq-scroll::-webkit-scrollbar{width:6px}
+  .rq-scroll::-webkit-scrollbar-thumb{background:var(--app-border);border-radius:99px}
+
+  .rq-item{display:flex;gap:.6rem;align-items:flex-start;background:var(--app-surface);border:1px solid var(--app-border);border-radius:var(--radius-card);padding:.8rem .9rem .85rem}
+  .rq-item.is-timedout{border-style:dashed}
+  .rq-item.is-resolved{border-color:var(--app-good-dim)}
+  .rq-item-select{padding-top:.2rem;flex-shrink:0}
+  .rq-item-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:.45rem}
+  .rq-item-top{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+  .rq-item-kindwrap{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
+  .rq-item-kind{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--app-accent)}
+  .rq-item-date{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--app-ink);font-weight:600}
+  .rq-item-queued{font-size:.64rem;color:var(--app-faint);font-family:var(--f-mono)}
+  .rq-item-summary{font-size:.85rem;color:var(--app-ink);line-height:1.5}
+  .rq-item-summary b{font-weight:600;color:var(--app-accent)}
+  .rq-item-rule{font-size:.73rem;color:var(--app-muted);line-height:1.5}
+  .rq-item-note{font-size:.7rem;color:var(--app-faint);line-height:1.5;border-top:1px dashed var(--app-border);padding-top:.45rem}
+  .rq-item-actions{display:flex;gap:.5rem;flex-wrap:wrap;padding-top:.1rem}
+  .rq-btn{appearance:none;border:1px solid var(--app-border);background:var(--app-bg);color:var(--app-ink);font-size:.73rem;font-weight:600;padding:.45rem .8rem;border-radius:var(--radius-pill);cursor:pointer}
+  .rq-btn:hover{border-color:var(--app-accent)}
+  .rq-btn-primary{background:var(--app-good-dim);border-color:var(--app-good-dim);color:var(--app-good)}
+  .rq-btn-primary:hover{border-color:var(--app-good)}
+  .rq-btn-ghost{background:transparent;border-style:dashed;color:var(--app-muted)}
+
+  .badge-review{font-size:.6rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.03em;padding:.14rem .45rem;border-radius:5px;white-space:nowrap;flex-shrink:0}
+  .badge-review.is-unreviewed{color:var(--app-faint);border:1px dotted var(--app-faint)}
+  .badge-review.is-reviewed{color:var(--app-good);border:1px solid var(--app-good-dim);background:var(--app-good-dim)}
+  .badge-review.is-confirmed{color:var(--app-accent);border:1px solid var(--app-accent-dim);background:var(--app-accent-dim)}
+  .badge-review.is-timedout{color:var(--app-faint);border:1px dashed var(--app-faint)}
+
+  .chip-picker{display:flex;gap:.35rem;flex-wrap:wrap;width:100%;padding:.2rem 0}
+  .chip-picker button{appearance:none;border:1px solid var(--app-border);background:var(--app-bg);color:var(--app-ink);font-size:.72rem;font-weight:500;padding:.35rem .6rem;border-radius:var(--radius-pill);cursor:pointer}
+  .chip-picker button:hover{border-color:var(--app-accent)}
+  .chip-picker button.is-current{border-color:var(--app-accent);color:var(--app-accent)}
+
+  .rq-generate{flex-shrink:0;padding:.7rem 1.15rem 1rem;border-top:1px solid var(--app-border);background:var(--app-surface)}
+  .rq-generate-btn{width:100%;appearance:none;border:none;background:var(--app-accent);color:#1B1208;font-size:.85rem;font-weight:600;padding:.72rem 1rem;border-radius:12px;cursor:pointer}
+  .rq-generate-btn[disabled]{background:var(--app-border);color:var(--app-faint);cursor:not-allowed}
+  .rq-generate-note{font-size:.67rem;color:var(--app-faint);margin-top:.4rem;text-align:center;line-height:1.4}
+
+  .rq-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.55rem;text-align:center;padding:2rem 1.4rem;color:var(--app-faint)}
+  .rq-empty-glyph{font-size:1.7rem;color:var(--app-border)}
+  .rq-empty-title{font-family:var(--f-display);font-weight:600;font-size:var(--fs-body-lg);color:var(--app-muted)}
+  .rq-empty-sub{font-size:.78rem;line-height:1.55;max-width:24rem}
+
+  /* ============ DOC WORLD — REPORT PAGES ============ */
+  .doc-toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+  .doc-toolbar-label{font-size:var(--fs-caption);color:var(--ink-muted)}
+  .doc-toolbar-actions{display:flex;gap:.6rem}
+  .btn{appearance:none;border:1px solid var(--border);background:var(--surface-raised);color:var(--ink);font-size:var(--fs-caption);font-weight:500;padding:.55rem 1rem;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:.45rem}
+  .btn:hover{border-color:var(--accent)}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn-primary:hover{filter:brightness(1.06)}
+
+  .report-pages{display:flex;flex-direction:column;gap:1.75rem}
+  .report-pages[hidden]{display:none}
+  .doc-page-label{font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.1em;color:var(--doc-faint);font-weight:600;margin-bottom:.6rem}
+
+  .doc-sheet{background:var(--doc-bg);color:var(--doc-ink);border:1px solid var(--doc-rule);border-radius:var(--radius-doc);padding:clamp(1.5rem, 4vw, 3.25rem);box-shadow:0 1px 2px rgba(20,15,5,.06), 0 12px 32px -20px rgba(20,15,5,.35)}
+  .doc-eyebrow{font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.11em;color:var(--doc-muted);font-weight:600}
+  .doc-hero{display:flex;flex-direction:column;gap:.6rem;padding-bottom:1.5rem;margin-bottom:1.75rem;border-bottom:2px solid var(--doc-rule)}
+  .doc-hero-line{display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap}
+  .doc-hero-num{font-family:var(--f-display);font-weight:600;font-size:clamp(1.7rem, 4.4vw, 2.5rem);line-height:1.15}
+  .doc-hero-of{font-family:var(--f-display);font-style:italic;font-size:clamp(1.05rem, 2.2vw, 1.3rem);color:var(--doc-muted)}
+  .doc-hero-sub{font-size:var(--fs-body-lg);color:var(--doc-muted)}
+  .doc-hero-sub b{color:var(--doc-ink);font-weight:600}
+  .doc-badges{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.35rem}
+  .badge{display:inline-flex;align-items:center;gap:.4rem;font-size:var(--fs-eyebrow);letter-spacing:.03em;padding:.32rem .65rem;border-radius:var(--radius-pill);font-weight:600}
+  .badge-visits{background:var(--doc-flag-soft);color:var(--doc-flag)}
+  .badge-not-new{background:rgba(0,0,0,.05);color:var(--doc-muted);border:1px solid var(--doc-rule)}
+  .badge-met{background:rgba(168,90,38,.12);color:var(--doc-accent)}
+
+  .doc-section{margin-bottom:1.9rem}
+  .doc-section:last-of-type{margin-bottom:0}
+  .doc-section h2{font-family:var(--f-body);font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.1em;font-weight:600;color:var(--doc-accent);margin-bottom:.75rem;display:flex;align-items:center;gap:.6rem}
+  .doc-section h2::after{content:'';flex:1;height:1px;background:var(--doc-rule)}
+  .doc-section > p{font-size:var(--fs-body);color:var(--doc-ink);line-height:1.6;margin-bottom:.75rem}
+  .doc-section > p:last-child{margin-bottom:0}
+
+  .med-table{width:100%;font-size:var(--fs-body)}
+  .med-table th{text-align:left;font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.06em;color:var(--doc-faint);font-weight:600;padding:0 .5rem .45rem 0;border-bottom:1px solid var(--doc-rule)}
+  .med-table td{padding:.5rem .5rem .5rem 0;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+  .med-table tr:last-child td{border-bottom:none}
+  .med-time{white-space:nowrap;color:var(--doc-muted)}
+  .med-name{font-weight:600}
+  .med-effect{color:var(--doc-muted);font-style:italic}
+
+  .doc-stat-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:.9rem;padding-top:.9rem;border-top:1px dashed var(--doc-rule)}
+  .doc-stat{font-size:var(--fs-body)}
+  .doc-stat b{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+  .flag-chip{display:inline-flex;align-items:center;gap:.4rem;background:var(--doc-flag-soft);color:var(--doc-flag);font-size:var(--fs-caption);font-weight:600;padding:.35rem .7rem;border-radius:var(--radius-pill)}
+  .flag-chip::before{content:'●';font-size:.55em}
+
+  .doc-timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.85rem}
+  .doc-timeline li{display:grid;grid-template-columns:6.5rem 1fr;gap:1rem}
+  .tl-date{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--doc-muted);padding-top:.15rem}
+  .tl-body b{font-weight:600}
+  .tl-arrow{color:var(--doc-accent)}
+  .unconfirmed{text-decoration:underline dotted var(--doc-muted);text-underline-offset:3px;cursor:help;position:relative}
+  .unconfirmed:hover::after,.unconfirmed:focus::after{content:'unconfirmed — awaiting review';position:absolute;left:0;bottom:1.5em;background:var(--doc-ink);color:var(--doc-bg);font-family:var(--f-body);font-size:.7rem;font-style:normal;white-space:nowrap;padding:.35rem .55rem;border-radius:5px}
+
+  .doc-grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.75rem}
+  .doc-fact{margin-bottom:.6rem;font-size:var(--fs-body)}
+  .doc-fact b{display:block;font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.06em;color:var(--doc-faint);font-weight:600;margin-bottom:.2rem}
+  .doc-redflag{color:var(--doc-flag);font-weight:600}
+
+  .doc-genmeta{display:flex;flex-direction:column;gap:.32rem;font-family:var(--f-mono);font-size:.78rem;color:var(--doc-muted)}
+  .doc-genmeta div b{color:var(--doc-ink);font-weight:500}
+
+  .doc-checklist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1rem}
+  .check-item{display:flex;gap:.7rem;align-items:flex-start;padding-bottom:1rem;border-bottom:1px dashed var(--doc-rule)}
+  .check-item:last-child{border-bottom:none;padding-bottom:0}
+  .check-icon{font-size:1rem;line-height:1.5;flex-shrink:0;width:1.2rem;text-align:center}
+  .check-icon.is-met{color:var(--doc-accent)}
+  .check-icon.is-notmet{color:var(--doc-flag)}
+  .check-body{flex:1;min-width:0}
+  .check-top{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.2rem}
+  .check-req{font-weight:600}
+  .check-cite{font-size:var(--fs-caption);color:var(--doc-faint);font-style:italic;margin-bottom:.4rem}
+  .check-computed{font-size:var(--fs-body);color:var(--doc-ink);line-height:1.55}
+  .check-computed b{font-family:var(--f-mono)}
+  .check-rule{font-size:var(--fs-caption);color:var(--doc-muted);margin-top:.25rem;line-height:1.5}
+
+  .doc-daycount-table{width:100%;font-size:var(--fs-caption)}
+  .doc-daycount-table th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--doc-faint);font-weight:600;padding:0 .5rem .4rem 0;border-bottom:1px solid var(--doc-rule)}
+  .doc-daycount-table td{padding:.4rem .5rem .4rem 0;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+  .doc-daycount-table tr:last-child td{border-bottom:none}
+  .doc-omitnote{font-size:var(--fs-caption);color:var(--doc-faint);font-style:italic;margin-top:.5rem}
+  .doc-caveat{font-size:var(--fs-caption);color:var(--doc-muted);line-height:1.6;background:rgba(0,0,0,.025);border:1px solid var(--doc-rule);border-radius:8px;padding:.7rem .85rem;margin-top:1rem}
+
+  .doc-footer{margin-top:2.25rem;padding-top:1.25rem;border-top:1px solid var(--doc-rule);display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
+  .doc-provenance{font-family:var(--f-display);font-style:italic;color:var(--doc-muted);font-size:var(--fs-body);max-width:42ch}
+  .doc-meta{font-size:var(--fs-caption);color:var(--doc-faint);text-align:right}
+  .doc-meta div{margin-bottom:.2rem}
+  .doc-citelist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.35rem;font-size:var(--fs-caption);color:var(--doc-muted)}
+
+  .toast{position:fixed;left:50%;bottom:1.75rem;transform:translate(-50%, 12px);background:var(--ink);color:var(--surface);font-size:var(--fs-caption);padding:.7rem 1.1rem;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:50;max-width:min(32rem, calc(100vw - 2rem));text-align:center}
+  .toast.is-visible{opacity:1;transform:translate(-50%, 0)}
+
+  @media print{
+    body *{visibility:hidden}
+    #report-output:not([hidden]) .report-pages:not([hidden]),
+    #report-output:not([hidden]) .report-pages:not([hidden]) *{visibility:visible}
+    .report-pages{position:absolute;top:0;left:0;width:100%}
+    .doc-sheet{border:none;box-shadow:none;border-radius:0}
+    .doc-sheet.report-page{page-break-after:always}
+    .doc-sheet.report-page:last-child{page-break-after:auto}
+    .doc-toolbar,.doc-page-label{display:none}
+  }
+
+  @media (max-width:640px){
+    .shell{padding:1.5rem 1rem 3rem}
+    .doc-grid2{grid-template-columns:1fr}
+    .doc-timeline li{grid-template-columns:4.5rem 1fr}
+    .doc-footer{flex-direction:column}
+    .doc-meta{text-align:left}
+  }
+</style>
+
+<div class="shell">
+
+  <div class="shell-head">
+    <div class="brand">
+      <div class="brand-mark">Head<em>State</em></div>
+      <div class="brand-sub">Screen mockup &mdash; the prior-authorization Report</div>
+    </div>
+  </div>
+
+  <p class="lede"><b>Not exempt.</b> Unlike the recall summary, this packet is behind the mandatory FR-3.30 confirmation gate &mdash; non-configurable, and not relaxed for the primary user. Pick one payer criterion below; if any derived object feeding that criterion's reporting window is still unconfirmed, it is force-surfaced here before <b>Generate</b> unlocks.</p>
+
+  <div class="device-stage">
+    <div class="device-frame"><div class="device-screen">
+      <div class="device-notch"></div>
+
+      <div class="crit-picker">
+        <span class="crit-picker-label">Target one payer criterion</span>
+        <div class="crit-options" id="crit-options" role="group" aria-label="Payer criterion">
+          <button type="button" class="crit-option" data-crit="chronic_botox">
+            <span class="crit-option-name">Botox &mdash; chronic initiation</span>
+            <span class="crit-option-desc">PAYER_CHRONIC_BOTOX &middot; &ge;15 headache days (&ge;4h/day), &ge;8 migraine days, 3 failed prophylactics &ge;2 classes</span>
+          </button>
+          <button type="button" class="crit-option" data-crit="cgrp_episodic">
+            <span class="crit-option-name">CGRP &mdash; episodic</span>
+            <span class="crit-option-desc">PAYER_CGRP_EPISODIC &middot; &ge;4 migraine days/month + 2 failed preventive classes</span>
+          </button>
+          <button type="button" class="crit-option" data-crit="botox_continuation">
+            <span class="crit-option-name">Botox &mdash; continuation</span>
+            <span class="crit-option-desc">PAYER_BOTOX_CONTINUATION &middot; &ge;50% reduction in monthly migraine days from baseline</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="rq-head">
+        <span class="rq-title">Confirm before generating</span>
+        <span class="rq-sub" id="gate-sub"></span>
+        <span class="rq-stat" id="rq-stat"></span>
+      </div>
+
+      <div class="rq-batchbar" id="rq-batchbar">
+        <label class="rq-selectall">
+          <input type="checkbox" class="rq-checkbox" id="rq-selectall-cb">
+          <span id="rq-selectall-label">Select all pending</span>
+        </label>
+        <button type="button" class="rq-confirm-selected" id="rq-confirm-selected" disabled>Confirm selected</button>
+      </div>
+
+      <div class="rq-scroll" id="rq-scroll"></div>
+
+      <div class="rq-generate">
+        <button type="button" class="rq-generate-btn" id="generate-btn" disabled>Generate report</button>
+        <p class="rq-generate-note" id="generate-note"></p>
+      </div>
+
+    </div></div>
+  </div>
+
+  <div class="annotation">
+    <span>&#9670;</span>
+    <span><b>The gate is pre-generation, not a page inside the document</b> (decision-log.md D20). A <code>review_status: timed_out</code> item blocks <b>Generate</b> identically to a fresh <code>unreviewed</code> one &mdash; timing out never touches <code>confirmed_by</code> (FR-3.28), so it is still unconfirmed by the gate's own definition. The dashed-border item below demonstrates this.</span>
+  </div>
+  <div class="annotation" style="border-color:var(--border)">
+    <span>&#9670;</span>
+    <span><b>Switching criteria re-evaluates the gate against that criterion's own reporting window and fixture set</b> &mdash; it does not carry a cleared state across criteria with different underlying data. A previously-generated report is hidden (not discarded) when you switch away; re-select the criterion to see it again.</span>
+  </div>
+
+  <div id="report-output" hidden>
+    <div class="doc-toolbar">
+      <span class="doc-toolbar-label" id="report-toolbar-label">For the payer, or the patient's own file</span>
+      <div class="doc-toolbar-actions">
+        <button class="btn" id="share-btn" type="button">Share PDF</button>
+        <button class="btn btn-primary" id="print-btn" type="button">Print</button>
+      </div>
+    </div>
+
+    <!-- ============ REPORT: PAYER_CHRONIC_BOTOX ============ -->
+    <div class="report-pages" data-report="chronic_botox" hidden>
+
+      <!-- PAGE 1 — COVER -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 1 of 7 &mdash; Cover</span>
+        <div class="doc-hero">
+          <span class="doc-eyebrow">Prior-authorization request</span>
+          <div class="doc-hero-line">
+            <span class="doc-hero-num">Cigna</span>
+            <span class="doc-hero-of">&mdash; chronic migraine, Botox&reg; (onabotulinumtoxinA) initiation</span>
+          </div>
+          <p class="doc-hero-sub">Reporting window <b>Jul 1&ndash;31, 2026</b> (calendar month)</p>
+          <div class="doc-badges">
+            <span class="badge badge-visits">MOH threshold met &mdash; triptan class</span>
+            <span class="badge badge-not-new">Currently Day 12 of a continuous episode (context, not the reporting window)</span>
+          </div>
+        </div>
+        <div class="doc-grid2">
+          <div>
+            <div class="doc-fact"><b>Patient</b>[name on file] &middot; [DOB on file]</div>
+            <div class="doc-fact"><b>Provider</b>Neurology &mdash; Dr.&nbsp;R.&nbsp;Okafor, (555) 019-2231</div>
+            <div class="doc-fact"><b>Reporting window</b>Jul 1&ndash;31, 2026, per PAYER_CHRONIC_BOTOX's own monthly criterion (D12: calendar month, not a rolling window)</div>
+          </div>
+          <div>
+            <div class="doc-fact"><b>Generation record</b></div>
+            <div class="doc-genmeta">
+              <div><b>algorithm_version</b> v0.4.2</div>
+              <div><b>config_hash</b> 7f3a2c9e1b04</div>
+              <div><b>derivation_id</b> 3e9f21a4-88c1-4b0e-9d7a-1c2f5e0b6a33</div>
+              <div><b>variant</b> primary</div>
+              <div><b>generated_at</b> Aug 15, 2026, 6:58&nbsp;AM</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:var(--fs-caption);color:var(--doc-faint);margin-top:1.5rem">A packet generated in March must be reproducible in June &mdash; the four values above are what would need to match (invariant 2).</p>
+      </article>
+
+      <!-- PAGE 2 — CRITERION CHECKLIST -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 2 of 7 &mdash; Criterion checklist</span>
+        <div class="doc-section">
+          <h2>Cigna &mdash; chronic migraine, Botox initiation</h2>
+          <p>Restated from the payer's own criterion (<code>PAYER_CHRONIC_BOTOX</code>, see <i>Research/clinical-regulatory.md</i>): &ldquo;&ge;15 headache days/month with &ge;8 migraine days among them (headache lasting <b>4 hours per day or longer</b>), plus failure of &ge;3 prophylactics drawn from &ge;2 classes.&rdquo;</p>
+        </div>
+        <ol class="doc-checklist">
+          <li class="check-item">
+            <span class="check-icon is-met">&#10003;</span>
+            <div class="check-body">
+              <div class="check-top"><span class="check-req">&ge;15 headache days in the reporting month</span><span class="badge badge-met">Met</span></div>
+              <div class="check-cite">Cigna's own definition: headache lasting &ge;4 hours per day &mdash; not the Delphi &ge;30-minute treated-day rule (see page 3).</div>
+              <div class="check-computed">Computed: <b class="u-numeric">16</b> of 31 days in Jul 2026 met the payer's &ge;4h/day headache-day definition.</div>
+            </div>
+          </li>
+          <li class="check-item">
+            <span class="check-icon is-met">&#10003;</span>
+            <div class="check-body">
+              <div class="check-top"><span class="check-req">&ge;8 migraine days among them</span><span class="badge badge-met">Met</span></div>
+              <div class="check-cite">Delphi 2026 day classification &mdash; migraine days include <code>aura_only</code> days regardless of head pain (Delphi rule 3).</div>
+              <div class="check-computed">Computed: <b class="u-numeric">13</b> migraine days in Jul 2026 (derivation_id 3e9f21a4&hellip;, variant primary).</div>
+            </div>
+          </li>
+          <li class="check-item">
+            <span class="check-icon is-met">&#10003;</span>
+            <div class="check-body">
+              <div class="check-top"><span class="check-req">Failure of &ge;3 prophylactics from &ge;2 classes</span><span class="badge badge-met">Met</span></div>
+              <div class="check-cite">Treatment history, page 4.</div>
+              <div class="check-computed">Documented: amitriptyline (TCA), topiramate (anticonvulsant), propranolol (beta-blocker) &mdash; <b class="u-numeric">3</b> drugs across <b class="u-numeric">3</b> classes.</div>
+            </div>
+          </li>
+        </ol>
+        <p class="doc-caveat">These are the criteria a specific named payer uses to make its own coverage determination, not independently validated diagnostic thresholds. ICHD-3 states its own day-count and duration thresholds are &ldquo;based on expert opinion rather than on formal evidence.&rdquo;</p>
+      </article>
+
+      <!-- PAGE 3 — DAY-COUNT DETAIL -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 3 of 7 &mdash; Day-count detail</span>
+        <div class="doc-section">
+          <h2>Two headache-day counts &mdash; not the same number</h2>
+          <p>Delphi classification and Cigna's own criterion define &ldquo;headache day&rdquo; differently. Both are shown, separately labelled, and neither is presented as the other.</p>
+          <div class="doc-stat-row">
+            <span class="doc-stat">Delphi headache days (any duration, treated &ge;30min or untreated compound predicate): <b class="u-numeric">19</b></span>
+          </div>
+          <div class="doc-stat-row">
+            <span class="doc-stat">Cigna headache days (&ge;4 hours per day): <b class="u-numeric">16</b> &mdash; the figure used on the checklist</span>
+          </div>
+          <div class="doc-stat-row">
+            <span class="doc-stat">Delphi migraine days (migraine + aura_only classes): <b class="u-numeric">13</b></span>
+          </div>
+        </div>
+        <div class="doc-section">
+          <h2>Representative day classifications, Jul 2026</h2>
+          <table class="doc-daycount-table">
+            <thead><tr><th>Date</th><th>Class</th><th>Rule</th><th>&ge;4h (Cigna)</th><th>Attenuated</th></tr></thead>
+            <tbody>
+              <tr><td class="u-numeric">Jul 3</td><td>migraine</td><td>delphi_untreated_4h</td><td>Yes</td><td>&mdash;</td></tr>
+              <tr><td class="u-numeric">Jul 7</td><td>headache</td><td>delphi_treated_30min</td><td>No (55min)</td><td>&mdash;</td></tr>
+              <tr><td class="u-numeric">Jul 12</td><td>headache</td><td>delphi_treated_30min</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td class="u-numeric">Jul 13</td><td>none</td><td>&mdash;</td><td>No</td><td>Yes</td></tr>
+              <tr><td class="u-numeric">Jul 14</td><td>migraine</td><td>delphi_untreated_4h</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td class="u-numeric">Jul 15</td><td>headache</td><td>delphi_treated_30min</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td class="u-numeric">Jul 16</td><td>headache</td><td>delphi_treated_30min</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td class="u-numeric">Jul 20&ndash;21</td><td>migraine</td><td>delphi_untreated_4h</td><td>Yes</td><td>&mdash;</td></tr>
+              <tr><td class="u-numeric">Jul 26</td><td>aura_only</td><td>delphi_aura</td><td>No</td><td>&mdash;</td></tr>
+            </tbody>
+          </table>
+          <p class="doc-omitnote">22 further classified days in the reporting window are omitted from this view for length; the full day-by-day table is available in the underlying export.</p>
+        </div>
+        <div class="doc-section">
+          <h2>Attenuated days in this window (D13, enumerated per invariant &mdash; never silently excluded)</h2>
+          <p>Jul 12&ndash;16 falls inside a recorded 5-day naproxen + as-needed sumatriptan course window. All five days are flagged attenuated regardless of class. Jul 13 classifies <code>none</code> and is attenuated &mdash; it does not count toward headache or migraine days, and is listed here rather than silently dropped.</p>
+        </div>
+      </article>
+
+      <!-- PAGE 4 — TREATMENT AND PREVENTIVE-FAILURE HISTORY -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 4 of 7 &mdash; Treatment and preventive-failure history</span>
+        <div class="doc-section">
+          <h2>Preventive medications tried</h2>
+          <table class="med-table">
+            <thead><tr><th>Drug</th><th>Class</th><th>Dose</th><th>Dates tried</th><th>Outcome</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="med-name">Amitriptyline</td><td>Tricyclic antidepressant</td><td>25&ndash;50&nbsp;mg nightly</td>
+                <td class="med-time u-numeric">Mar&ndash;Jun 2017</td>
+                <td class="med-effect">Discontinued &mdash; excessive daytime sedation, no clear benefit after 12 weeks</td>
+              </tr>
+              <tr>
+                <td class="med-name">Topiramate</td><td>Anticonvulsant</td><td>Titrated to 100&nbsp;mg/day</td>
+                <td class="med-time u-numeric">Jan&ndash;Nov 2018</td>
+                <td class="med-effect">Discontinued &mdash; cognitive slowing / word-finding difficulty</td>
+              </tr>
+              <tr>
+                <td class="med-name">Propranolol</td><td>Beta-blocker</td><td>80&nbsp;mg/day</td>
+                <td class="med-time u-numeric">Jul 2019&ndash;present</td>
+                <td class="med-effect">Ongoing, but inadequate &mdash; frequency progressed to a chronic pattern despite adherence</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="doc-section">
+          <h2>Current episode, for context (not a count &mdash; prose-with-dates)</h2>
+          <ol class="doc-timeline">
+            <li>
+              <span class="tl-date u-numeric">Aug 3</span>
+              <span class="tl-body">ED visit 1 &mdash; sumatriptan injection + IV fluids <span class="tl-arrow">&rarr;</span> brief relief, <span class="unconfirmed" tabindex="0">recurred ~4h later</span></span>
+            </li>
+            <li>
+              <span class="tl-date u-numeric">Aug 9</span>
+              <span class="tl-body">ED visit 2 &mdash; dexamethasone IV 10&nbsp;mg <span class="tl-arrow">&rarr;</span> remission ~36h <span class="tl-arrow">&rarr;</span> recurrence Aug 11, similar severity</span>
+            </li>
+            <li>
+              <span class="tl-date u-numeric">Aug 11&ndash;today</span>
+              <span class="tl-body">Oral triptan on recurrence, partial relief each time &mdash; headache has not fully resolved</span>
+            </li>
+          </ol>
+        </div>
+      </article>
+
+      <!-- PAGE 5 — MOH FLAG STATUS -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 5 of 7 &mdash; Medication-overuse headache flag</span>
+        <div class="doc-section">
+          <h2>MOH criteria &mdash; the criterion ICHD-3 8.2/8.2.6 uses, not settled fact</h2>
+          <p><span class="flag-chip">MOH_GENERAL_CRITERION met, plus a per-class overage</span></p>
+          <table class="doc-daycount-table" style="margin-top:1rem">
+            <thead><tr><th>Basis</th><th>Value</th><th>Threshold</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>General criterion</td><td>19 Delphi headache days; pre-existing disorder attested; &gt;3mo history</td><td>&ge;15 days/mo + attested disorder + &gt;3mo</td><td>Met</td></tr>
+              <tr><td>Per-class &mdash; triptan</td><td class="u-numeric">11 distinct days</td><td class="u-numeric">10 days/mo</td><td>Exceeded</td></tr>
+              <tr><td>Per-class &mdash; non-opioid analgesic</td><td class="u-numeric">6 distinct days</td><td class="u-numeric">15 days/mo</td><td>Not exceeded</td></tr>
+              <tr><td>Combined-class (distinct days, excl. combination analgesics)</td><td class="u-numeric">13 distinct days</td><td class="u-numeric">10 days/mo</td><td>Exceeded</td></tr>
+              <tr><td>Sustained</td><td class="u-numeric">4 consecutive qualifying months</td><td>&gt;3 months</td><td>Met</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:1rem">Presented as the criterion ICHD-3 8.2/8.2.6 uses for its own determination &mdash; ICHD-3 states its day-count thresholds are &ldquo;based on expert opinion rather than on formal evidence,&rdquo; not settled fact.</p>
+        </div>
+        <div class="doc-section">
+          <h2>Status migrainosus vs. MOH &mdash; surfaced, not decided</h2>
+          <p>The current continuous episode (Aug 3&ndash;ongoing) is a candidate for a status-migrainosus reading under ICHD-3 1.4.1. ICHD-3 notes status migrainosus &ldquo;may often be caused by medication overuse.&rdquo; Because <code>MOH_GENERAL_CRITERION</code> and a per-class threshold are both met for this reporting window, ICHD-3 directs coding MOH plus the underlying migraine type rather than status migrainosus &mdash; that clinical determination is surfaced here for the prescriber, not decided by this system.</p>
+        </div>
+      </article>
+
+      <!-- PAGE 6 — SUPPORTING CLINICAL CONTEXT -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 6 of 7 &mdash; Supporting clinical context</span>
+        <div class="doc-section">
+          <h2>Baseline &amp; what's different this time</h2>
+          <div class="doc-grid2">
+            <div>
+              <div class="doc-fact"><b>Typical pattern</b>Episodic migraine, ~3&ndash;4 days/month, left-sided, throbbing, photophobia + nausea</div>
+              <div class="doc-fact"><b>Aura</b>None, historically</div>
+            </div>
+            <div>
+              <div class="doc-fact"><b>What's different this time</b><span class="doc-redflag">Continuous &gt;12 days</span> &mdash; prior attacks resolved within 72h</div>
+              <div class="doc-fact"><b>Also different</b>Acute-medication use in the reporting month exceeded the triptan and combined-class MOH thresholds (page 5) &mdash; not typical of this patient's baseline pattern</div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-section">
+          <h2>Current preventives</h2>
+          <p>Propranolol 80&nbsp;mg daily, since 2019 &mdash; the third and most recent of three documented preventive failures (page 4).</p>
+        </div>
+      </article>
+
+      <!-- PAGE 7 — CONFIRMATION AND PROVENANCE FOOTER -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 7 of 7 &mdash; Confirmation and provenance</span>
+        <div class="doc-section">
+          <h2>Confirmation</h2>
+          <p>Every derived claim behind this packet &mdash; episode boundaries, day classifications, and the MOH assessment on page 5 &mdash; was human-confirmed before generation, per the mandatory pre-generation gate (FR-3.30). That gate is non-configurable and was not relaxed for the primary user. Nothing in this packet reflects an unconfirmed system inference.</p>
+        </div>
+        <div class="doc-section">
+          <h2>Thresholds and citations used in this packet</h2>
+          <ul class="doc-citelist">
+            <li>ICHD-3 8.2 / 8.2.6 &mdash; medication-overuse headache, general and combined-class criteria</li>
+            <li>ICHD-3, Definition of Terms &mdash; DISTINCT_ATTACK_SEPARATION (48h headache-free)</li>
+            <li>Delphi 2026 &mdash; DELPHI_TREATED_DAY_MIN, DELPHI_UNTREATED_DAY, DELPHI_AURA_DAY (outstanding published Correction not yet reviewed &mdash; see CLAUDE.md perishable facts)</li>
+            <li>Cigna coverage policy, chronic migraine Botox initiation (see Research/clinical-regulatory.md)</li>
+            <li>House decision D12 &mdash; MOH_EVALUATION_WINDOW is a calendar month, not a rolling window</li>
+            <li>House decision D13 / tech-spec.md &sect;5.5 &mdash; attenuation is annotation, never silent exclusion</li>
+          </ul>
+        </div>
+        <div class="doc-footer">
+          <p class="doc-provenance">&ldquo;Generated from a continuously time-stamped patient log, not reconstructed from memory. Verify all details with the patient.&rdquo;</p>
+          <div class="doc-meta">
+            <div>Generated Aug 15, 2026, 6:58&nbsp;AM</div>
+            <div>derivation_id 3e9f21a4&hellip; &middot; config_hash 7f3a2c9e1b04</div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- ============ REPORT: PAYER_CGRP_EPISODIC ============ -->
+    <div class="report-pages" data-report="cgrp_episodic" hidden>
+
+      <!-- PAGE 1 — COVER -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 1 of 6 &mdash; Cover</span>
+        <div class="doc-hero">
+          <span class="doc-eyebrow">Prior-authorization request</span>
+          <div class="doc-hero-line">
+            <span class="doc-hero-num">CGRP mAb</span>
+            <span class="doc-hero-of">&mdash; episodic migraine, prior authorization</span>
+          </div>
+          <p class="doc-hero-sub">Reporting window <b>Jun 1&ndash;30, 2026</b> (calendar month)</p>
+          <div class="doc-badges">
+            <span class="badge badge-not-new">First CGRP prior-authorization request for this patient</span>
+          </div>
+        </div>
+        <div class="doc-grid2">
+          <div>
+            <div class="doc-fact"><b>Patient</b>[name on file] &middot; [DOB on file]</div>
+            <div class="doc-fact"><b>Provider</b>Neurology &mdash; [name on file]</div>
+            <div class="doc-fact"><b>Reporting window</b>Jun 1&ndash;30, 2026, calendar month</div>
+            <div class="doc-fact"><b>Named payer</b><span class="doc-redflag">Not specified in this fixture</span> &mdash; <code>PAYER_CGRP_EPISODIC</code> names no single payer in CLAUDE.md's clinical-constants table; see Research/clinical-regulatory.md before this ships against a real policy</div>
+          </div>
+          <div>
+            <div class="doc-fact"><b>Generation record</b></div>
+            <div class="doc-genmeta">
+              <div><b>algorithm_version</b> v0.4.2</div>
+              <div><b>config_hash</b> 9d1e6b3f2a77</div>
+              <div><b>derivation_id</b> 58bd0a2e-4f13-4c8a-9e02-77a1d4b6c9f0</div>
+              <div><b>variant</b> primary</div>
+              <div><b>generated_at</b> Jul 3, 2026, 8:14&nbsp;AM</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 2 — CRITERION CHECKLIST -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 2 of 6 &mdash; Criterion checklist</span>
+        <div class="doc-section">
+          <h2>Episodic migraine, CGRP monoclonal antibody</h2>
+          <p>Restated from <code>PAYER_CGRP_EPISODIC</code> (see Research/clinical-regulatory.md): &ldquo;&ge;4 migraine days/month, plus documented failure of two preventive drug classes.&rdquo;</p>
+        </div>
+        <ol class="doc-checklist">
+          <li class="check-item">
+            <span class="check-icon is-met">&#10003;</span>
+            <div class="check-body">
+              <div class="check-top"><span class="check-req">&ge;4 migraine days in the reporting month</span><span class="badge badge-met">Met</span></div>
+              <div class="check-cite">This criterion does not redefine &ldquo;migraine day&rdquo; &mdash; the Delphi classification is used directly, unlike PAYER_CHRONIC_BOTOX's own &ge;4h/day headache-day redefinition.</div>
+              <div class="check-computed">Computed: <b class="u-numeric">5</b> migraine days in Jun 2026 (derivation_id 58bd0a2e&hellip;, variant primary) &mdash; 2 via <code>delphi_untreated_4h</code>, 3 via <code>delphi_treated_30min</code> — see the day-by-day table, page 3.</div>
+            </div>
+          </li>
+          <li class="check-item">
+            <span class="check-icon is-met">&#10003;</span>
+            <div class="check-body">
+              <div class="check-top"><span class="check-req">Documented failure of two preventive drug classes</span><span class="badge badge-met">Met</span></div>
+              <div class="check-cite">Treatment history, page 4.</div>
+              <div class="check-computed">Documented: propranolol (beta-blocker) and topiramate (anticonvulsant) &mdash; <b class="u-numeric">2</b> distinct classes.</div>
+            </div>
+          </li>
+        </ol>
+        <p class="doc-caveat">Presented as the criterion a named payer's own policy uses, not independently validated diagnostic fact. ICHD-3 states its own day-count thresholds are &ldquo;based on expert opinion rather than on formal evidence.&rdquo;</p>
+      </article>
+
+      <!-- PAGE 3 — DAY-COUNT DETAIL -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 3 of 6 &mdash; Day-count detail</span>
+        <div class="doc-section">
+          <h2>Delphi day counts, Jun 2026</h2>
+          <p>This criterion has no payer-specific headache-day redefinition, so only the Delphi count is shown &mdash; unlike the Chronic Botox packet's Cigna-specific &ge;4h/day count.</p>
+          <div class="doc-stat-row">
+            <span class="doc-stat">Delphi headache days: <b class="u-numeric">6</b></span>
+          </div>
+          <div class="doc-stat-row">
+            <span class="doc-stat">Delphi migraine days (migraine + aura_only): <b class="u-numeric">5</b> &mdash; the figure used on the checklist</span>
+          </div>
+        </div>
+        <div class="doc-section">
+          <h2>Day classifications, Jun 2026</h2>
+          <table class="doc-daycount-table">
+            <thead><tr><th>Date</th><th>Class</th><th>Rule</th><th>Attenuated</th></tr></thead>
+            <tbody>
+              <tr><td class="u-numeric">Jun 2</td><td>migraine</td><td>delphi_untreated_4h</td><td>&mdash;</td></tr>
+              <tr><td class="u-numeric">Jun 9</td><td>migraine</td><td>delphi_treated_30min</td><td>Yes</td></tr>
+              <tr><td class="u-numeric">Jun 10</td><td>migraine</td><td>delphi_treated_30min</td><td>Yes</td></tr>
+              <tr><td class="u-numeric">Jun 14</td><td>migraine</td><td>delphi_untreated_4h</td><td>&mdash;</td></tr>
+              <tr><td class="u-numeric">Jun 21</td><td>migraine</td><td>delphi_treated_30min</td><td>&mdash;</td></tr>
+              <tr><td class="u-numeric">Jun 27</td><td>headache</td><td>&mdash;</td><td>&mdash;</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="doc-section">
+          <h2>Attenuated days in this window (D13, enumerated per invariant)</h2>
+          <p>Jun 9&ndash;10 falls inside a recorded 2-day naproxen course window. Both days are flagged attenuated; both still classify as headache days and are not excluded from the counts above &mdash; the flag applies to any day inside a recorded window, not only <code>none</code> days.</p>
+        </div>
+      </article>
+
+      <!-- PAGE 4 — TREATMENT AND PREVENTIVE-FAILURE HISTORY -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 4 of 6 &mdash; Treatment and preventive-failure history</span>
+        <div class="doc-section">
+          <h2>Preventive medications tried</h2>
+          <table class="med-table">
+            <thead><tr><th>Drug</th><th>Class</th><th>Dose</th><th>Dates tried</th><th>Outcome</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="med-name">Propranolol</td><td>Beta-blocker</td><td>60&nbsp;mg/day</td>
+                <td class="med-time u-numeric">Jan&ndash;Apr 2023</td>
+                <td class="med-effect">Discontinued &mdash; symptomatic bradycardia on routine follow-up</td>
+              </tr>
+              <tr>
+                <td class="med-name">Topiramate</td><td>Anticonvulsant</td><td>50&nbsp;mg/day</td>
+                <td class="med-time u-numeric">Feb&ndash;Mar 2024 (6 weeks)</td>
+                <td class="med-effect">Discontinued &mdash; intolerable paresthesias</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- PAGE 5 — SUPPORTING CLINICAL CONTEXT (MOH page omitted — no flag live) -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 5 of 6 &mdash; Supporting clinical context</span>
+        <p class="doc-omitnote" style="margin-bottom:1.25rem">No MOH flag is live for this reporting window &mdash; the medication-overuse page is omitted from this packet entirely, per D20 (&ldquo;shown only if a flag is live&rdquo;), not shown with a placeholder.</p>
+        <div class="doc-section">
+          <h2>Baseline &amp; what's different this time</h2>
+          <div class="doc-grid2">
+            <div>
+              <div class="doc-fact"><b>Typical pattern</b>Right-sided, throbbing, photophobia; nausea uncommon</div>
+              <div class="doc-fact"><b>Aura</b>Visual aura preceding onset by ~20&ndash;30 minutes, present in roughly half of attacks</div>
+            </div>
+            <div>
+              <div class="doc-fact"><b>What's different this time</b>Frequency increased from ~3/month (2024 baseline) to <span class="doc-redflag">5&ndash;6/month</span> over the past two quarters &mdash; newly meeting the &ge;4/month threshold above</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 6 — CONFIRMATION AND PROVENANCE FOOTER -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 6 of 6 &mdash; Confirmation and provenance</span>
+        <div class="doc-section">
+          <h2>Confirmation</h2>
+          <p>Every derived claim behind this packet &mdash; day classifications and the migraine-day count on page 3 &mdash; was human-confirmed before generation, per the mandatory pre-generation gate (FR-3.30). That gate is non-configurable and was not relaxed for the primary user.</p>
+        </div>
+        <div class="doc-section">
+          <h2>Thresholds and citations used in this packet</h2>
+          <ul class="doc-citelist">
+            <li>ICHD-3 1.1 &mdash; migraine diagnostic criteria underlying the Delphi day classification</li>
+            <li>Delphi 2026 &mdash; DELPHI_TREATED_DAY_MIN, DELPHI_UNTREATED_DAY (outstanding published Correction not yet reviewed)</li>
+            <li><code>PAYER_CGRP_EPISODIC</code> (see Research/clinical-regulatory.md; named payer unspecified in this fixture &mdash; flagged on page 1)</li>
+            <li>House decision D13 / tech-spec.md &sect;5.5 &mdash; attenuation is annotation, never silent exclusion</li>
+          </ul>
+        </div>
+        <div class="doc-footer">
+          <p class="doc-provenance">&ldquo;Generated from a continuously time-stamped patient log, not reconstructed from memory. Verify all details with the patient.&rdquo;</p>
+          <div class="doc-meta">
+            <div>Generated Jul 3, 2026, 8:14&nbsp;AM</div>
+            <div>derivation_id 58bd0a2e&hellip; &middot; config_hash 9d1e6b3f2a77</div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- ============ REPORT: PAYER_BOTOX_CONTINUATION ============ -->
+    <div class="report-pages" data-report="botox_continuation" hidden>
+
+      <!-- PAGE 1 — COVER -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 1 of 6 &mdash; Cover</span>
+        <div class="doc-hero">
+          <span class="doc-eyebrow">Prior-authorization re-request</span>
+          <div class="doc-hero-line">
+            <span class="doc-hero-num">Cigna</span>
+            <span class="doc-hero-of">&mdash; Botox&reg; continuation (re-authorization)</span>
+          </div>
+          <p class="doc-hero-sub">Current window <b>Dec 1&ndash;31, 2026</b> vs. baseline <b>Feb 1&ndash;28, 2026</b> (pre-treatment)</p>
+          <div class="doc-badges">
+            <span class="badge badge-met">55.6% reduction from baseline</span>
+            <span class="badge badge-not-new">2 completed treatment cycles</span>
+          </div>
+        </div>
+        <div class="doc-grid2">
+          <div>
+            <div class="doc-fact"><b>Patient</b>[name on file] &middot; [DOB on file]</div>
+            <div class="doc-fact"><b>Provider</b>Neurology &mdash; Dr.&nbsp;R.&nbsp;Okafor, (555) 019-2231</div>
+            <div class="doc-fact"><b>Baseline window</b>Feb 1&ndash;28, 2026, calendar month, pre-treatment</div>
+            <div class="doc-fact"><b>Current window</b>Dec 1&ndash;31, 2026, calendar month</div>
+          </div>
+          <div>
+            <div class="doc-fact"><b>Generation record</b></div>
+            <div class="doc-genmeta">
+              <div><b>algorithm_version</b> v0.4.2</div>
+              <div><b>config_hash</b> 7f3a2c9e1b04</div>
+              <div><b>derivation_id</b> 3e9f21a4-88c1-4b0e-9d7a-1c2f5e0b6a33</div>
+              <div><b>variant</b> primary</div>
+              <div><b>generated_at</b> Jan 5, 2027, 9:02&nbsp;AM</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:var(--fs-caption);color:var(--doc-faint);margin-top:1.5rem">Same <code>derivation_id</code> and <code>config_hash</code> as the earlier initiation packet (page 1 of the Chronic Botox report), several months prior &mdash; the underlying computed reading is unchanged; only the reporting window advances, per tech-spec.md &sect;3.3's day-count SQL. The initiation packet's own window was Jul 2026; this packet's current window is Dec 2026, after two completed treatment cycles &mdash; not the same month re-evaluated.</p>
+      </article>
+
+      <!-- PAGE 2 — CRITERION CHECKLIST -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 2 of 6 &mdash; Criterion checklist</span>
+        <div class="doc-section">
+          <h2>Botox continuation</h2>
+          <p>Restated from <code>PAYER_BOTOX_CONTINUATION</code> (see Research/clinical-regulatory.md): &ldquo;&ge;50% reduction in monthly migraine frequency from baseline.&rdquo;</p>
+        </div>
+        <ol class="doc-checklist">
+          <li class="check-item">
+            <span class="check-icon is-met">&#10003;</span>
+            <div class="check-body">
+              <div class="check-top"><span class="check-req">&ge;50% reduction in monthly migraine-day frequency from baseline</span><span class="badge badge-met">Met</span></div>
+              <div class="check-cite">Delphi migraine-day count, same derivation, two reporting windows (page 3).</div>
+              <div class="check-computed">Computed: baseline <b class="u-numeric">18</b> migraine days/month (Feb 2026) &rarr; current <b class="u-numeric">8</b> migraine days/month (Dec 2026) = <b class="u-numeric">55.6%</b> reduction.</div>
+            </div>
+          </li>
+        </ol>
+        <p class="doc-caveat">Presented as the criterion a named payer's own policy uses, not independently validated diagnostic fact. ICHD-3 states its own day-count thresholds are &ldquo;based on expert opinion rather than on formal evidence.&rdquo;</p>
+      </article>
+
+      <!-- PAGE 3 — DAY-COUNT DETAIL -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 3 of 6 &mdash; Day-count detail</span>
+        <div class="doc-section">
+          <h2>Baseline vs. current, Delphi day counts</h2>
+          <table class="doc-daycount-table">
+            <thead><tr><th>Window</th><th>Headache days</th><th>Migraine days</th></tr></thead>
+            <tbody>
+              <tr><td>Baseline &mdash; Feb 2026 (pre-treatment)</td><td class="u-numeric">22</td><td class="u-numeric">18</td></tr>
+              <tr><td>Current &mdash; Dec 2026 (post-cycle-2)</td><td class="u-numeric">11</td><td class="u-numeric">8</td></tr>
+            </tbody>
+          </table>
+          <div class="doc-stat-row">
+            <span class="doc-stat">Reduction: (18 &minus; 8) / 18 = <b class="u-numeric">55.6%</b> &mdash; exceeds the &ge;50% threshold</span>
+          </div>
+        </div>
+        <div class="doc-section">
+          <h2>Attenuated days</h2>
+          <p>Baseline window: none recorded. Current window: Dec 16&ndash;18 falls inside a 3-day post-injection soreness NSAID course; all three days are flagged attenuated and none changed classification below the migraine threshold.</p>
+        </div>
+      </article>
+
+      <!-- PAGE 4 — TREATMENT HISTORY -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 4 of 6 &mdash; Treatment history</span>
+        <div class="doc-section">
+          <h2>Botox treatment cycles (prose-with-dates, not an attack count)</h2>
+          <ol class="doc-timeline">
+            <li>
+              <span class="tl-date u-numeric">Sep 20</span>
+              <span class="tl-body">Cycle 1 &mdash; 155 units, standard PREEMPT injection sites, ~6 weeks after this patient's Botox initiation was approved <span class="tl-arrow">&rarr;</span> well tolerated, no adverse effects reported</span>
+            </li>
+            <li>
+              <span class="tl-date u-numeric">Dec 13</span>
+              <span class="tl-body">Cycle 2 &mdash; 155 units, same sites, standard 12-week interval <span class="tl-arrow">&rarr;</span> well tolerated; first patient-reported reduction in frequency noted around week 6</span>
+            </li>
+          </ol>
+        </div>
+      </article>
+
+      <!-- PAGE 5 — SUPPORTING CLINICAL CONTEXT (MOH page omitted — resolved) -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 5 of 6 &mdash; Supporting clinical context</span>
+        <p class="doc-omitnote" style="margin-bottom:1.25rem">No MOH flag is live for the current reporting window &mdash; the medication-overuse page is omitted from this packet, per D20. Acute-medication use declined alongside migraine frequency: triptan use in Dec 2026 was 4 distinct days, well under the 10-day/month threshold that was exceeded in the Jul 2026 window reported in the initiation packet above. Jul 2026 and Dec 2026 are different calendar months, five months apart in this patient's treatment course &mdash; the lower Dec 2026 count reflects the reduction in acute-medication need this packet documents, not a discrepancy in how the same month was counted.</p>
+        <div class="doc-section">
+          <h2>Baseline &amp; what's different now</h2>
+          <div class="doc-grid2">
+            <div>
+              <div class="doc-fact"><b>Pre-treatment baseline</b>Chronic migraine, ~18&ndash;20 headache days/month, poorly controlled on oral preventives (see the initiation packet's treatment history)</div>
+              <div class="doc-fact"><b>Aura</b>None, historically</div>
+            </div>
+            <div>
+              <div class="doc-fact"><b>What's different now</b>Frequency reduced to <b>8 migraine days/month</b> after 2 completed Botox cycles &mdash; a sustained response, not a single good month</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PAGE 6 — CONFIRMATION AND PROVENANCE FOOTER -->
+      <article class="doc-sheet report-page">
+        <span class="doc-page-label">Page 6 of 6 &mdash; Confirmation and provenance</span>
+        <div class="doc-section">
+          <h2>Confirmation</h2>
+          <p>Every derived claim behind this packet &mdash; both the baseline and current day classifications &mdash; was human-confirmed before generation, per the mandatory pre-generation gate (FR-3.30). For this reporting window, the filtered queue was already empty at the time generation was requested; the gate still ran, it simply had nothing to force-surface.</p>
+        </div>
+        <div class="doc-section">
+          <h2>Thresholds and citations used in this packet</h2>
+          <ul class="doc-citelist">
+            <li><code>PAYER_BOTOX_CONTINUATION</code> (see Research/clinical-regulatory.md)</li>
+            <li>Delphi 2026 day-classification rules, applied identically to both windows</li>
+            <li>House decision D12 &mdash; calendar month window, applied to both the baseline and current periods</li>
+          </ul>
+        </div>
+        <div class="doc-footer">
+          <p class="doc-provenance">&ldquo;Generated from a continuously time-stamped patient log, not reconstructed from memory. Verify all details with the patient.&rdquo;</p>
+          <div class="doc-meta">
+            <div>Generated Jan 5, 2027, 9:02&nbsp;AM</div>
+            <div>derivation_id 3e9f21a4&hellip; &middot; config_hash 7f3a2c9e1b04</div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+  <div class="shell-foot">
+    <span>Mockup only &mdash; not wired to the derivation engine or a backend.</span>
+    <span>decision-log.md D20 &middot; tech-spec.md &sect;3.3/&sect;5.6/&sect;5.7 &middot; frd.md FR-3.26&ndash;3.31 &middot; design-system.md &sect;7 task 8</span>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 3200);
+  }
+
+  function reviewBadge(confirmedBy, reviewStatus){
+    var span = document.createElement('span');
+    span.className = 'badge-review';
+    if (reviewStatus === 'timed_out'){
+      span.classList.add('is-timedout');
+      span.textContent = 'system · timed out';
+    } else if (confirmedBy === 'user'){
+      span.classList.add('is-confirmed');
+      span.textContent = 'user · confirmed';
+    } else if (reviewStatus === 'user_reviewed'){
+      span.classList.add('is-reviewed');
+      span.textContent = 'system · reviewed';
+    } else {
+      span.classList.add('is-unreviewed');
+      span.textContent = 'system · unreviewed';
+    }
+    return span;
+  }
+
+  /* ---------------- fixture data ----------------
+     GATE_DATA holds, per payer criterion, the reporting window label and the
+     set of derived objects whose computed_from falls inside it and are still
+     confirmed_by:'system'. Mutating an item's confirmedBy/reviewStatus here is
+     the entire "confirm" action — each criterion keeps its own independent
+     state, so switching away and back does not lose or fabricate progress. */
+
+  var RELAPSE = {
+    collapsed: { title: 'relapse_collapsed', label: 'One episode — relapse of the same attack' },
+    split:     { title: 'relapse_split',     label: 'Two distinct episodes' }
+  };
+
+  var GATE_DATA = {
+    chronic_botox: {
+      windowLabel: 'Jul 1–31, 2026 (calendar month)',
+      items: [
+        {
+          id: 'g-botox-1', kind: 'recurrence', dateLabel: 'Jul 20–21', queuedLabel: 'Queued 28 days ago',
+          confirmedBy: 'system', reviewStatus: 'timed_out', variant: 'split',
+          candidates: {
+            collapsed: 'Read as one continuing episode across the ~13.5h onset-to-onset gap.',
+            split: 'System’s current reading — reads the Jul 21 mid-morning onset as a new, separate attack.'
+          },
+          rule: 'Governing rule: DISTINCT_ATTACK_SEPARATION requires ≥48h headache-free (ICHD-3, Definition of Terms). The gap fell short either way, so ICHD-3 declines to resolve it and both readings are already computed.'
+        },
+        {
+          id: 'g-botox-2', kind: 'dayclass', dateLabel: 'Jul 26', queuedLabel: 'Queued 3 days ago',
+          confirmedBy: 'system', reviewStatus: 'unreviewed',
+          summary: 'System reading: <b>aura-only day</b> — aura meeting ICHD-3 criteria, no headache reported (DELPHI_AURA_DAY).',
+          rule: 'Counts as a migraine day regardless of head pain (Delphi rule 3, 83% consensus) — feeds the ≥8-migraine-day component of the Cigna criterion, page 2 of the generated packet.'
+        }
+      ]
+    },
+    cgrp_episodic: {
+      windowLabel: 'Jun 1–30, 2026 (calendar month)',
+      items: [
+        {
+          id: 'g-cgrp-1', kind: 'dayclass', dateLabel: 'Jun 14', queuedLabel: 'Queued 9 days ago',
+          confirmedBy: 'system', reviewStatus: 'unreviewed',
+          summary: 'System reading: <b>migraine day</b> — untreated, 5h duration, ≥2 characteristics plus nausea.',
+          rule: 'Computed under DELPHI_UNTREATED_DAY — duration ≥4h AND (≥2 of 4 characteristics OR (≥1 characteristic AND ≥1 associated symptom)).'
+        },
+        {
+          id: 'g-cgrp-2', kind: 'dayclass', dateLabel: 'Jun 27', queuedLabel: 'Queued 22 days ago',
+          confirmedBy: 'system', reviewStatus: 'timed_out',
+          summary: 'System reading: <b>headache day</b> — duration and characteristics fell short of the migraine-qualifying compound predicate.',
+          rule: 'Computed under DURATION_QUALIFICATION step 3 (no acute medication taken, untreated compound predicate not met) — defaults to headache-qualifying.'
+        }
+      ]
+    },
+    botox_continuation: {
+      windowLabel: 'Dec 1–31, 2026 vs. baseline Feb 2026',
+      items: []
+    }
+  };
+
+  var CRITERIA_ORDER = ['chronic_botox', 'cgrp_episodic', 'botox_continuation'];
+
+  var currentCriterion = 'chronic_botox';
+  var selected = {}; /* itemId -> true, scoped implicitly to currentCriterion since ids don't collide across criteria */
+
+  function currentItems(){ return GATE_DATA[currentCriterion].items; }
+  function findItem(id){
+    var items = currentItems();
+    for (var i = 0; i < items.length; i++) if (items[i].id === id) return items[i];
+    return null;
+  }
+  function isSettled(item){ return item.confirmedBy === 'user'; }
+  function isPending(item){ return !isSettled(item); }
+  function isBatchEligible(item){ return isPending(item); }
+
+  /* ---------------- item cards ---------------- */
+  function buildRecurrenceItem(item){
+    var card = document.createElement('div');
+    card.className = 'rq-item' + (item.reviewStatus === 'timed_out' ? ' is-timedout' : '') + (isSettled(item) ? ' is-resolved' : '');
+
+    var selectWrap = document.createElement('div');
+    selectWrap.className = 'rq-item-select';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'rq-checkbox';
+    cb.setAttribute('aria-label', 'Select ' + item.dateLabel + ' for batch confirmation');
+    if (isSettled(item)){
+      cb.disabled = true;
+    } else {
+      cb.checked = !!selected[item.id];
+      cb.addEventListener('change', function(){
+        if (cb.checked) selected[item.id] = true; else delete selected[item.id];
+        updateBatchBar();
+      });
+    }
+    selectWrap.appendChild(cb);
+    card.appendChild(selectWrap);
+
+    var body = document.createElement('div');
+    body.className = 'rq-item-body';
+
+    var top = document.createElement('div');
+    top.className = 'rq-item-top';
+    var kindWrap = document.createElement('div');
+    kindWrap.className = 'rq-item-kindwrap';
+    var kind = document.createElement('span');
+    kind.className = 'rq-item-kind';
+    kind.textContent = '48-hour rule';
+    var date = document.createElement('span');
+    date.className = 'rq-item-date';
+    date.textContent = item.dateLabel;
+    var queued = document.createElement('span');
+    queued.className = 'rq-item-queued';
+    queued.textContent = item.queuedLabel;
+    kindWrap.appendChild(kind); kindWrap.appendChild(date); kindWrap.appendChild(queued);
+    top.appendChild(kindWrap);
+    top.appendChild(reviewBadge(item.confirmedBy, item.reviewStatus));
+    body.appendChild(top);
+
+    var summary = document.createElement('p');
+    summary.className = 'rq-item-summary';
+    summary.innerHTML = 'System reading: <b>' + RELAPSE[item.variant].title + '</b> — ' + RELAPSE[item.variant].label;
+    body.appendChild(summary);
+
+    var rule = document.createElement('p');
+    rule.className = 'rq-item-rule';
+    rule.textContent = item.rule;
+    body.appendChild(rule);
+
+    if (item.reviewStatus === 'timed_out'){
+      var note = document.createElement('p');
+      note.className = 'rq-item-note';
+      note.textContent = 'The 14-day REVIEW_TIMEOUT elapsed with nobody looking — confirmed_by stayed system, never recorded as human confirmation (FR-3.28). Still blocks Generate identically to a fresh unreviewed item.';
+      body.appendChild(note);
+    }
+
+    var picker = document.createElement('div');
+    picker.className = 'chip-picker';
+    picker.hidden = true;
+    ['collapsed', 'split'].forEach(function(variant){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = RELAPSE[variant].title;
+      if (item.variant === variant) b.classList.add('is-current');
+      b.addEventListener('click', function(){
+        item.variant = variant;
+        item.confirmedBy = 'user';
+        item.reviewStatus = 'user_reviewed';
+        delete selected[item.id];
+        renderGate();
+        showToast('Boundary set: ' + RELAPSE[variant].title + ' for ' + item.dateLabel + '.');
+      });
+      picker.appendChild(b);
+    });
+
+    if (!isSettled(item)){
+      var actions = document.createElement('div');
+      actions.className = 'rq-item-actions';
+      var confirmBtn = document.createElement('button');
+      confirmBtn.type = 'button';
+      confirmBtn.className = 'rq-btn rq-btn-primary';
+      confirmBtn.textContent = 'Confirm this reading';
+      confirmBtn.addEventListener('click', function(){
+        item.confirmedBy = 'user';
+        item.reviewStatus = 'user_reviewed';
+        delete selected[item.id];
+        renderGate();
+        showToast('Confirmed: ' + RELAPSE[item.variant].title + ' for ' + item.dateLabel + '.');
+      });
+      var altBtn = document.createElement('button');
+      altBtn.type = 'button';
+      altBtn.className = 'rq-btn';
+      altBtn.textContent = 'Choose a different reading';
+      altBtn.addEventListener('click', function(){ picker.hidden = !picker.hidden; });
+      actions.appendChild(confirmBtn);
+      actions.appendChild(altBtn);
+      body.appendChild(actions);
+    } else {
+      var changeWrap = document.createElement('div');
+      changeWrap.className = 'rq-item-actions';
+      var changeBtn = document.createElement('button');
+      changeBtn.type = 'button';
+      changeBtn.className = 'rq-btn rq-btn-ghost';
+      changeBtn.textContent = 'Confirmed by you — change';
+      changeBtn.addEventListener('click', function(){ picker.hidden = !picker.hidden; });
+      changeWrap.appendChild(changeBtn);
+      body.appendChild(changeWrap);
+    }
+    body.appendChild(picker);
+
+    card.appendChild(body);
+    return card;
+  }
+
+  function buildDayclassItem(item){
+    var card = document.createElement('div');
+    card.className = 'rq-item' + (item.reviewStatus === 'timed_out' ? ' is-timedout' : '') + (isSettled(item) ? ' is-resolved' : '');
+
+    var selectWrap = document.createElement('div');
+    selectWrap.className = 'rq-item-select';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'rq-checkbox';
+    cb.setAttribute('aria-label', 'Select ' + item.dateLabel + ' for batch confirmation');
+    if (isSettled(item)){
+      cb.disabled = true;
+    } else {
+      cb.checked = !!selected[item.id];
+      cb.addEventListener('change', function(){
+        if (cb.checked) selected[item.id] = true; else delete selected[item.id];
+        updateBatchBar();
+      });
+    }
+    selectWrap.appendChild(cb);
+    card.appendChild(selectWrap);
+
+    var body = document.createElement('div');
+    body.className = 'rq-item-body';
+
+    var top = document.createElement('div');
+    top.className = 'rq-item-top';
+    var kindWrap = document.createElement('div');
+    kindWrap.className = 'rq-item-kindwrap';
+    var kind = document.createElement('span');
+    kind.className = 'rq-item-kind';
+    kind.textContent = 'Day classification';
+    var date = document.createElement('span');
+    date.className = 'rq-item-date';
+    date.textContent = item.dateLabel;
+    var queued = document.createElement('span');
+    queued.className = 'rq-item-queued';
+    queued.textContent = item.queuedLabel;
+    kindWrap.appendChild(kind); kindWrap.appendChild(date); kindWrap.appendChild(queued);
+    top.appendChild(kindWrap);
+    top.appendChild(reviewBadge(item.confirmedBy, item.reviewStatus));
+    body.appendChild(top);
+
+    var summary = document.createElement('p');
+    summary.className = 'rq-item-summary';
+    summary.innerHTML = item.summary;
+    body.appendChild(summary);
+
+    var rule = document.createElement('p');
+    rule.className = 'rq-item-rule';
+    rule.textContent = item.rule;
+    body.appendChild(rule);
+
+    if (item.reviewStatus === 'timed_out'){
+      var note = document.createElement('p');
+      note.className = 'rq-item-note';
+      note.textContent = 'The 14-day REVIEW_TIMEOUT elapsed with nobody looking — confirmed_by stayed system (FR-3.28). Still blocks Generate identically to a fresh unreviewed item.';
+      body.appendChild(note);
+    }
+
+    if (!isSettled(item)){
+      var actions = document.createElement('div');
+      actions.className = 'rq-item-actions';
+      var confirmBtn = document.createElement('button');
+      confirmBtn.type = 'button';
+      confirmBtn.className = 'rq-btn rq-btn-primary';
+      confirmBtn.textContent = 'Confirm as shown';
+      confirmBtn.addEventListener('click', function(){
+        item.confirmedBy = 'user';
+        item.reviewStatus = 'user_reviewed';
+        delete selected[item.id];
+        renderGate();
+        showToast('Confirmed: ' + item.dateLabel + '.');
+      });
+      actions.appendChild(confirmBtn);
+      body.appendChild(actions);
+    } else {
+      var changeWrap = document.createElement('div');
+      changeWrap.className = 'rq-item-actions';
+      var settledNote = document.createElement('span');
+      settledNote.className = 'rq-item-queued';
+      settledNote.textContent = 'Confirmed by you';
+      changeWrap.appendChild(settledNote);
+      body.appendChild(changeWrap);
+    }
+
+    card.appendChild(body);
+    return card;
+  }
+
+  function buildItem(item){
+    return item.kind === 'recurrence' ? buildRecurrenceItem(item) : buildDayclassItem(item);
+  }
+
+  /* ---------------- batch bar ---------------- */
+  var scrollEl = document.getElementById('rq-scroll');
+  var batchbarEl = document.getElementById('rq-batchbar');
+  var statEl = document.getElementById('rq-stat');
+  var gateSubEl = document.getElementById('gate-sub');
+  var selectAllCb = document.getElementById('rq-selectall-cb');
+  var selectAllLabel = document.getElementById('rq-selectall-label');
+  var confirmSelectedBtn = document.getElementById('rq-confirm-selected');
+  var generateBtn = document.getElementById('generate-btn');
+  var generateNote = document.getElementById('generate-note');
+  var reportOutput = document.getElementById('report-output');
+
+  function updateBatchBar(){
+    var eligible = currentItems().filter(isBatchEligible);
+    var selectedCount = Object.keys(selected).length;
+    confirmSelectedBtn.disabled = selectedCount === 0;
+    confirmSelectedBtn.textContent = selectedCount === 0 ? 'Confirm selected' : 'Confirm selected (' + selectedCount + ')';
+    selectAllCb.disabled = eligible.length === 0;
+    selectAllCb.checked = eligible.length > 0 && selectedCount === eligible.length;
+    selectAllLabel.textContent = eligible.length === 0 ? 'Nothing left to select' : 'Select all pending (' + eligible.length + ')';
+  }
+
+  selectAllCb.addEventListener('change', function(){
+    var eligible = currentItems().filter(isBatchEligible);
+    if (selectAllCb.checked){
+      eligible.forEach(function(item){ selected[item.id] = true; });
+    } else {
+      selected = {};
+    }
+    renderGate();
+  });
+
+  confirmSelectedBtn.addEventListener('click', function(){
+    var ids = Object.keys(selected);
+    if (!ids.length) return;
+    ids.forEach(function(id){
+      var item = findItem(id);
+      if (!item || !isBatchEligible(item)) return;
+      item.confirmedBy = 'user';
+      item.reviewStatus = 'user_reviewed';
+    });
+    selected = {};
+    renderGate();
+    showToast('Confirmed ' + ids.length + ' item' + (ids.length === 1 ? '' : 's') + ' as shown.');
+  });
+
+  function updateGenerateBtn(){
+    var pending = currentItems().filter(isPending).length;
+    generateBtn.disabled = pending > 0;
+    if (pending > 0){
+      generateBtn.textContent = 'Generate report — ' + pending + ' item' + (pending === 1 ? '' : 's') + ' pending';
+      generateNote.textContent = 'Every unconfirmed derived object in this reporting window must be resolved above before generation proceeds (FR-3.30). Not relaxed for the primary user.';
+    } else {
+      generateBtn.textContent = 'Generate report';
+      generateNote.textContent = 'Nothing pending in this reporting window — ready to generate.';
+    }
+  }
+
+  /* ---------------- gate render ---------------- */
+  function renderGate(){
+    var data = GATE_DATA[currentCriterion];
+    gateSubEl.textContent = 'Reporting window: ' + data.windowLabel;
+    scrollEl.textContent = '';
+
+    if (data.items.length === 0){
+      batchbarEl.hidden = true;
+      statEl.textContent = 'Nothing pending in this window.';
+      var empty = document.createElement('div');
+      empty.className = 'rq-empty';
+      empty.innerHTML =
+        '<span class="rq-empty-glyph">&#10003;</span>' +
+        '<span class="rq-empty-title">Nothing pending</span>' +
+        '<span class="rq-empty-sub">No derived object with computed_from inside this reporting window is unconfirmed. Generate is available immediately — the gate still ran, it simply had nothing to force-surface.</span>';
+      scrollEl.appendChild(empty);
+    } else {
+      batchbarEl.hidden = false;
+      var pendingCount = data.items.filter(isPending).length;
+      var timedOutCount = data.items.filter(function(i){ return i.reviewStatus === 'timed_out' && isPending(i); }).length;
+      var statParts = ['<b class="u-numeric">' + pendingCount + '</b> unconfirmed in window'];
+      if (timedOutCount) statParts.push('<b class="u-numeric">' + timedOutCount + '</b> timed out');
+      statEl.innerHTML = statParts.join(' · ');
+      data.items.forEach(function(item){ scrollEl.appendChild(buildItem(item)); });
+    }
+
+    updateBatchBar();
+    updateGenerateBtn();
+  }
+
+  /* ---------------- criterion switching ---------------- */
+  var critButtons = document.querySelectorAll('.crit-option');
+  /* Tracks which criteria have already been generated this session, so switching back to one
+     restores its report rather than requiring Generate to be clicked twice — matching the
+     annotation's own claim below rather than leaving the copy to overstate the behavior. */
+  var generated = {};
+  function setCriterion(crit){
+    currentCriterion = crit;
+    selected = {};
+    critButtons.forEach(function(b){ b.classList.toggle('is-active', b.dataset.crit === crit); });
+    document.querySelectorAll('.report-pages').forEach(function(el){ el.hidden = true; });
+    if (generated[crit]){
+      document.querySelectorAll('.report-pages').forEach(function(el){
+        el.hidden = el.dataset.report !== crit;
+      });
+      reportOutput.hidden = false;
+    } else {
+      reportOutput.hidden = true;
+    }
+    renderGate();
+  }
+  critButtons.forEach(function(b){
+    b.addEventListener('click', function(){ setCriterion(b.dataset.crit); });
+  });
+
+  /* ---------------- generate / report display ---------------- */
+  generateBtn.addEventListener('click', function(){
+    if (generateBtn.disabled) return;
+    generated[currentCriterion] = true;
+    document.querySelectorAll('.report-pages').forEach(function(el){
+      el.hidden = el.dataset.report !== currentCriterion;
+    });
+    reportOutput.hidden = false;
+    reportOutput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast('Report generated for ' + currentCriterion.replace(/_/g, ' ') + '.');
+  });
+
+  document.getElementById('share-btn').addEventListener('click', function(){
+    showToast('Share sheet would open here — export as PDF, unchanged from what is on screen.');
+  });
+  document.getElementById('print-btn').addEventListener('click', function(){
+    window.print();
+  });
+
+  /* ---------------- init ---------------- */
+  setCriterion('chronic_botox');
+})();
+</script>

@@ -338,6 +338,25 @@
   .explink-disclose{font-size:.7rem;color:var(--app-faint);line-height:1.5;border-top:1px dashed var(--app-border);padding-top:.5rem}
   .explink-actions{display:flex;gap:.5rem}
 
+  /* ---- added with the Report, single-criterion packet + pre-generation gate (task 8) ---- */
+  .crit-option{appearance:none;text-align:left;border:1px solid var(--app-border);background:var(--app-bg);color:var(--app-ink);border-radius:10px;padding:.5rem .65rem;cursor:pointer;font:inherit;width:100%}
+  .crit-option.is-active{border-color:var(--app-accent);background:var(--app-accent-dim)}
+  .doc-genmeta{display:flex;flex-direction:column;gap:.32rem;font-family:var(--f-mono);font-size:.78rem;color:var(--doc-muted)}
+  .doc-genmeta div b{color:var(--doc-ink);font-weight:500}
+  .check-item{display:flex;gap:.7rem;align-items:flex-start;padding-bottom:1rem;border-bottom:1px dashed var(--doc-rule)}
+  .check-item:last-child{border-bottom:none;padding-bottom:0}
+  .check-icon{font-size:1rem;line-height:1.5;flex-shrink:0;width:1.2rem;text-align:center}
+  .check-icon.is-met{color:var(--doc-accent)}
+  .check-body{flex:1;min-width:0}
+  .check-top{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.2rem}
+  .check-req{font-weight:600}
+  .check-cite{font-size:var(--fs-caption);color:var(--doc-faint);font-style:italic;margin-bottom:.4rem}
+  .check-computed{font-size:var(--fs-body);color:var(--doc-ink);line-height:1.55}
+  .doc-daycount-table{width:100%;font-size:var(--fs-caption)}
+  .doc-daycount-table th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--doc-faint);font-weight:600;padding:0 .5rem .4rem 0;border-bottom:1px solid var(--doc-rule)}
+  .doc-daycount-table td{padding:.4rem .5rem .4rem 0;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+  .doc-omitnote{font-size:var(--fs-caption);color:var(--doc-faint);font-style:italic;margin-top:.5rem}
+
   .tag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem}
   .tag-swatch{border:1px solid var(--border);border-radius:10px;padding:.75rem .85rem;background:var(--surface-raised);display:flex;flex-direction:column;gap:.4rem}
   .tag-meaning{font-size:.72rem;color:var(--ink-muted);line-height:1.4}
@@ -567,6 +586,43 @@
           </div>
         </div>
         <div class="cell-foot"><span class="cell-name">ExportLinkRow &mdash; revoked</span><span class="cell-world">Device (Settings) &mdash; one-way transition, disclosure stays in the copy, not just at click time</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start">
+          <div style="display:flex;flex-direction:column;gap:.4rem;width:100%">
+            <span class="crit-picker-label" style="font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--app-faint);font-weight:600">Target payer criterion</span>
+            <button class="crit-option is-active" type="button">PAYER_CHRONIC_BOTOX &mdash; Cigna, Botox initiation</button>
+            <button class="crit-option" type="button">PAYER_CGRP_EPISODIC</button>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">CriterionPicker</span><span class="cell-world">Device (Report) &mdash; real control, not a reviewer demo toggle; re-evaluates the gate on change (D20)</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-doc" style="justify-content:flex-start">
+          <div class="check-item">
+            <span class="check-icon is-met">&#10003;</span>
+            <div class="check-body">
+              <div class="check-top"><span class="check-req">&ge;15 headache days/month, &ge;8 migraine days</span><span class="badge badge-met">Met</span></div>
+              <div class="check-cite">Cigna coverage policy, chronic migraine Botox initiation.</div>
+              <div class="check-computed">Computed: <b class="u-numeric">16</b> headache days, <b class="u-numeric">13</b> migraine days &mdash; Jul 2026.</div>
+            </div>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">CriterionChecklist</span><span class="cell-world">Doc (Report) &mdash; per-requirement met/not-met, never a bare &ldquo;eligible: yes&rdquo; (D20)</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-doc" style="justify-content:flex-start">
+          <div class="doc-genmeta">
+            <div><b>algorithm_version</b> v0.4.2</div>
+            <div><b>config_hash</b> 7f3a2c9e1b04</div>
+            <div><b>derivation_id</b> 3e9f21a4&hellip;</div>
+            <div><b>generated_at</b> Aug 15, 2026, 8:40&nbsp;AM</div>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">GenerationRecord</span><span class="cell-world">Doc (Report cover) &mdash; the reproducibility anchor D20 requires</span></div>
       </div>
 
       <div class="cell">
