@@ -310,6 +310,37 @@ An observation is flagged backfilled — and written with reduced confidence per
 
 ---
 
+## D22 — Desktop is a first-class surface; a navigation shell is designed, not retrofitted
+
+**Date:** 21 August 2026 · **Status:** Adopted · **House decision — information architecture and responsive strategy, additive to D1, not a reversal**
+
+**The trigger.** All ten mockup screens were built mobile-only — every device-world screen is hard-capped inside a `.device-frame` at `width:min(390px, 100%)`. Eric clarified the product is reached via the website, including on desktop, and that Capacitor stays as a mobile wrapper around that same web app — this does not reverse D1's native-wrapper reasoning (HealthKit/Health Connect, scheduled local notifications, and the ChatGPT Health route are unaffected), it adds desktop as a second first-class surface for the same underlying app.
+
+**What checking turned up.** Closing this gap is not "widen ten screens." There is currently **no inter-screen navigation chrome anywhere, at any width.** Every one of the ten screens is a standalone artifact — no tab bar, no sidebar, no menu, nothing that moves a person from Home to Timeline to Settings inside the product itself. `design-system.md` names "navigation" once, in passing, as something "Chrome" conceptually covers, and never specifies it. `Research/product-architecture.md` has a route list (`/`, `/timeline`, `/insights`, `/report`, `/settings`) but the document is explicitly marked superseded and never describes a navigation *mechanism*. So the navigation shell has to be designed, not retrofitted onto an existing mobile pattern — and it needs to work at both breakpoints from the start, the same way `ConsentScope` was designed once in Onboarding and reused verbatim rather than being invented per screen.
+
+**The decision.**
+
+- **Two breakpoints, not three.** Mobile keeps the existing 390px `.device-frame` convention unchanged. Desktop is ≥1024px, sidebar nav plus reflowed content where it earns it. Tablet/mid-width inherits the mobile single-column layout, wider and centered — no dedicated tablet reflow in this pass. Same shape of reasoning as D19's binary-not-graduated choice: narrower scope now, revisit with real usage data later rather than building a third tier speculatively.
+- **Four primary nav destinations, one shared shell**: Home, Timeline, Insights, Settings — a bottom tab bar on mobile, a left sidebar on desktop, both built from the same reference implementation rather than mobile-first-then-ported.
+  - **Review Queue** is reached via a badge/entry point from Home, not a fifth tab — it is a work queue visited when something is pending, not a daily-use destination, and both Task 5's own design and the Report's pre-generation gate already assume it is reached contextually rather than as a persistent destination.
+  - **Recall summary** is reached via a prominent one-tap action from Home, matching its own existing design intent ("generated on demand, one tap from app open") — not a nav tab.
+  - **Report** is reached via Settings or a "Documents" action, matching its gated, occasional-use nature.
+  - **Onboarding, mid-attack capture, morning checkpoint get no persistent nav chrome at all.** These are bounded, single-purpose flows — a first-run wizard, a photophobic person mid-attack, a capped morning backstop — not places that should offer an inviting way to wander off mid-task. This matches the existing precedent that `StepRail` is explicitly "a position indicator, not navigation" (`design-system.md` §4). Stated here so it reads as a boundary, not a gap, the same way D6/D21 state what they deliberately leave out.
+- **Screen tiering, so effort is sequenced honestly rather than treated as one undifferentiated pass:**
+
+  | Tier | Screens | Work |
+  |---|---|---|
+  | 1 | Home, Timeline, Settings, Insights | Nav shell plus a genuine multi-column desktop reflow; Home builds first and becomes the reference the other three copy from |
+  | 1b | Review Queue | Same tier of work — reached via badge rather than a tab, but still gets the full nav shell once inside it |
+  | 3 | Recall summary, Report | No nav shell (they're documents, not app screens) — verify/adjust `.doc-sheet` centering at desktop widths only |
+  | *(none)* | Onboarding, mid-attack capture, morning checkpoint | No nav shell by design (see above) — verify/adjust desktop-width centering only |
+
+**Why Home builds first.** The nav shell (`TabBar`/`SideNav`) needs one reference implementation before four other screens reuse it, the same way D16's Timeline row model became the pattern other screens copied rather than each re-deriving row semantics. Home is the natural first build: it is the app's default landing surface and already has the most device-world precedent (`ContextCard`/`PassiveStrip`) for other screens — including Insights — to build from.
+
+**Changes.** `design-system.md` §1 gains a note that breakpoint is now a second axis orthogonal to world (a screen's world governs color/type treatment; its tier governs whether it gets a desktop reflow at all). §4 gains `TabBar`/`SideNav` once Home's reference build exists. §7 gains a responsive-coverage tracking table alongside the existing mockup-coverage one. No change to `CLAUDE.md` or `tech-spec.md` — D1's native-wrapper reasoning is untouched, and no new clinical or backend behavior is introduced by this entry.
+
+---
+
 ## Revised build order
 
 Capacitor is repository scaffolding rather than a numbered step (D1). The steps are otherwise unchanged.
