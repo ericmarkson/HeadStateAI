@@ -1,0 +1,402 @@
+<title>Insights</title>
+<style>
+  @font-face{
+    font-family:'Fraunces';font-style:italic;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_ITALIC__) format('woff2');
+  }
+  @font-face{
+    font-family:'Fraunces';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__FRAUNCES_NORMAL__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Sans';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXSANS__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_400__) format('woff2');
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;
+    src:url(data:font/woff2;base64,__PLEXMONO_500__) format('woff2');
+  }
+
+  /* ============ TOKENS (copied verbatim from settings.html — design-system.md §5) ============ */
+  :root{
+    /* chrome — light (default / un-stamped) */
+    --surface:#F6F7F9;
+    --surface-raised:#FFFFFF;
+    --ink:#1B1C22;
+    --ink-muted:#5B5E68;
+    --ink-faint:#6A6C74;
+    --border:#DDE0E5;
+    --accent:#B5652A;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#F3E4D3;
+    --focus:#2B57B0;
+    --good:#3F6B62;
+    --good-soft:#E1EBE8;
+    --flag:#9C4A3A;
+    --flag-soft:#F3E1DD;
+
+    /* fixed device world — the phone screens (a "screenshot," not viewer-themed) */
+    --app-bg:#121019;
+    --app-surface:#1C1927;
+    --app-surface-raised:#242032;
+    --app-ink:#EDEAF2;
+    --app-muted:#948FA6;
+    --app-faint:#87839C;
+    --app-border:#332F42;
+    --app-accent:#D98A46;
+    --app-accent-dim:#3B2A1C;
+    --app-good:#7FA79D;
+    --app-good-dim:#233330;
+    --app-focus:#7DA2FF;
+    --app-flag:#C97A68;
+
+    /* fixed paper world — kept for token parity with the other mockups */
+    --doc-bg:#FCFAF5;
+    --doc-ink:#211D1A;
+    --doc-muted:#6E655B;
+    --doc-faint:#756C5B;
+    --doc-rule:#DCD1BE;
+    --doc-accent:#A85A26;
+    --doc-flag:#9C4A3A;
+    --doc-flag-soft:#F1DFD3;
+    --doc-focus:#2B57B0;
+
+    /* type */
+    --f-display:'Fraunces', ui-serif, Georgia, serif;
+    --f-body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --f-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+    --fs-eyebrow:.6875rem;
+    --fs-caption:.8125rem;
+    --fs-body:.9375rem;
+    --fs-body-lg:1.0625rem;
+    --fs-h3:1.1875rem;
+    --fs-h2:1.5rem;
+
+    --radius-doc:3px;
+    --radius-card:14px;
+    --radius-pill:999px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --surface:#15141C;
+      --surface-raised:#1D1B26;
+      --ink:#EDEAF2;
+      --ink-muted:#A9A5B8;
+      --ink-faint:#8A8699;
+      --border:#332F3F;
+      --accent:#D98A46;
+      --accent-ink:#1B1208;
+      --accent-soft:#3B2A1C;
+      --focus:#7DA2FF;
+      --good:#7FA79D;
+      --good-soft:#233330;
+      --flag:#C97A68;
+      --flag-soft:#3A241F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --surface:#15141C;
+    --surface-raised:#1D1B26;
+    --ink:#EDEAF2;
+    --ink-muted:#A9A5B8;
+    --ink-faint:#8A8699;
+    --border:#332F3F;
+    --accent:#D98A46;
+    --accent-ink:#1B1208;
+    --accent-soft:#3B2A1C;
+    --focus:#7DA2FF;
+    --good:#7FA79D;
+    --good-soft:#233330;
+    --flag:#C97A68;
+    --flag-soft:#3A241F;
+  }
+
+  /* ============ BASE ============ */
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--surface);
+    color:var(--ink);
+    font-family:var(--f-body);
+    font-size:var(--fs-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+  p{margin:0}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+  /* Fixed worlds pin their own focus color — the chrome --focus token flips with the
+     viewer's OS theme and fails contrast inside the always-dark device world. */
+  .device-screen :focus-visible{outline-color:var(--app-focus)}
+  .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
+
+  /* ============ SHELL ============ */
+  .shell{max-width:1180px;margin:0 auto;padding:2.25rem 1.5rem 4rem}
+  .shell-head{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:1.5rem;flex-wrap:wrap;margin-bottom:1.75rem;
+    padding-bottom:1.25rem;border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;flex-direction:column;gap:.3rem}
+  .brand-mark{font-family:var(--f-display);font-weight:600;font-size:1.375rem;letter-spacing:.01em}
+  .brand-mark em{font-style:italic;color:var(--accent)}
+  .brand-sub{font-size:var(--fs-caption);color:var(--ink-muted);max-width:44ch}
+
+  .lede{max-width:68ch;color:var(--ink-muted);font-size:var(--fs-body);margin-bottom:1.5rem}
+  .lede b{color:var(--ink);font-weight:600}
+  .lede code{font-family:var(--f-mono);font-size:.92em;color:var(--ink-muted)}
+
+  .shell-foot{
+    margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--border);
+    font-size:var(--fs-caption);color:var(--ink-faint);
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  }
+
+  /* ============ DEVICE FRAME ============ */
+  .device-stage{display:flex;justify-content:center;padding:.5rem 0 1rem}
+  .device-frame{
+    width:min(390px, 100%);
+    border-radius:40px;padding:12px;
+    background:linear-gradient(155deg,#2A2735,#131019);
+    box-shadow:0 1px 1px rgba(0,0,0,.4), 0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .device-screen{
+    background:var(--app-bg);color:var(--app-ink);
+    border-radius:30px;overflow:hidden;
+    font-family:var(--f-body);
+    min-height:720px;
+    display:flex;flex-direction:column;position:relative;
+  }
+  .device-notch{height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .device-notch::before{
+    content:'';width:90px;height:6px;border-radius:99px;background:rgba(255,255,255,.14);
+  }
+  .app-body{padding:.25rem 1.15rem 1.4rem;flex:1;display:flex;flex-direction:column;gap:1.1rem}
+
+  /* ---- shared app type (reused from onboarding.html / settings.html) ---- */
+  .app-title{
+    font-family:var(--f-display);font-weight:600;font-size:1.4rem;line-height:1.2;letter-spacing:-.01em;
+  }
+  .app-title em{font-style:italic;color:var(--app-accent)}
+  .app-lede{font-size:var(--fs-caption);color:var(--app-muted);line-height:1.55}
+  .app-lede b{color:var(--app-ink);font-weight:600}
+  .app-hint{font-size:.75rem;color:var(--app-faint);line-height:1.5}
+
+  /* ---- ScopeNote: the unmissable "what this is / isn't" framing card ---- */
+  .scope-note{
+    background:var(--app-surface);
+    border-left:3px solid var(--app-accent);
+    border-radius:var(--radius-card);
+    padding:.85rem 1rem .95rem;
+    display:flex;flex-direction:column;gap:.6rem;
+  }
+  .scope-note-head{font-size:var(--fs-body-lg);font-weight:600;color:var(--app-ink);line-height:1.3}
+  .scope-note-row{display:flex;gap:.55rem;align-items:flex-start}
+  .scope-note-tag{
+    flex-shrink:0;margin-top:.1rem;
+    font-family:var(--f-mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;
+    font-weight:700;padding:.2rem .42rem;border-radius:5px;white-space:nowrap;
+  }
+  .scope-note-tag.is-yes{color:var(--app-good);background:var(--app-good-dim);border:1px solid var(--app-good)}
+  /* rgba(201,122,104,.14) is --app-flag (#C97A68) at reduced opacity — no --app-flag-dim
+     token exists yet to pair with --app-good-dim above, so this is a literal, not a leak. */
+  .scope-note-tag.is-no{color:var(--app-flag);background:rgba(201,122,104,.14);border:1px solid var(--app-flag)}
+  .scope-note-row p{font-size:var(--fs-caption);color:var(--app-muted);line-height:1.55}
+  .scope-note-row p b{color:var(--app-ink);font-weight:600}
+  .scope-note-foot{
+    font-size:.72rem;color:var(--app-faint);line-height:1.5;
+    border-top:1px dashed var(--app-border);padding-top:.55rem;
+  }
+
+  /* ---- section scaffolding ---- */
+  .insights-section{display:flex;flex-direction:column;gap:.6rem}
+  .insights-subhead{
+    font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.08em;
+    font-weight:600;color:var(--app-faint);margin-top:.1rem;
+  }
+
+  /* ---- ContextCard / PassiveStrip, from home.html — .ctx/.strip/.strip-what/.strip-val/
+     .feed-tag/.ctx-explain are verbatim; .ctx-head is adapted, not verbatim: home's version
+     is a short uppercase eyebrow label ("TODAY"), but a correlation title is a full sentence,
+     so this drops the eyebrow treatment for body-sized ink-colored text instead. ---- */
+  .ctx{
+    background:var(--app-surface);
+    border:1px solid var(--app-border);
+    border-radius:var(--radius-card);
+    padding:.75rem .95rem .8rem;
+    display:flex;flex-direction:column;gap:.1rem;
+  }
+  .ctx-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;
+    font-size:var(--fs-body);font-weight:600;color:var(--app-ink);
+    padding-bottom:.5rem;
+  }
+  .ctx-head span:last-child{
+    letter-spacing:.02em;font-weight:400;font-size:.68rem;
+    font-family:var(--f-mono);color:var(--app-faint);flex-shrink:0;
+  }
+  .strip{
+    display:flex;align-items:baseline;justify-content:space-between;gap:.7rem;
+    padding:.42rem 0;
+    border-top:1px solid var(--app-border);
+    font-size:var(--fs-caption);
+  }
+  .strip-what{color:var(--app-muted);display:flex;align-items:baseline;gap:.45rem;flex-wrap:wrap}
+  .strip-val{
+    font-family:var(--f-mono);color:var(--app-ink);font-size:var(--fs-caption);
+    text-align:right;white-space:nowrap;
+  }
+  .strip-val.is-absent{font-family:var(--f-body);color:var(--app-faint);font-style:italic}
+  .feed-tag{
+    font-family:var(--f-mono);font-size:.6rem;
+    color:var(--app-faint);border:1px solid var(--app-border);
+    padding:.1rem .32rem;border-radius:4px;white-space:nowrap;
+  }
+  .ctx-explain{
+    font-size:.72rem;color:var(--app-faint);line-height:1.55;
+    border-top:1px solid var(--app-border);
+    padding-top:.55rem;margin-top:.35rem;
+  }
+  .ctx-explain b{color:var(--app-muted);font-weight:600}
+  .ctx-explain code{font-family:var(--f-mono);font-size:.92em;color:var(--app-muted)}
+
+  /* ---- Annotation, device-scoped, reused verbatim (mockup-only reviewer note) ---- */
+  .device-annotation{
+    display:flex;gap:.55rem;align-items:flex-start;
+    border:1px dashed var(--app-border);border-radius:10px;
+    padding:.65rem .8rem;font-size:.73rem;color:var(--app-faint);line-height:1.5;
+  }
+  .device-annotation b{color:var(--app-muted)}
+  .device-annotation code{font-family:var(--f-mono);font-size:.92em;color:var(--app-muted)}
+
+  /* ---- closing research-bet note ---- */
+  .closing-note{
+    font-family:var(--f-display);font-style:italic;
+    color:var(--app-muted);font-size:.85rem;line-height:1.6;
+    border-top:1px solid var(--app-border);padding-top:.9rem;
+  }
+  .closing-note b{color:var(--app-ink);font-style:normal;font-weight:600}
+
+  @media (max-width:640px){
+    .shell{padding:1.5rem 1rem 3rem}
+  }
+</style>
+
+<div class="shell">
+
+  <div class="shell-head">
+    <div class="brand">
+      <div class="brand-mark">Head<em>State</em></div>
+      <div class="brand-sub">Screen mockup — Insights: retrospective correlation, scoped by D21</div>
+    </div>
+  </div>
+
+  <p class="lede"><b>Retrospective, descriptive, unscored</b> — the scope <code>decision-log.md</code> D21 settled after narrowing D6. Every relationship on this screen describes what has already happened in the logged record; nothing predicts, scores, or reacts to today. Sleep/weather/medication-day co-occurrence is in scope now (needs nothing beyond build steps 1&ndash;4); anything keyed to a phase or prodrome label stays gated on step 5 and is called out below as deliberately absent, not missing.</p>
+
+  <div class="device-stage">
+    <div class="device-frame"><div class="device-screen">
+      <div class="device-notch"></div>
+      <div class="app-body">
+
+        <div class="app-title">Insights</div>
+        <p class="app-lede">Patterns already in your own log — sleep, weather, medication days — set beside the headache and migraine days you logged. Recomputed each time you open this page, over a fixed trailing window: <b>23 May&ndash;21 Aug 2026 (90 days)</b>.</p>
+
+        <div class="scope-note">
+          <div class="scope-note-head">What this page is — and isn&rsquo;t</div>
+          <div class="scope-note-row">
+            <span class="scope-note-tag is-yes">Is</span>
+            <p>A look back at your own record: how often a migraine day <b>followed</b> a night of short sleep, an overnight pressure drop, or a treated day, over the fixed window above.</p>
+          </div>
+          <div class="scope-note-row">
+            <span class="scope-note-tag is-no">Isn&rsquo;t</span>
+            <p>A prediction, a risk score, or a &ldquo;your migraine risk today&rdquo; statement. Nothing on this screen is forward-looking, and nothing scores today or any day to come.</p>
+          </div>
+          <p class="scope-note-foot">Correlation here means co-occurrence, never cause. &ldquo;On days you did X, Y happened Z% of the time&rdquo; is what this page shows &mdash; never &ldquo;X causes Y&rdquo; or &ldquo;X is a trigger.&rdquo;</p>
+        </div>
+
+        <div class="insights-section">
+          <span class="insights-subhead">Sleep</span>
+          <div class="ctx">
+            <div class="ctx-head"><span>Short sleep, and the day that followed</span><span>last 90 days</span></div>
+            <div class="strip">
+              <span class="strip-what">Nights under 6h sleep <span class="feed-tag">apple_health</span></span>
+              <span class="strip-val">31 nights</span>
+            </div>
+            <div class="strip">
+              <span class="strip-what">Next day was a migraine day <span class="feed-tag">observation log</span></span>
+              <span class="strip-val">13 of 31 &middot; 42%</span>
+            </div>
+            <p class="ctx-explain">On nights you slept under 6 hours, the following day was classified a migraine day in <b>13 of 31</b> such nights, 23 May&ndash;21 Aug 2026. This describes what followed those nights in your own log &mdash; not a prediction, and not a claim that short sleep caused it.</p>
+          </div>
+        </div>
+
+        <div class="insights-section">
+          <span class="insights-subhead">Weather</span>
+          <div class="ctx">
+            <div class="ctx-head"><span>Overnight pressure drop, and the day that followed</span><span>last 90 days</span></div>
+            <div class="strip">
+              <span class="strip-what">Nights with an 8+&nbsp;hPa overnight drop <span class="feed-tag">openweather</span></span>
+              <span class="strip-val">22 nights</span>
+            </div>
+            <div class="strip">
+              <span class="strip-what">Next day was a migraine day <span class="feed-tag">observation log</span></span>
+              <span class="strip-val">9 of 22 &middot; 41%</span>
+            </div>
+            <p class="ctx-explain">Following a night with a barometric-pressure drop of 8&nbsp;hPa or more, you logged a migraine day the next day in <b>9 of 22</b> such instances this window. Co-occurrence in your own record &mdash; weather is not shown as a cause, and no forecast is used or implied anywhere on this screen.</p>
+          </div>
+        </div>
+
+        <div class="insights-section">
+          <span class="insights-subhead">Medication</span>
+          <div class="ctx">
+            <div class="ctx-head"><span>A triptan-treated day, and the 48 hours after it</span><span>last 90 days</span></div>
+            <div class="strip">
+              <span class="strip-what">Days a triptan was taken <span class="feed-tag">observation log</span></span>
+              <span class="strip-val">19 days</span>
+            </div>
+            <div class="strip">
+              <span class="strip-what">Another migraine day within 48h <span class="feed-tag">observation log</span></span>
+              <span class="strip-val">7 of 19 &middot; 37%</span>
+            </div>
+            <p class="ctx-explain">Of the days you took a triptan this window, a further migraine day followed within 48 hours in <b>7 of 19</b> of them. This is a recurrence pattern in your own log &mdash; not a statement about whether the medication worked, and not medication guidance of any kind.</p>
+          </div>
+        </div>
+
+        <div class="insights-section">
+          <span class="insights-subhead">Stress</span>
+          <div class="ctx">
+            <div class="ctx-head"><span>High-stress days, and the day that followed</span><span>last 90 days</span></div>
+            <div class="strip">
+              <span class="strip-what">Pattern for &ldquo;stress: high&rdquo; days <span class="feed-tag">observation log</span></span>
+              <span class="strip-val is-absent">not enough data yet</span>
+            </div>
+            <p class="ctx-explain">HeadState waits for at least <b>8</b> qualifying days in the window before showing a percentage here, and this window doesn&rsquo;t have that many yet. We deliberately don&rsquo;t show the current count next to that threshold &mdash; a running tally against a target reads as a countdown to complete, which is exactly the &ldquo;log a few more to see your pattern&rdquo; nudge this screen is built not to be. The minimum itself is a product choice we made, not a clinical or statistical rule (the same kind of house decision as <code>BACKFILL_WINDOW</code> in <code>CLAUDE.md</code>). This card only ever reflects stress observations you already logged for their own reasons &mdash; it is not a prompt to log more.</p>
+          </div>
+        </div>
+
+        <div class="device-annotation">
+          <span>&#9670;</span>
+          <span><b>Deliberately absent:</b> any correlation keyed to phase or prodrome labels &mdash; e.g. &ldquo;symptom X preceded a migraine in Y% of cases.&rdquo; That is D6's forward-looking, phase-dependent surface: narrowed by D21, not reopened. It stays out until step 5's retrospective phase annotation actually exists and has run for a while.</span>
+        </div>
+
+        <p class="closing-note">This page is exploratory, not validated. The largest trial of trigger-analytics layered on a headache diary (n=477, 12 weeks) found no significant benefit over a bare diary &mdash; <b>self-monitoring itself</b> appeared to drive the improvement in both arms. Insights is offered because some people find it useful to see their own record reflected back, not because doing so has been shown to change outcomes.</p>
+
+      </div>
+    </div></div>
+  </div>
+
+  <div class="shell-foot">
+    <span>Mockup only &mdash; not wired to the derivation engine or a backend.</span>
+    <span>decision-log.md D6 &middot; D21 &middot; CLAUDE.md</span>
+  </div>
+</div>
