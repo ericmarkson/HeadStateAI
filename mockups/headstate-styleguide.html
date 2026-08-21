@@ -367,6 +367,27 @@
   .scope-note-row p{font-size:var(--fs-caption);color:var(--app-muted);line-height:1.55;margin:0}
   .scope-note-row p b{color:var(--app-ink);font-weight:600}
 
+  /* ---- added with the nav shell, D22 / Sec7a task 1 (reference build: Home) ---- */
+  .navitem{display:flex;align-items:center;gap:.55rem;color:var(--app-faint);cursor:pointer;appearance:none;border:none;background:none;font:inherit}
+  .navitem-icon{flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-pill);width:19px;height:19px}
+  .navitem-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .navitem-label{white-space:nowrap;font-size:var(--fs-body);font-weight:500}
+  .sidenav-demo{display:flex;flex-direction:column;gap:.15rem;background:var(--app-surface);border:1px solid var(--app-border);border-radius:var(--radius-card);padding:.8rem .6rem;width:100%}
+  .sidenav-demo .navitem{padding:.55rem .55rem;border-radius:10px}
+  .sidenav-demo .navitem.is-active{background:var(--app-accent-dim);color:var(--app-accent)}
+  .sidenav-demo .navitem.is-active .navitem-label{font-weight:700}
+  .tabbar-demo{display:flex;border-top:1px solid var(--app-border);background:var(--app-surface);width:100%}
+  .tabbar-demo .navitem{flex:1;flex-direction:column;justify-content:center;gap:.3rem;padding:.55rem .25rem .6rem;font-size:.64rem;font-weight:500}
+  .tabbar-demo .navitem-label{font-size:.64rem}
+  .tabbar-demo .navitem.is-active{color:var(--app-accent)}
+  .tabbar-demo .navitem.is-active .navitem-icon{background:var(--app-accent-dim)}
+  .tabbar-demo .navitem.is-active .navitem-label{font-weight:700}
+  .home-action{flex:1 1 9rem;display:flex;flex-direction:column;gap:.35rem;background:var(--app-surface);border:1px solid var(--app-border);border-radius:var(--radius-card);padding:.7rem .85rem .75rem;text-align:left;appearance:none;color:var(--app-ink);cursor:pointer}
+  .home-action-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+  .home-action-title{font-size:var(--fs-body);font-weight:600}
+  .home-action-badge{font-size:.68rem;font-weight:600;color:var(--app-accent);background:var(--app-accent-dim);border:1px solid var(--app-accent-dim);padding:.1rem .42rem;border-radius:var(--radius-pill);line-height:1.3}
+  .home-action-sub{font-size:.72rem;color:var(--app-faint);line-height:1.45}
+
   .tag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem}
   .tag-swatch{border:1px solid var(--border);border-radius:10px;padding:.75rem .85rem;background:var(--surface-raised);display:flex;flex-direction:column;gap:.4rem}
   .tag-meaning{font-size:.72rem;color:var(--ink-muted);line-height:1.4}
@@ -655,6 +676,40 @@
           </div>
         </div>
         <div class="cell-foot"><span class="cell-name">CorrelationCard</span><span class="cell-world">Device (Insights) &mdash; every stat carries its numerator/denominator and window, never a bare percentage</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-end;padding-bottom:0">
+          <nav class="tabbar-demo" aria-label="Primary">
+            <button class="navitem is-active" type="button"><span class="navitem-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></span><span class="navitem-label">Home</span></button>
+            <button class="navitem" type="button"><span class="navitem-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></span><span class="navitem-label">Timeline</span></button>
+            <button class="navitem" type="button"><span class="navitem-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></span><span class="navitem-label">Insights</span></button>
+            <button class="navitem" type="button"><span class="navitem-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></span><span class="navitem-label">Settings</span></button>
+          </nav>
+        </div>
+        <div class="cell-foot"><span class="cell-name">TabBar</span><span class="cell-world">Device (mobile, &lt;1024px) &mdash; one of two renderings of one <code>NAV_ITEMS</code> array; active state is never color-alone (D22)</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start">
+          <nav class="sidenav-demo" aria-label="Primary">
+            <button class="navitem is-active" type="button"><span class="navitem-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></span><span class="navitem-label">Home</span></button>
+            <button class="navitem" type="button"><span class="navitem-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></span><span class="navitem-label">Timeline</span></button>
+            <button class="navitem" type="button"><span class="navitem-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></span><span class="navitem-label">Insights</span></button>
+            <button class="navitem" type="button"><span class="navitem-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></span><span class="navitem-label">Settings</span></button>
+          </nav>
+        </div>
+        <div class="cell-foot"><span class="cell-name">SideNav</span><span class="cell-world">Device (desktop, &ge;1024px) &mdash; the other rendering of the same <code>NAV_ITEMS</code> array; genuine desktop chrome, no phone-bezel styling reaches it</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start">
+          <button class="home-action" type="button" style="width:100%">
+            <div class="home-action-head"><span class="home-action-title">Review queue</span><span class="home-action-badge">2</span></div>
+            <span class="home-action-sub">Two items waiting on your review</span>
+          </button>
+        </div>
+        <div class="cell-foot"><span class="cell-name">HomeActionCard</span><span class="cell-world">Device (Home only) &mdash; contextual entry point, deliberately not part of TabBar/SideNav (D22)</span></div>
       </div>
 
       <div class="cell">
