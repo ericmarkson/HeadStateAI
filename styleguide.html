@@ -282,8 +282,7 @@
   .boundary-episode-badge{border-width:1.5px}
   .boundary-episode-badge::before{content:'episode · ';opacity:.7;font-weight:400}
 
-  /* ---- badge-review — introduced with Timeline/task 4 (D16/D18) but never added to this
-     stylesheet; the gallery cell at #boundary-badge below was rendering unstyled until now ---- */
+  /* ---- badge-review (ReviewStatusBadge) — introduced with Timeline/task 4 (D16/D18) ---- */
   .badge-review{font-size:.62rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.03em;padding:.14rem .45rem;border-radius:5px;white-space:nowrap;flex-shrink:0}
   .badge-review.is-unreviewed{color:var(--app-faint);border:1px dotted var(--app-faint)}
   .badge-review.is-reviewed{color:var(--app-good);border:1px solid var(--app-good-dim);background:var(--app-good-dim)}
@@ -382,6 +381,11 @@
   .tabbar-demo .navitem.is-active{color:var(--app-accent)}
   .tabbar-demo .navitem.is-active .navitem-icon{background:var(--app-accent-dim)}
   .tabbar-demo .navitem.is-active .navitem-label{font-weight:700}
+  .device-close-demo{display:flex;align-items:center;justify-content:center;width:2.25rem;height:2.25rem;border-radius:999px;border:1px solid var(--border);background:var(--surface-raised);color:var(--ink-muted);font-size:1.1rem;line-height:1;cursor:pointer}
+  .device-close-demo:hover{color:var(--ink);border-color:var(--accent)}
+  .doc-open{background:var(--app-surface);border:1px solid var(--app-border);border-radius:var(--radius-card);padding:.8rem .9rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+  .doc-open-title{font-size:var(--fs-body);font-weight:600;color:var(--app-ink)}
+  .doc-open-sub{font-size:.75rem;color:var(--app-muted);margin-top:.2rem}
   .home-action{flex:1 1 9rem;display:flex;flex-direction:column;gap:.35rem;background:var(--app-surface);border:1px solid var(--app-border);border-radius:var(--radius-card);padding:.7rem .85rem .75rem;text-align:left;appearance:none;color:var(--app-ink);cursor:pointer}
   .home-action-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
   .home-action-title{font-size:var(--fs-body);font-weight:600}
@@ -499,7 +503,7 @@
 
       <div class="cell">
         <div class="cell-stage on-doc" style="gap:.5rem;display:flex;flex-wrap:wrap"><span class="badge badge-neutral">Not a new or first-time headache</span></div>
-        <div class="cell-foot"><span class="cell-name">Badge</span><span class="cell-world">Doc</span></div>
+        <div class="cell-foot"><span class="cell-name">Badge</span><span class="cell-world">Doc &mdash; design-system.md &sect;4 also lists Chrome, but no mockup has actually built a chrome-world Badge yet; treat that combination as spec'd, not demonstrated</span></div>
       </div>
 
       <div class="cell">
@@ -657,6 +661,20 @@
       </div>
 
       <div class="cell">
+        <div class="cell-stage on-doc" style="justify-content:flex-start">
+          <table class="doc-daycount-table">
+            <thead><tr><th>Date</th><th>Class</th><th>Rule</th><th>Attenuated</th></tr></thead>
+            <tbody>
+              <tr><td class="u-numeric">Jul 12</td><td>headache</td><td>delphi_treated_30min</td><td>Yes</td></tr>
+              <tr><td class="u-numeric">Jul 13</td><td>none</td><td>&mdash;</td><td>Yes</td></tr>
+              <tr><td class="u-numeric">Jul 14</td><td>migraine</td><td>delphi_untreated_4h</td><td>Yes</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="cell-foot"><span class="cell-name">DayCountTable</span><span class="cell-world">Doc (Report) &mdash; derived-layer <code>day_classifications</code> rows backing a checklist number, distinct from MedTable (observations); an attenuated <code>none</code> day is listed, never silently dropped (invariant 13)</span></div>
+      </div>
+
+      <div class="cell">
         <div class="cell-stage on-device" style="justify-content:flex-start">
           <div class="scope-note">
             <span class="scope-note-head">What this screen is &mdash; and isn&rsquo;t</span>
@@ -722,6 +740,26 @@
           </nav>
         </div>
         <div class="cell-foot"><span class="cell-name">SectionSubnav</span><span class="cell-world">Device (desktop, Settings) &mdash; sticky in-page anchor rail beside a long single-scroll screen; needs an explicit <code>grid-template-rows</code> on its container or its <code>grid-row:1/-1</code> span silently collapses (QA-caught)</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage">
+          <button type="button" class="device-close-demo" aria-label="Exit setup">&times;</button>
+        </div>
+        <div class="cell-foot"><span class="cell-name">DeviceClose</span><span class="cell-world">Chrome (Onboarding, mid-attack capture, morning checkpoint) &mdash; desktop-only, an artifact of the surrounding page rather than something the phone screen itself renders; a mobile home-gesture has no equivalent at desktop width for these no-nav-shell flows (D22, &sect;7a task 4)</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="cell-stage on-device" style="justify-content:flex-start">
+          <div class="doc-open" style="width:100%">
+            <div>
+              <div class="doc-open-title">Prior-authorization report</div>
+              <div class="doc-open-sub">Payer criteria, behind the mandatory confirmation gate</div>
+            </div>
+            <button class="conn-btn" type="button">Open &rarr;</button>
+          </div>
+        </div>
+        <div class="cell-foot"><span class="cell-name">DocOpen</span><span class="cell-world">Device (Settings) &mdash; the concrete answer to &ldquo;Report is reached via Settings or a &lsquo;Documents&rsquo; action&rdquo; (D22, &sect;7a task 5)</span></div>
       </div>
 
       <div class="cell">
@@ -797,7 +835,7 @@
             <button>unknown</button>
           </div>
         </div>
-        <div class="cell-foot"><span class="cell-name">CorrectableField — chip-picker</span><span class="cell-world">Device — added with Timeline, for enums and tri-state symptoms</span></div>
+        <div class="cell-foot"><span class="cell-name">CorrectableField — chip-picker</span><span class="cell-world">Device — added with Timeline, for enums and tri-state symptoms. design-system.md &sect;6 also names the recall summary (Doc) as a real surface using CorrectableField, but no doc-world "not quite?" affordance exists in any mockup yet; treat that combination as spec'd, not demonstrated</span></div>
       </div>
 
       <div class="cell">
@@ -861,7 +899,7 @@
         <div class="cell-stage on-device">
           <span class="badge-review is-confirmed boundary-episode-badge">user &middot; confirmed</span>
         </div>
-        <div class="cell-foot"><span class="cell-name">badge-review &mdash; episode-scoped modifier</span><span class="cell-world">Device &mdash; an override sets the episode's own <code>confirmed_by</code> (D18); day-row badges are untouched unless separately overridden</span></div>
+        <div class="cell-foot"><span class="cell-name">ReviewStatusBadge &mdash; episode-scoped modifier</span><span class="cell-world">Device &mdash; an override sets the episode's own <code>confirmed_by</code> (D18); day-row badges are untouched unless separately overridden</span></div>
       </div>
 
       <div class="cell">
@@ -875,8 +913,8 @@
               </div>
               <p class="rq-item-summary">Currently read as <b>relapse_split</b> &mdash; two distinct attacks.</p>
               <div class="rq-item-actions">
-                <button type="button" class="rq-btn rq-btn-primary" disabled>Confirm this reading</button>
-                <button type="button" class="rq-btn" disabled>Choose a different reading &rarr;</button>
+                <button type="button" class="rq-btn rq-btn-primary">Confirm this reading</button>
+                <button type="button" class="rq-btn">Choose a different reading &rarr;</button>
               </div>
             </div>
           </div>
@@ -912,6 +950,6 @@
 
   <footer>
     <span>Full rationale, token block and the roadmap live in <code>design-system.md</code>.</span>
-    <span>decision-log.md D15&ndash;D19</span>
+    <span>decision-log.md D15&ndash;D22</span>
   </footer>
 </div>
