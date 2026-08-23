@@ -1,6 +1,6 @@
 # HeadState — Storybook Component System: Build Plan
 
-**Status:** Step 1 (style guide) complete. Step 2 onward (the actual Storybook/React build) not started — no application source code exists anywhere in the repo yet.
+**Status:** Steps 1–3 complete — style guide finished, project skeleton created, Storybook 10.5 installed and verified (`build-storybook` succeeds, all default example stories pass as Vitest tests via the addon-vitest + Playwright pipeline). Step 4 (token/font migration) is next; no real HeadState components exist yet, only Storybook's own default Button/Header/Page examples.
 
 ## Why this exists
 
