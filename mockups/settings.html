@@ -498,6 +498,16 @@
   }
   .explink-actions{display:flex;gap:.5rem}
 
+  /* ---- Documents entry point (D22) — Settings/Documents reaches the Report,
+     the reachability leg of §7a task 5 (mockups/report.html) ---- */
+  .doc-open{
+    background:var(--app-surface);border:1px solid var(--app-border);
+    border-radius:var(--radius-card);padding:.8rem .9rem;
+    display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;
+  }
+  .doc-open-title{font-size:var(--fs-body);font-weight:600;color:var(--app-ink)}
+  .doc-open-sub{font-size:.75rem;color:var(--app-muted);margin-top:.2rem}
+
   /* ---- privacy policy row (new) ---- */
   .policy-row{
     display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;
@@ -568,21 +578,23 @@
 
     /* Section sub-nav + content pane. .app-body is already the scroll region
        (see its base rule above) — a 220px rail plus a flexible content column,
-       the six .settings-section blocks stacking vertically in that column in
+       the seven .settings-section blocks stacking vertically in that column in
        their existing DOM order (untouched — the sub-nav is additive, not a
        reorder). The rail is placed via grid-column on the sub-nav itself,
        not by wrapping the existing sections in a new container. */
     .app-body{
       display:grid;
       grid-template-columns:220px 1fr;
-      /* Explicit row tracks, one per column-2 item (title + six sections) —
+      /* Explicit row tracks, one per column-2 item (title + seven sections) —
          required for the sub-nav's grid-row:1/-1 below to resolve against.
          Without this, the explicit grid has only the one implicit row line
          CSS Grid creates by default, "-1" collapses to that same line, and
          the rail spans nothing: it stops sticking past its own first row and
          opens an unwanted gap under the title (the row track sized to the
-         rail's own six-link content instead of the title's one line). */
-      grid-template-rows:repeat(7, auto);
+         rail's own content instead of the title's one line). Bump this count
+         whenever a .settings-section is added or removed (§7a task 5 added
+         Documents, taking this from 7 to 8). */
+      grid-template-rows:repeat(8, auto);
       align-items:start;
       column-gap:1.75rem;
       padding:1.6rem 1.75rem;
@@ -647,14 +659,15 @@
       <div class="device-notch"></div>
       <div class="app-body">
 
-        <!-- section sub-nav — desktop only, jump links into the six sections below.
+        <!-- section sub-nav — desktop only, jump links into the seven sections below.
              Placed first in the DOM but positioned via grid-column (see CSS), so the
-             six sections keep their existing order untouched. -->
+             seven sections keep their existing order untouched. -->
         <nav class="settings-subnav" aria-label="Settings sections">
           <a href="#section-integrations">Integrations</a>
           <a href="#section-collection">What I keep</a>
           <a href="#section-sharing">What can leave</a>
           <a href="#section-history">Consent history</a>
+          <a href="#section-documents">Documents</a>
           <a href="#section-exports">Export links</a>
           <a href="#section-policy">Privacy policy</a>
         </nav>
@@ -855,6 +868,19 @@
             <div class="receipt-head"><span>All scopes, all time</span><span class="u-numeric" id="history-count"></span></div>
             <div class="cr-scroll"><div id="history-rows"></div></div>
             <p class="cr-foot">Change a decision above and watch it land here immediately &mdash; that is the append-only claim onboarding made, demonstrated rather than just stated. <code>share_health_platform</code> below shows a grant, a withdrawal, a re-grant and a second withdrawal &mdash; four rows, one scope, nothing overwritten.</p>
+          </div>
+        </div>
+
+        <!-- ================= DOCUMENTS ================= -->
+        <div class="settings-section" id="section-documents">
+          <div class="app-title">Documents</div>
+          <p class="app-lede">The one generated document Settings opens directly (D22) &mdash; everything else on this screen is configuration, not output.</p>
+          <div class="doc-open">
+            <div>
+              <div class="doc-open-title">Prior-authorization report</div>
+              <div class="doc-open-sub">Payer criteria, behind the mandatory confirmation gate &mdash; not exempt like the recall summary</div>
+            </div>
+            <button class="conn-btn" type="button" id="open-report-btn">Open &rarr;</button>
           </div>
         </div>
 
@@ -1255,6 +1281,14 @@
     });
   }
   renderExportLinks();
+
+  /* ---------- Documents entry point ---------- */
+  var openReportBtn = document.getElementById('open-report-btn');
+  if (openReportBtn){
+    openReportBtn.addEventListener('click', function(){
+      showToast('Opens the prior-authorization Report (mockups/report.html) — gated by the mandatory confirmation gate, not relaxed for the primary user.');
+    });
+  }
 
   /* ---------- policy links (reused pattern from onboarding.html) ---------- */
   document.querySelectorAll('[data-policy]').forEach(function(a){

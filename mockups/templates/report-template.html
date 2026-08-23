@@ -324,6 +324,16 @@
     .doc-footer{flex-direction:column}
     .doc-meta{text-align:left}
   }
+
+  /* ============ DESKTOP (D22) ============
+     Doc-world, no nav shell (it's a document, not an app screen) — the only
+     gap is that unconstrained .doc-sheet stretches to .shell's full 1180px at
+     desktop widths and stops reading as a printable page. Same fix as the
+     recall summary: cap at Timeline/Review Queue's 52rem reading width and
+     center it in the remaining space. */
+  @media (min-width:1024px){
+    .doc-sheet{max-width:52rem;margin-left:auto;margin-right:auto}
+  }
 </style>
 
 <div class="shell">

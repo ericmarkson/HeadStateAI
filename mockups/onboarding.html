@@ -691,6 +691,37 @@
     .switcher{width:100%}
     .switcher button{flex:1 1 auto}
   }
+
+  /* ============ DESKTOP (D22) ============
+     No nav shell here, by design (decision-log D22) — Onboarding is a bounded,
+     single-purpose flow, not a place to invite navigating away mid-task. The
+     phone-frame convention is kept as-is, unlike the Tier-1 screens, and
+     .device-stage's existing flex centering already keeps it centered inside
+     .shell at any width — nothing to change there. The one real gap: on
+     mobile the frame reads as "the whole app," where a hardware-level away-
+     from-app gesture is the implicit exit. At desktop width, the same frame
+     reads as a floating card with no equivalent gesture, so it needs its own
+     close affordance — chrome-world (not device-world), since it's an artifact
+     of the surrounding page, not a control the phone screen itself renders. */
+  .device-close{display:none}
+  @media (min-width:1024px){
+    .device-stage{position:relative}
+    .device-close{
+      display:flex;align-items:center;justify-content:center;
+      position:absolute;
+      top:-.5rem;
+      left:calc(50% + 195px + 1rem); /* frame is a fixed 390px here, min(390px,100%) never falls below it at this width */
+      width:2.25rem;height:2.25rem;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--surface-raised);
+      color:var(--ink-muted);
+      font-size:1.1rem;
+      line-height:1;
+      cursor:pointer;
+    }
+    .device-close:hover{color:var(--ink);border-color:var(--accent)}
+  }
 </style>
 
 <div class="shell">
@@ -709,7 +740,7 @@
         <button type="button" role="tab" aria-selected="false" data-step="4">Permissions</button>
         <button type="button" role="tab" aria-selected="false" data-step="5">Ready</button>
       </div>
-      <p class="switcher-note">Reviewer&rsquo;s jump list &mdash; not part of the flow. The in-app <b>Continue</b> and the Back/Next below the phone are gated on the consent screens; these tabs deliberately are not, so any screen stays reachable for review.</p>
+      <p class="switcher-note">Reviewer&rsquo;s jump list &mdash; not part of the flow. The in-app <b>Continue</b> and the Back/Next below the phone are gated on the consent screens; these tabs deliberately are not, so any screen stays reachable for review. The &times; beside the phone at desktop widths is real, though &mdash; no nav shell here (D22), but a floating card needs its own way out where a mobile home-gesture would otherwise serve.</p>
     </div>
   </div>
 
@@ -717,6 +748,7 @@
   <section class="step is-active" data-panel="0">
     <p class="lede"><b>First open, nothing logged yet.</b> A calm first encounter &mdash; the product is asking for two minutes, and it says so.</p>
     <div class="device-stage">
+      <button class="device-close" type="button" aria-label="Exit setup" title="Exit setup &mdash; desktop only, resumes where you left off">&times;</button>
       <div class="device-frame"><div class="device-screen">
         <div class="device-notch"></div>
         <div class="app-body">
@@ -755,6 +787,7 @@
   <section class="step" data-panel="1">
     <p class="lede"><b>Collection consent, on its own screen, before the first question is asked.</b> The baseline conversation on the next step <i>is</i> collection &mdash; so it cannot come first. Allow and decline are the same size, the same weight, and neither is pre-selected or focused (FR-7.3).</p>
     <div class="device-stage">
+      <button class="device-close" type="button" aria-label="Exit setup" title="Exit setup &mdash; desktop only, resumes where you left off">&times;</button>
       <div class="device-frame"><div class="device-screen">
         <div class="device-notch"></div>
         <div class="app-body">
@@ -823,6 +856,7 @@
   <section class="step" data-panel="2">
     <p class="lede"><b>One paragraph, typed or spoken, becomes a batch of correctable cards.</b> Not re-asked field by field. Press play &mdash; then try &ldquo;not quite?&rdquo; on any row: the editor is typed by the field, so laterality gets a chip picker and a tri-state symptom gets four options, never a bare text box.</p>
     <div class="device-stage">
+      <button class="device-close" type="button" aria-label="Exit setup" title="Exit setup &mdash; desktop only, resumes where you left off">&times;</button>
       <div class="device-frame"><div class="device-screen">
         <div class="device-notch"></div>
         <div class="app-body">
@@ -960,6 +994,7 @@
   <section class="step" data-panel="3">
     <p class="lede"><b>A second, separate screen with its own affirmative actions.</b> Decline all three and symptom logging, the recall summary and every day count still work in full &mdash; that&rsquo;s FR-7.5, a requirement rather than a courtesy, and the copy says it out loud on each one.</p>
     <div class="device-stage">
+      <button class="device-close" type="button" aria-label="Exit setup" title="Exit setup &mdash; desktop only, resumes where you left off">&times;</button>
       <div class="device-frame"><div class="device-screen">
         <div class="device-notch"></div>
         <div class="app-body">
@@ -1036,6 +1071,7 @@
   <section class="step" data-panel="4">
     <p class="lede"><b>Device permissions, not consent scopes</b> &mdash; and each one is pitched as a question I&rsquo;ll stop asking you, not a box to tick. The weather row is live: go back to step 2, decline coarse location, and the operating-system prompt is never even reached.</p>
     <div class="device-stage">
+      <button class="device-close" type="button" aria-label="Exit setup" title="Exit setup &mdash; desktop only, resumes where you left off">&times;</button>
       <div class="device-frame"><div class="device-screen">
         <div class="device-notch"></div>
         <div class="app-body">
@@ -1096,6 +1132,7 @@
   <section class="step" data-panel="5">
     <p class="lede"><b>One calibration question, then out.</b> The receipt below is live &mdash; it reflects whatever you actually chose on steps 2 and 4, undecided scopes included, exactly as the <code>consent_events</code> log would show them.</p>
     <div class="device-stage">
+      <button class="device-close" type="button" aria-label="Exit setup" title="Exit setup &mdash; desktop only, resumes where you left off">&times;</button>
       <div class="device-frame"><div class="device-screen">
         <div class="device-notch"></div>
         <div class="app-body">
