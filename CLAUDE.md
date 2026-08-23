@@ -641,17 +641,21 @@ before being relied on for a shipping or clinical decision:
   the component vocabulary a future Storybook library would build against.
   Covers three screens; records which remaining screens are ready to mock and
   which are blocked on an undecided interaction pattern.
-- `styleguide.html` — the canonical, component-by-component design-system
-  reference: every token and every named component/state from
-  `design-system.md` §4, in one self-contained HTML gallery. Moved out of
-  `mockups/` once it stopped being one mockup among ten and became the page
-  the Storybook build is verified against directly. Keep it current with §4 —
-  a new component pattern gets a gallery cell added here in the same pass.
-- `storybook-plan.md` — the phased plan for extracting `design-system.md`'s
-  component vocabulary into a real Storybook/React component library, built
-  against `styleguide.html`. Step 1 is completing/verifying that style guide;
-  later steps build `apps/app` and are explicitly scoped short of build step 0
-  (no Capacitor, CI, Postgres, API, or MCP server work).
+- `storybook/` — the pre-step-0 Storybook build, kept separate from the repo
+  root's design/spec documents until it's ready to be promoted into the
+  binding repository layout below. `storybook/styleguide.html` is the
+  canonical, component-by-component design-system reference: every token and
+  every named component/state from `design-system.md` §4, in one
+  self-contained HTML gallery. Moved out of `mockups/` once it stopped being
+  one mockup among ten and became the page the Storybook build is verified
+  against directly — keep it current with §4, a new component pattern gets a
+  gallery cell added here in the same pass. `storybook/storybook-plan.md` is
+  the phased plan for extracting `design-system.md`'s component vocabulary
+  into a real Storybook/React component library built against that style
+  guide; later steps build `storybook/apps/app`, explicitly scoped short of
+  build step 0 (no Capacitor, CI, Postgres, API, or MCP server work) — when
+  step 0 actually happens, this becomes the root-level `apps/app` the layout
+  below requires, rather than being rebuilt from scratch.
 - `mockups/` — the actual mockup HTML files `design-system.md` was extracted
   from, self-contained and openable directly in a browser. `mockups/templates/`
   and `mockups/fonts/` hold the reusable pre-font-splice source and the
