@@ -133,8 +133,10 @@
   button{font:inherit;color:inherit}
   :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
   /* Fixed worlds pin their own focus color — the chrome --focus token flips with the
-     viewer's OS theme and fails contrast inside the always-dark device world. */
-  .device-screen :focus-visible{outline-color:var(--app-focus)}
+     viewer's OS theme and fails contrast inside the always-dark device world. .sidenav
+     is device-world too (D22: breakpoint changes, not world) but sits outside
+     .device-screen, so it needs its own copy of this rule rather than inheriting it. */
+  .device-screen :focus-visible, .sidenav :focus-visible{outline-color:var(--app-focus)}
   .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
@@ -210,14 +212,64 @@
     background:var(--app-bg);color:var(--app-ink);
     border-radius:30px;overflow:hidden;
     font-family:var(--f-body);
-    min-height:720px;
+    height:780px;
     display:flex;flex-direction:column;position:relative;
   }
   .device-notch{height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .device-notch::before{
     content:'';width:90px;height:6px;border-radius:99px;background:rgba(255,255,255,.14);
   }
-  .app-body{padding:.25rem 1.15rem 1.4rem;flex:1;display:flex;flex-direction:column;gap:1rem}
+  /* Settings' content is one long scroll, not a flex-column-with-fixed-footer like Home
+     — .app-body is itself the scroll region (Home's equivalent is .app-scroll). */
+  .app-body{padding:.25rem 1.15rem 1.4rem;flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:1rem}
+
+  /* ============ NAV SHELL — TabBar (mobile) / SideNav (desktop) ============
+     One reference implementation (D22 / design-system.md §7a task 1): both
+     render the same .navitem/.is-active markup from one JS data source, so
+     the two can never drift out of sync with each other. Reused verbatim from
+     home-template.html — Timeline, Insights and Review Queue also copy it. */
+  .app-shell{display:block}
+  .app-main{min-width:0}
+
+  .sidenav{
+    display:none; /* shown at desktop, see @media (min-width:1024px) */
+    flex-direction:column;gap:2rem;
+    width:208px;flex-shrink:0;
+    background:var(--app-surface);
+    border-right:1px solid var(--app-border);
+    padding:1.35rem 1rem;
+  }
+  .sidenav-brand{padding:0 .5rem}
+  .sidenav-mark{font-family:var(--f-display);font-weight:600;font-size:1.05rem;color:var(--app-ink)}
+  .sidenav-mark em{font-style:italic;color:var(--app-accent)}
+  .sidenav-items{display:flex;flex-direction:column;gap:.15rem}
+
+  .navitem{
+    display:flex;align-items:center;gap:.55rem;
+    color:var(--app-faint);text-decoration:none;cursor:pointer;
+    appearance:none;border:none;background:none;font:inherit;
+  }
+  .navitem-icon{flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-pill)}
+  .navitem-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .navitem-label{white-space:nowrap}
+
+  .tabbar{flex-shrink:0;display:flex;border-top:1px solid var(--app-border);background:var(--app-surface)}
+  .tabbar .navitem{
+    flex:1;flex-direction:column;justify-content:center;gap:.3rem;
+    padding:.55rem .25rem .6rem;font-size:.64rem;font-weight:500;
+  }
+  .tabbar .navitem-icon{width:21px;height:21px}
+  /* Active state is never color alone: a filled icon well plus a bolder label
+     ride alongside the accent color (design-system.md's color-only-signal rule). */
+  .tabbar .navitem.is-active{color:var(--app-accent)}
+  .tabbar .navitem.is-active .navitem-icon{background:var(--app-accent-dim)}
+  .tabbar .navitem.is-active .navitem-label{font-weight:700}
+
+  .sidenav .navitem{padding:.6rem .55rem;border-radius:10px;font-size:var(--fs-body);font-weight:500}
+  .sidenav .navitem-icon{width:19px;height:19px}
+  .sidenav .navitem:hover{background:var(--app-surface-raised)}
+  .sidenav .navitem.is-active{background:var(--app-accent-dim);color:var(--app-accent)}
+  .sidenav .navitem.is-active .navitem-label{font-weight:700}
 
   /* ---- shared app type (reused from onboarding.html) ---- */
   .app-title{
@@ -234,6 +286,21 @@
     font-size:var(--fs-eyebrow);text-transform:uppercase;letter-spacing:.08em;
     font-weight:600;color:var(--app-faint);margin-top:.15rem;
   }
+
+  /* ---- section sub-nav (new — Settings-only desktop reflow, design-system.md §7a task 2) ----
+     Hidden on mobile; a sticky jump-link rail alongside the content column at
+     desktop widths, see @media (min-width:1024px). Not a nav destination in
+     its own right (D22) — purely in-page anchors to the six sections below. */
+  .settings-subnav{display:none}
+  .settings-subnav a{
+    display:block;
+    padding:.5rem .65rem;
+    border-radius:8px;
+    font-size:var(--fs-caption);font-weight:600;
+    color:var(--app-muted);
+    text-decoration:none;
+  }
+  .settings-subnav a:hover{background:var(--app-surface-raised);color:var(--app-ink)}
 
   /* ---- ConsentScope (reused verbatim from onboarding.html) ---- */
   .scope{
@@ -474,6 +541,66 @@
     .shell{padding:1.5rem 1rem 3rem}
     .controls{flex-direction:column;gap:1rem}
   }
+
+  /* ============ DESKTOP (D22) ============
+     Two breakpoints only — mobile below, this above. Desktop swaps TabBar for
+     SideNav, drops the phone-frame convention entirely (real app chrome, not
+     a screenshot). World stays fixed dark device-world regardless — only the
+     breakpoint changes, not the world (design-system.md §1). Everything in
+     this first block is copied verbatim from home-template.html; the second
+     block below is Settings' own reflow (design-system.md §7a task 2:
+     "section sub-nav + content pane"). */
+  @media (min-width:1024px){
+    .app-shell{
+      display:flex;align-items:stretch;
+      border:1px solid var(--app-border);
+      border-radius:var(--radius-card);
+      overflow:hidden;
+    }
+    .sidenav{display:flex}
+    .app-main{flex:1}
+
+    .device-stage{display:block;padding:0}
+    .device-frame{width:100%;padding:0;border-radius:0;background:none;box-shadow:none}
+    .device-screen{border-radius:0}
+    .device-notch{display:none}
+    .tabbar{display:none}
+
+    /* Section sub-nav + content pane. .app-body is already the scroll region
+       (see its base rule above) — a 220px rail plus a flexible content column,
+       the six .settings-section blocks stacking vertically in that column in
+       their existing DOM order (untouched — the sub-nav is additive, not a
+       reorder). The rail is placed via grid-column on the sub-nav itself,
+       not by wrapping the existing sections in a new container. */
+    .app-body{
+      display:grid;
+      grid-template-columns:220px 1fr;
+      /* Explicit row tracks, one per column-2 item (title + six sections) —
+         required for the sub-nav's grid-row:1/-1 below to resolve against.
+         Without this, the explicit grid has only the one implicit row line
+         CSS Grid creates by default, "-1" collapses to that same line, and
+         the rail spans nothing: it stops sticking past its own first row and
+         opens an unwanted gap under the title (the row track sized to the
+         rail's own six-link content instead of the title's one line). */
+      grid-template-rows:repeat(7, auto);
+      align-items:start;
+      column-gap:1.75rem;
+      padding:1.6rem 1.75rem;
+    }
+    .app-body > .app-title,
+    .app-body > .settings-section{
+      grid-column:2;
+    }
+    .settings-subnav{
+      display:flex;flex-direction:column;gap:.15rem;
+      grid-column:1;
+      grid-row:1 / -1; /* spans every content row so the rail can stay pinned
+        alongside the whole page, not just its own first row */
+      align-self:start;
+      position:sticky;
+      top:1.6rem;
+    }
+  }
 </style>
 
 <div class="shell">
@@ -509,15 +636,33 @@
     <p class="controls-note">Reviewer-only, chrome world &mdash; lets this one mockup show every FR-4.x integration state side by side (design-system.md &sect;1). Everything below the notch &mdash; connect/disconnect, the consent cards, the export-link revoke action &mdash; is a real in-product control.</p>
   </div>
 
-  <div class="device-stage">
+  <div class="app-shell">
+    <nav class="sidenav" aria-label="Primary">
+      <div class="sidenav-brand"><span class="sidenav-mark">Head<em>State</em></span></div>
+      <div class="sidenav-items" id="sidenav-items"></div>
+    </nav>
+
+    <div class="app-main"><div class="device-stage">
     <div class="device-frame"><div class="device-screen">
       <div class="device-notch"></div>
       <div class="app-body">
 
+        <!-- section sub-nav — desktop only, jump links into the six sections below.
+             Placed first in the DOM but positioned via grid-column (see CSS), so the
+             six sections keep their existing order untouched. -->
+        <nav class="settings-subnav" aria-label="Settings sections">
+          <a href="#section-integrations">Integrations</a>
+          <a href="#section-collection">What I keep</a>
+          <a href="#section-sharing">What can leave</a>
+          <a href="#section-history">Consent history</a>
+          <a href="#section-exports">Export links</a>
+          <a href="#section-policy">Privacy policy</a>
+        </nav>
+
         <div class="app-title">Settings</div>
 
         <!-- ================= INTEGRATIONS ================= -->
-        <div class="settings-section">
+        <div class="settings-section" id="section-integrations">
           <p class="app-lede">Device permissions, as they actually stand right now.</p>
 
           <div class="settings-subhead">Health data</div>
@@ -602,7 +747,7 @@
         </div>
 
         <!-- ================= COLLECTION CONSENT ================= -->
-        <div class="settings-section">
+        <div class="settings-section" id="section-collection">
           <div class="app-title">What I <em>keep</em></div>
           <p class="app-lede">Two decisions, kept separate &mdash; the split FR-7.4 requires, not merged into one settings list.</p>
 
@@ -636,7 +781,7 @@
         </div>
 
         <!-- ================= SHARING CONSENT ================= -->
-        <div class="settings-section">
+        <div class="settings-section" id="section-sharing">
           <div class="app-title">What can <em>leave</em></div>
           <p class="app-lede">Four ways data can go outward. Declining any or all of them leaves logging, recall and day classification fully working (FR-7.5).</p>
 
@@ -703,7 +848,7 @@
         </div>
 
         <!-- ================= CONSENT HISTORY ================= -->
-        <div class="settings-section">
+        <div class="settings-section" id="section-history">
           <div class="app-title">Consent history</div>
           <p class="app-lede">The full <code>consent_events</code> log &mdash; append-only. Every change above wrote a new row here; none of them edited or replaced an old one.</p>
           <div class="cr" id="consent-receipt">
@@ -714,14 +859,14 @@
         </div>
 
         <!-- ================= EXPORT LINKS ================= -->
-        <div class="settings-section">
+        <div class="settings-section" id="section-exports">
           <div class="app-title">Export links</div>
           <p class="app-lede">Single-use web links for a clinic that won&rsquo;t take a PDF (tech-spec.md &sect;4.3). Default expiry 24h, selectable to 72h; capped to 3 views; revocable, never unlimited.</p>
           <div id="explinks"></div>
         </div>
 
         <!-- ================= PRIVACY POLICY ================= -->
-        <div class="settings-section">
+        <div class="settings-section" id="section-policy">
           <div class="app-title">Privacy policy</div>
           <div class="policy-row">
             <a href="/policy/consumer-health" data-policy="chd">Consumer Health Data Privacy Policy</a>
@@ -734,6 +879,10 @@
         </div>
 
       </div>
+
+      <nav class="tabbar" id="tabbar" aria-label="Primary"></nav>
+
+    </div></div>
     </div></div>
   </div>
 
@@ -763,6 +912,44 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 3600);
   }
+
+  /* ---------- nav shell: TabBar (mobile) / SideNav (desktop) ----------
+     One data source rendered into both #sidenav-items and #tabbar, so the
+     two can never disagree about which item is active or what it's called.
+     Copied verbatim from home-template.html (design-system.md §7a task 1's
+     reference build) — only which item carries active:true changes here. */
+  var NAV_ITEMS = [
+    { key:'home', label:'Home',
+      icon:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"/>' },
+    { key:'timeline', label:'Timeline',
+      icon:'<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/>' },
+    { key:'insights', label:'Insights',
+      icon:'<line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="15"/>' },
+    { key:'settings', label:'Settings', active:true,
+      icon:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><circle cx="4" cy="12" r="2"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><circle cx="12" cy="10" r="2"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="20" cy="14" r="2"/>' }
+  ];
+
+  function renderNav(container){
+    if (!container) return;
+    NAV_ITEMS.forEach(function(item){
+      var a = document.createElement('a');
+      a.className = 'navitem' + (item.active ? ' is-active' : '');
+      a.href = '#';
+      a.dataset.nav = item.key;
+      if (item.active) a.setAttribute('aria-current', 'page');
+      a.innerHTML =
+        '<span class="navitem-icon" aria-hidden="true"><svg viewBox="0 0 24 24">' + item.icon + '</svg></span>' +
+        '<span class="navitem-label">' + item.label + '</span>';
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        if (item.active) return;
+        showToast('Reference nav shell — ' + item.label + ' isn’t wired in this mockup. Settings is the only screen built here.');
+      });
+      container.appendChild(a);
+    });
+  }
+  renderNav(document.getElementById('sidenav-items'));
+  renderNav(document.getElementById('tabbar'));
 
   /* ---------- timestamp helpers ---------- */
   function stamp(d){

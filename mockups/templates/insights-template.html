@@ -133,8 +133,10 @@
   button{font:inherit;color:inherit}
   :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
   /* Fixed worlds pin their own focus color — the chrome --focus token flips with the
-     viewer's OS theme and fails contrast inside the always-dark device world. */
-  .device-screen :focus-visible{outline-color:var(--app-focus)}
+     viewer's OS theme and fails contrast inside the always-dark device world. .sidenav
+     is device-world too (D22: breakpoint changes, not world) but sits outside
+     .device-screen, so it needs its own copy of this rule rather than inheriting it. */
+  .device-screen :focus-visible, .sidenav :focus-visible{outline-color:var(--app-focus)}
   .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
@@ -174,14 +176,65 @@
     background:var(--app-bg);color:var(--app-ink);
     border-radius:30px;overflow:hidden;
     font-family:var(--f-body);
-    min-height:720px;
+    height:780px;
     display:flex;flex-direction:column;position:relative;
   }
   .device-notch{height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .device-notch::before{
     content:'';width:90px;height:6px;border-radius:99px;background:rgba(255,255,255,.14);
   }
-  .app-body{padding:.25rem 1.15rem 1.4rem;flex:1;display:flex;flex-direction:column;gap:1.1rem}
+  /* Fixed height + internal scroll (matches home-template.html's .app-scroll):
+     the tab bar below now needs to stay pinned at the screen bottom rather
+     than scroll away with the correlation cards. */
+  .app-body{padding:.25rem 1.15rem 1.4rem;flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:1.1rem}
+
+  /* ============ NAV SHELL — TabBar (mobile) / SideNav (desktop) ============
+     One reference implementation (D22 / design-system.md §7a task 1): both
+     render the same .navitem/.is-active markup from one JS data source, so
+     the two can never drift out of sync with each other. Copied verbatim from
+     home-template.html. */
+  .app-shell{display:block}
+  .app-main{min-width:0}
+
+  .sidenav{
+    display:none; /* shown at desktop, see @media (min-width:1024px) */
+    flex-direction:column;gap:2rem;
+    width:208px;flex-shrink:0;
+    background:var(--app-surface);
+    border-right:1px solid var(--app-border);
+    padding:1.35rem 1rem;
+  }
+  .sidenav-brand{padding:0 .5rem}
+  .sidenav-mark{font-family:var(--f-display);font-weight:600;font-size:1.05rem;color:var(--app-ink)}
+  .sidenav-mark em{font-style:italic;color:var(--app-accent)}
+  .sidenav-items{display:flex;flex-direction:column;gap:.15rem}
+
+  .navitem{
+    display:flex;align-items:center;gap:.55rem;
+    color:var(--app-faint);text-decoration:none;cursor:pointer;
+    appearance:none;border:none;background:none;font:inherit;
+  }
+  .navitem-icon{flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-pill)}
+  .navitem-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .navitem-label{white-space:nowrap}
+
+  .tabbar{flex-shrink:0;display:flex;border-top:1px solid var(--app-border);background:var(--app-surface)}
+  .tabbar .navitem{
+    flex:1;flex-direction:column;justify-content:center;gap:.3rem;
+    padding:.55rem .25rem .6rem;font-size:.64rem;font-weight:500;
+  }
+  .tabbar .navitem-icon{width:21px;height:21px}
+  /* Active state is never color alone: a filled icon well plus a bolder label
+     ride alongside the accent color (design-system.md's color-only-signal rule). */
+  .tabbar .navitem.is-active{color:var(--app-accent)}
+  .tabbar .navitem.is-active .navitem-icon{background:var(--app-accent-dim)}
+  .tabbar .navitem.is-active .navitem-label{font-weight:700}
+
+  .sidenav .navitem{padding:.6rem .55rem;border-radius:10px;font-size:var(--fs-body);font-weight:500}
+  .sidenav .navitem-icon{width:19px;height:19px}
+  .sidenav .navitem:hover{background:var(--app-surface-raised)}
+  .sidenav .navitem.is-active{background:var(--app-accent-dim);color:var(--app-accent)}
+  .sidenav .navitem.is-active .navitem-label{font-weight:700}
 
   /* ---- shared app type (reused from onboarding.html / settings.html) ---- */
   .app-title{
@@ -287,8 +340,64 @@
   }
   .closing-note b{color:var(--app-ink);font-style:normal;font-weight:600}
 
+  .toast{
+    position:fixed;left:50%;bottom:1.75rem;
+    transform:translate(-50%, 12px);
+    background:var(--ink);color:var(--surface);
+    font-size:var(--fs-caption);padding:.7rem 1.1rem;border-radius:10px;
+    opacity:0;pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:50;max-width:min(32rem, calc(100vw - 2rem));text-align:center;
+  }
+  .toast.is-visible{opacity:1;transform:translate(-50%, 0)}
+
   @media (max-width:640px){
     .shell{padding:1.5rem 1rem 3rem}
+  }
+
+  /* ============ DESKTOP (D22) ============
+     Two breakpoints only — mobile below, this above. Desktop swaps TabBar for
+     SideNav, drops the phone-frame convention entirely (real app chrome, not
+     a screenshot), and reflows the four correlation cards into a 2-column
+     grid (design-system.md §7a task 2). World stays fixed dark device-world
+     regardless — only the breakpoint changes, not the world (design-system.md
+     §1). The underlying content is untouched here: every rule below
+     repositions existing elements, never duplicates or rewords them. */
+  @media (min-width:1024px){
+    .app-shell{
+      display:flex;align-items:stretch;
+      border:1px solid var(--app-border);
+      border-radius:var(--radius-card);
+      overflow:hidden;
+    }
+    .sidenav{display:flex}
+    .app-main{flex:1}
+
+    .device-stage{display:block;padding:0}
+    .device-frame{width:100%;padding:0;border-radius:0;background:none;box-shadow:none}
+    .device-screen{border-radius:0}
+    .device-notch{display:none}
+    .tabbar{display:none}
+
+    /* Four correlation cards reflow into a 2-column grid, not 3: four items
+       split evenly into 2x2, while 3 columns leaves one card stranded alone
+       on its own row. The Stress card's explanatory paragraph also runs
+       noticeably longer than the other three, and the wider measure a
+       2-column layout gives each card holds that prose better than a
+       cramped 3-column one would. Placement is by grid auto-flow only — the
+       four .insights-section elements are adjacent siblings in source order,
+       so nothing is reordered and no grid-column is set on them; only the
+       header/framing and footer elements around them are pinned to span
+       both columns, the same grid-column-only technique home-template.html
+       uses for its own reflow. */
+    .app-body{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      column-gap:1.5rem;row-gap:1.1rem;
+      align-items:start;
+      padding:1.6rem 1.75rem;
+    }
+    .app-title,.app-lede,.scope-note,.device-annotation,.closing-note{grid-column:1/-1}
   }
 </style>
 
@@ -303,7 +412,13 @@
 
   <p class="lede"><b>Retrospective, descriptive, unscored</b> — the scope <code>decision-log.md</code> D21 settled after narrowing D6. Every relationship on this screen describes what has already happened in the logged record; nothing predicts, scores, or reacts to today. Sleep/weather/medication-day co-occurrence is in scope now (needs nothing beyond build steps 1&ndash;4); anything keyed to a phase or prodrome label stays gated on step 5 and is called out below as deliberately absent, not missing.</p>
 
-  <div class="device-stage">
+  <div class="app-shell">
+    <nav class="sidenav" aria-label="Primary">
+      <div class="sidenav-brand"><span class="sidenav-mark">Head<em>State</em></span></div>
+      <div class="sidenav-items" id="sidenav-items"></div>
+    </nav>
+
+    <div class="app-main"><div class="device-stage">
     <div class="device-frame"><div class="device-screen">
       <div class="device-notch"></div>
       <div class="app-body">
@@ -392,6 +507,10 @@
         <p class="closing-note">This page is exploratory, not validated. The largest trial of trigger-analytics layered on a headache diary (n=477, 12 weeks) found no significant benefit over a bare diary &mdash; <b>self-monitoring itself</b> appeared to drive the improvement in both arms. Insights is offered because some people find it useful to see their own record reflected back, not because doing so has been shown to change outcomes.</p>
 
       </div>
+
+      <nav class="tabbar" id="tabbar" aria-label="Primary"></nav>
+
+    </div></div>
     </div></div>
   </div>
 
@@ -400,3 +519,59 @@
     <span>decision-log.md D6 &middot; D21 &middot; CLAUDE.md</span>
   </div>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- toast ---------- */
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 3600);
+  }
+
+  /* ---------- nav shell: TabBar (mobile) / SideNav (desktop) ----------
+     Same reference implementation as home-template.html: one data source
+     rendered into both #sidenav-items and #tabbar, so the two can never
+     disagree about which item is active or what it's called. */
+  var NAV_ITEMS = [
+    { key:'home', label:'Home',
+      icon:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"/>' },
+    { key:'timeline', label:'Timeline',
+      icon:'<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/>' },
+    { key:'insights', label:'Insights', active:true,
+      icon:'<line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="15"/>' },
+    { key:'settings', label:'Settings',
+      icon:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><circle cx="4" cy="12" r="2"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><circle cx="12" cy="10" r="2"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="20" cy="14" r="2"/>' }
+  ];
+
+  function renderNav(container){
+    if (!container) return;
+    NAV_ITEMS.forEach(function(item){
+      var a = document.createElement('a');
+      a.className = 'navitem' + (item.active ? ' is-active' : '');
+      a.href = '#';
+      a.dataset.nav = item.key;
+      if (item.active) a.setAttribute('aria-current', 'page');
+      a.innerHTML =
+        '<span class="navitem-icon" aria-hidden="true"><svg viewBox="0 0 24 24">' + item.icon + '</svg></span>' +
+        '<span class="navitem-label">' + item.label + '</span>';
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        if (item.active) return;
+        showToast('Reference nav shell — ' + item.label + ' isn’t wired in this mockup. Insights is the only screen built here.');
+      });
+      container.appendChild(a);
+    });
+  }
+  renderNav(document.getElementById('sidenav-items'));
+  renderNav(document.getElementById('tabbar'));
+
+})();
+</script>

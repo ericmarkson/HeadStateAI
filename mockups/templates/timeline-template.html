@@ -141,8 +141,10 @@
   button{font:inherit;color:inherit}
   :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
   /* Fixed worlds pin their own focus color — the chrome --focus token flips with the
-     viewer's OS theme and fails contrast inside the always-dark device world. */
-  .device-screen :focus-visible{outline-color:var(--app-focus)}
+     viewer's OS theme and fails contrast inside the always-dark device world. .sidenav
+     is device-world too (D22: breakpoint changes, not world) but sits outside
+     .device-screen, so it needs its own copy of this rule rather than inheriting it. */
+  .device-screen :focus-visible, .sidenav :focus-visible{outline-color:var(--app-focus)}
   .u-numeric{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
@@ -233,6 +235,54 @@
   .device-notch::before{
     content:'';width:90px;height:6px;border-radius:99px;background:rgba(255,255,255,.14);
   }
+
+  /* ============ NAV SHELL — TabBar (mobile) / SideNav (desktop) ============
+     One reference implementation (D22 / design-system.md §7a task 1): both
+     render the same .navitem/.is-active markup from one JS data source, so
+     the two can never drift out of sync with each other. Reused verbatim by
+     Timeline, Settings, Insights and Review Queue. */
+  .app-shell{display:block}
+  .app-main{min-width:0}
+
+  .sidenav{
+    display:none; /* shown at desktop, see @media (min-width:1024px) */
+    flex-direction:column;gap:2rem;
+    width:208px;flex-shrink:0;
+    background:var(--app-surface);
+    border-right:1px solid var(--app-border);
+    padding:1.35rem 1rem;
+  }
+  .sidenav-brand{padding:0 .5rem}
+  .sidenav-mark{font-family:var(--f-display);font-weight:600;font-size:1.05rem;color:var(--app-ink)}
+  .sidenav-mark em{font-style:italic;color:var(--app-accent)}
+  .sidenav-items{display:flex;flex-direction:column;gap:.15rem}
+
+  .navitem{
+    display:flex;align-items:center;gap:.55rem;
+    color:var(--app-faint);text-decoration:none;cursor:pointer;
+    appearance:none;border:none;background:none;font:inherit;
+  }
+  .navitem-icon{flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-pill)}
+  .navitem-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .navitem-label{white-space:nowrap}
+
+  .tabbar{flex-shrink:0;display:flex;border-top:1px solid var(--app-border);background:var(--app-surface)}
+  .tabbar .navitem{
+    flex:1;flex-direction:column;justify-content:center;gap:.3rem;
+    padding:.55rem .25rem .6rem;font-size:.64rem;font-weight:500;
+  }
+  .tabbar .navitem-icon{width:21px;height:21px}
+  /* Active state is never color alone: a filled icon well plus a bolder label
+     ride alongside the accent color (design-system.md's color-only-signal rule). */
+  .tabbar .navitem.is-active{color:var(--app-accent)}
+  .tabbar .navitem.is-active .navitem-icon{background:var(--app-accent-dim)}
+  .tabbar .navitem.is-active .navitem-label{font-weight:700}
+
+  .sidenav .navitem{padding:.6rem .55rem;border-radius:10px;font-size:var(--fs-body);font-weight:500}
+  .sidenav .navitem-icon{width:19px;height:19px}
+  .sidenav .navitem:hover{background:var(--app-surface-raised)}
+  .sidenav .navitem.is-active{background:var(--app-accent-dim);color:var(--app-accent)}
+  .sidenav .navitem.is-active .navitem-label{font-weight:700}
 
   /* ---- fixed screen header ---- */
   .tl-head{
@@ -560,6 +610,51 @@
     .shell{padding:1.5rem 1rem 3rem}
     .controls{flex-direction:column;gap:1rem}
   }
+
+  /* ============ DESKTOP (D22) ============
+     Two breakpoints only — mobile below, this above. Desktop swaps TabBar for
+     SideNav and drops the phone-frame convention entirely (real app chrome, not
+     a screenshot). World stays fixed dark device-world regardless — only the
+     breakpoint changes, not the world (design-system.md §1). The shell rules
+     below are generic and copied verbatim from Home's reference build. Timeline
+     does NOT get Home's two-column grid reflow: Home splits primary capture
+     flow from secondary passive context, but Timeline is one chronological
+     feed with no such split (design-system.md §7a task 2 calls for "wider
+     day-rail layout" as the simpler of the two named options, not a list+detail
+     split view). So the reflow here only widens the gutter and caps line length
+     — content stays exactly one column, source order untouched. */
+  @media (min-width:1024px){
+    .app-shell{
+      display:flex;align-items:stretch;
+      border:1px solid var(--app-border);
+      border-radius:var(--radius-card);
+      overflow:hidden;
+    }
+    .sidenav{display:flex}
+    .app-main{flex:1}
+
+    .device-stage{display:block;padding:0}
+    .device-frame{width:100%;padding:0;border-radius:0;background:none;box-shadow:none}
+    .device-screen{border-radius:0}
+    .device-notch{display:none}
+    .tabbar{display:none}
+
+    .tl-head{padding:1.1rem 1.75rem 1rem}
+    .tl-scroll{padding:1.6rem 1.75rem 2rem}
+    /* Every direct child of the feed (day-group, episode-span, the teaser rail,
+       the divider, the "load earlier" button) gets the same reading-width cap,
+       centered in the widened gutter above — rather than stretching to the full
+       desktop pane. No element is reordered or restructured, only laid out
+       narrower than its now-wider container. */
+    .tl-scroll > *{max-width:52rem;margin-left:auto;margin-right:auto}
+    /* .episode-span.is-collapsed's own margin-left:-2px (a mobile-only border-
+       alignment trick, two classes) outranks the rule above (one class) on
+       specificity alone, regardless of source order — it would otherwise pin
+       the Aug 12-13 relapse block to the left edge instead of centering it,
+       which matters because "collapsed" is the default reading shown on load.
+       Restated here with matching specificity so centering wins at desktop. */
+    .tl-scroll > .episode-span.is-collapsed{margin-left:auto}
+  }
 </style>
 
 <div class="shell">
@@ -585,7 +680,13 @@
     <p class="controls-note">Reviewer-only, chrome world &mdash; nothing inside the phone frame depicts a control that doesn&rsquo;t exist in the product. ICHD-3 declines to resolve a recurrence under 48h headache-free; both readings are computed and neither is chosen silently (§5.3). The day classes below don&rsquo;t change between the two &mdash; only the episode boundary and the attack count do, which is exactly why payer exports report day counts, never attack counts (invariant 9).</p>
   </div>
 
-  <div class="device-stage">
+  <div class="app-shell">
+    <nav class="sidenav" aria-label="Primary">
+      <div class="sidenav-brand"><span class="sidenav-mark">Head<em>State</em></span></div>
+      <div class="sidenav-items" id="sidenav-items"></div>
+    </nav>
+
+    <div class="app-main"><div class="device-stage">
     <div class="device-frame"><div class="device-screen">
       <div class="device-notch"></div>
 
@@ -596,6 +697,9 @@
 
       <div class="tl-scroll" id="tl-scroll"></div>
 
+      <nav class="tabbar" id="tabbar" aria-label="Primary"></nav>
+
+    </div></div>
     </div></div>
   </div>
 
@@ -629,6 +733,45 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 3200);
   }
+
+  /* ---------- nav shell: TabBar (mobile) / SideNav (desktop) ----------
+     One data source rendered into both #sidenav-items and #tabbar, so the
+     two can never disagree about which item is active or what it's called —
+     the underlying "state" (which screen you're on) is identical at both
+     breakpoints, only the layout differs. Reference implementation from
+     Home (design-system.md §7a task 1), reused verbatim here. */
+  var NAV_ITEMS = [
+    { key:'home', label:'Home',
+      icon:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"/>' },
+    { key:'timeline', label:'Timeline', active:true,
+      icon:'<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/>' },
+    { key:'insights', label:'Insights',
+      icon:'<line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="15"/>' },
+    { key:'settings', label:'Settings',
+      icon:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><circle cx="4" cy="12" r="2"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><circle cx="12" cy="10" r="2"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="20" cy="14" r="2"/>' }
+  ];
+
+  function renderNav(container){
+    if (!container) return;
+    NAV_ITEMS.forEach(function(item){
+      var a = document.createElement('a');
+      a.className = 'navitem' + (item.active ? ' is-active' : '');
+      a.href = '#';
+      a.dataset.nav = item.key;
+      if (item.active) a.setAttribute('aria-current', 'page');
+      a.innerHTML =
+        '<span class="navitem-icon" aria-hidden="true"><svg viewBox="0 0 24 24">' + item.icon + '</svg></span>' +
+        '<span class="navitem-label">' + item.label + '</span>';
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        if (item.active) return;
+        showToast('Reference nav shell — ' + item.label + ' isn’t wired in this mockup. Timeline is the only screen built here.');
+      });
+      container.appendChild(a);
+    });
+  }
+  renderNav(document.getElementById('sidenav-items'));
+  renderNav(document.getElementById('tabbar'));
 
   /* Closed vocabulary — design-system.md §4. Every value maps to a distinct
      treatment; anything unmapped is a bug, not a default. */
